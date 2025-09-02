@@ -43,7 +43,6 @@ class InvoiceApp extends StatelessWidget {
               BlocProvider(
                 create: (context) => InvoiceBloc(
                   context.read<InvoiceService>(),
-                  context.read<ClientService>(),
                 ),
               ),
             ],

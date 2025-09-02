@@ -86,9 +86,8 @@ class InvoiceOperationSuccess extends InvoiceState {
 // BLoC
 class InvoiceBloc extends Bloc<InvoiceEvent, InvoiceState> {
   final InvoiceService _invoiceService;
-  final ClientService _clientService;
 
-  InvoiceBloc(this._invoiceService, this._clientService) : super(InvoiceInitial()) {
+  InvoiceBloc(this._invoiceService) : super(InvoiceInitial()) {
     on<LoadInvoices>(_onLoadInvoices);
     on<LoadInvoiceDetails>(_onLoadInvoiceDetails);
     on<CreateInvoice>(_onCreateInvoice);

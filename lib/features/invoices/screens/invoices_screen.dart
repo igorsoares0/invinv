@@ -17,7 +17,6 @@ class InvoicesScreen extends StatefulWidget {
 
 class _InvoicesScreenState extends State<InvoicesScreen> with SingleTickerProviderStateMixin {
   late TabController _tabController;
-  final PDFService _pdfService = PDFService();
 
   @override
   void initState() {

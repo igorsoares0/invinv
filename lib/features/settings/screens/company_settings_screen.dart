@@ -66,7 +66,7 @@ class _CompanySettingsScreenState extends State<CompanySettingsScreen> {
           logoPath: values['logoPath'],
         );
 
-        final savedCompany = await _companyService.updateCompany(company);
+        await _companyService.updateCompany(company);
         final updatedCompany = await _companyService.getCompany();
         setState(() {
           _company = updatedCompany;

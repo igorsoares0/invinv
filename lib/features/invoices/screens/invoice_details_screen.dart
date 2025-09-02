@@ -10,7 +10,7 @@ import 'invoice_preview_screen.dart';
 class InvoiceDetailsScreen extends StatefulWidget {
   final int invoiceId;
 
-  const InvoiceDetailsScreen({Key? key, required this.invoiceId}) : super(key: key);
+  const InvoiceDetailsScreen({super.key, required this.invoiceId});
 
   @override
   State<InvoiceDetailsScreen> createState() => _InvoiceDetailsScreenState();
@@ -131,7 +131,7 @@ class _InvoiceDetailsScreenState extends State<InvoiceDetailsScreen> {
           end: Alignment.bottomRight,
           colors: [
             _getStatusColor(invoice.status),
-            _getStatusColor(invoice.status).withOpacity(0.8),
+            _getStatusColor(invoice.status).withAlpha(204),
           ],
         ),
       ),
@@ -152,7 +152,7 @@ class _InvoiceDetailsScreenState extends State<InvoiceDetailsScreen> {
                         Text(
                           invoice.type.value.toUpperCase(),
                           style: TextStyle(
-                            color: Colors.white.withOpacity(0.9),
+                            color: Colors.white.withAlpha(230),
                             fontSize: 14,
                             fontWeight: FontWeight.w500,
                             letterSpacing: 1.2,
@@ -173,9 +173,9 @@ class _InvoiceDetailsScreenState extends State<InvoiceDetailsScreen> {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.2),
+                      color: Colors.white.withAlpha(51),
                       borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: Colors.white.withOpacity(0.3)),
+                      border: Border.all(color: Colors.white.withAlpha(77)),
                     ),
                     child: Text(
                       invoice.status.value.toUpperCase(),
@@ -201,19 +201,19 @@ class _InvoiceDetailsScreenState extends State<InvoiceDetailsScreen> {
               const SizedBox(height: 8),
               Row(
                 children: [
-                  Icon(Icons.calendar_today, color: Colors.white.withOpacity(0.8), size: 16),
+                  Icon(Icons.calendar_today, color: Colors.white.withAlpha(204), size: 16),
                   const SizedBox(width: 8),
                   Text(
                     DateFormat('MMM dd, yyyy').format(invoice.issueDate),
-                    style: TextStyle(color: Colors.white.withOpacity(0.9), fontSize: 14),
+                    style: TextStyle(color: Colors.white.withAlpha(230), fontSize: 14),
                   ),
                   if (invoice.dueDate != null) ...[
                     const SizedBox(width: 20),
-                    Icon(Icons.schedule, color: Colors.white.withOpacity(0.8), size: 16),
+                    Icon(Icons.schedule, color: Colors.white.withAlpha(204), size: 16),
                     const SizedBox(width: 8),
                     Text(
                       'Due ${DateFormat('MMM dd').format(invoice.dueDate!)}',
-                      style: TextStyle(color: Colors.white.withOpacity(0.9), fontSize: 14),
+                      style: TextStyle(color: Colors.white.withAlpha(230), fontSize: 14),
                     ),
                   ],
                 ],
@@ -233,7 +233,7 @@ class _InvoiceDetailsScreenState extends State<InvoiceDetailsScreen> {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
+            color: Colors.grey.withAlpha(26),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -291,7 +291,7 @@ class _InvoiceDetailsScreenState extends State<InvoiceDetailsScreen> {
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: color.withOpacity(0.1),
+              color: color.withAlpha(26),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Icon(icon, color: color, size: 24),
@@ -318,7 +318,7 @@ class _InvoiceDetailsScreenState extends State<InvoiceDetailsScreen> {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
+            color: Colors.grey.withAlpha(26),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -342,7 +342,7 @@ class _InvoiceDetailsScreenState extends State<InvoiceDetailsScreen> {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(
-                  color: Colors.blue.withOpacity(0.1),
+                  color: Colors.blue.withAlpha(26),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(
@@ -362,7 +362,7 @@ class _InvoiceDetailsScreenState extends State<InvoiceDetailsScreen> {
             children: [
               CircleAvatar(
                 radius: 24,
-                backgroundColor: Colors.blue.withOpacity(0.1),
+                backgroundColor: Colors.blue.withAlpha(26),
                 child: Text(
                   (invoiceData['client_name'] ?? 'U').substring(0, 1).toUpperCase(),
                   style: TextStyle(
@@ -441,7 +441,7 @@ class _InvoiceDetailsScreenState extends State<InvoiceDetailsScreen> {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
+            color: Colors.grey.withAlpha(26),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -464,7 +464,7 @@ class _InvoiceDetailsScreenState extends State<InvoiceDetailsScreen> {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
-                  color: Colors.grey.withOpacity(0.1),
+                  color: Colors.grey.withAlpha(26),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
@@ -501,7 +501,7 @@ class _InvoiceDetailsScreenState extends State<InvoiceDetailsScreen> {
                 width: 40,
                 height: 40,
                 decoration: BoxDecoration(
-                  color: Colors.blue.withOpacity(0.1),
+                  color: Colors.blue.withAlpha(26),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Center(
@@ -569,7 +569,7 @@ class _InvoiceDetailsScreenState extends State<InvoiceDetailsScreen> {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
+            color: Colors.grey.withAlpha(26),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -590,10 +590,10 @@ class _InvoiceDetailsScreenState extends State<InvoiceDetailsScreen> {
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: _getStatusColor(invoice.status).withOpacity(0.1),
+              color: _getStatusColor(invoice.status).withAlpha(26),
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
-                color: _getStatusColor(invoice.status).withOpacity(0.3),
+                color: _getStatusColor(invoice.status).withAlpha(77),
               ),
             ),
             child: _buildModernTotalRow('Total', invoice.total, true),

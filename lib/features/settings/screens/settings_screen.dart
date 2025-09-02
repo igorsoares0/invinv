@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'company_settings_screen.dart';
 
 class SettingsScreen extends StatelessWidget {
