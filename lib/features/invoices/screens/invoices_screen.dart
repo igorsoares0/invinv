@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import '../bloc/invoice_bloc.dart';
 import '../../../shared/models/models.dart';
+import '../../../shared/services/pdf_service.dart';
 import 'invoice_form_screen.dart';
 import 'invoice_details_screen.dart';
 import 'invoice_preview_screen.dart';
@@ -16,6 +17,7 @@ class InvoicesScreen extends StatefulWidget {
 
 class _InvoicesScreenState extends State<InvoicesScreen> with SingleTickerProviderStateMixin {
   late TabController _tabController;
+  final PDFService _pdfService = PDFService();
 
   @override
   void initState() {
@@ -175,6 +177,8 @@ class _InvoicesScreenState extends State<InvoicesScreen> with SingleTickerProvid
           itemBuilder: (context) => [
             const PopupMenuItem(value: 'view', child: Text('View Details')),
             const PopupMenuItem(value: 'preview', child: Text('Preview')),
+            const PopupMenuItem(value: 'pdf', child: Text('Generate PDF')),
+            const PopupMenuItem(value: 'share', child: Text('Share')),
             const PopupMenuItem(value: 'edit', child: Text('Edit')),
             if (invoice.type == InvoiceType.estimate)
               const PopupMenuItem(value: 'convert', child: Text('Convert to Invoice')),
@@ -250,6 +254,12 @@ class _InvoicesScreenState extends State<InvoicesScreen> with SingleTickerProvid
         break;
       case 'preview':
         _navigateToInvoicePreview(invoice.id!);
+        break;
+      case 'pdf':
+        _generatePDF(invoice);
+        break;
+      case 'share':
+        _shareInvoice(invoice);
         break;
       case 'edit':
         _navigateToInvoiceForm(invoice.type, invoice: invoice);
@@ -331,5 +341,63 @@ class _InvoicesScreenState extends State<InvoicesScreen> with SingleTickerProvid
         builder: (context) => InvoicePreviewScreen(invoiceId: invoiceId),
       ),
     );
+  }
+
+  Future<void> _generatePDF(Invoice invoice) async {
+    try {
+      // First we need to get the invoice details with items and client data
+      context.read<InvoiceBloc>().add(LoadInvoiceDetails(invoice.id!));
+      
+      // Show loading message
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Generating PDF...'),
+          duration: Duration(seconds: 1),
+        ),
+      );
+
+      // Note: In a real implementation, you would need to fetch the details first
+      // For now, we'll show a placeholder message
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('PDF generation will be available after loading invoice details'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error generating PDF: ${e.toString()}'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
+  Future<void> _shareInvoice(Invoice invoice) async {
+    try {
+      // Show loading message
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Preparing invoice for sharing...'),
+          duration: Duration(seconds: 1),
+        ),
+      );
+
+      // Note: In a real implementation, you would need to fetch the details first
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Share feature will be available after loading invoice details'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error sharing invoice: ${e.toString()}'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
 }

@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import '../bloc/invoice_bloc.dart';
 import '../../../shared/models/models.dart';
+import '../../../shared/services/pdf_service.dart';
 import 'invoice_form_screen.dart';
 import 'invoice_preview_screen.dart';
 
@@ -16,6 +17,8 @@ class InvoiceDetailsScreen extends StatefulWidget {
 }
 
 class _InvoiceDetailsScreenState extends State<InvoiceDetailsScreen> {
+  final PDFService _pdfService = PDFService();
+
   @override
   void initState() {
     super.initState();
@@ -482,16 +485,10 @@ class _InvoiceDetailsScreenState extends State<InvoiceDetailsScreen> {
         );
         break;
       case 'pdf':
-        // TODO: Implement PDF generation
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('PDF generation coming soon')),
-        );
+        _generatePDF(invoice);
         break;
       case 'share':
-        // TODO: Implement sharing
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Share feature coming soon')),
-        );
+        _shareInvoice(invoice);
         break;
       case 'mark_paid':
         context.read<InvoiceBloc>().add(UpdateInvoiceStatus(invoice.id!, InvoiceStatus.paid));
@@ -551,5 +548,68 @@ class _InvoiceDetailsScreenState extends State<InvoiceDetailsScreen> {
     ).then((_) {
       context.read<InvoiceBloc>().add(LoadInvoiceDetails(widget.invoiceId));
     });
+  }
+
+  Future<void> _generatePDF(Invoice invoice) async {
+    final state = context.read<InvoiceBloc>().state;
+    if (state is! InvoiceDetailsLoaded) return;
+
+    try {
+      final invoiceData = state.invoiceDetails['invoice'] as Map<String, dynamic>;
+      final items = (state.invoiceDetails['items'] as List)
+          .map((item) => InvoiceItem.fromMap(item))
+          .toList();
+
+      await _pdfService.printInvoice(
+        invoice: invoice,
+        items: items,
+        clientData: invoiceData,
+      );
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('PDF generated successfully!'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error generating PDF: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _shareInvoice(Invoice invoice) async {
+    final state = context.read<InvoiceBloc>().state;
+    if (state is! InvoiceDetailsLoaded) return;
+
+    try {
+      final invoiceData = state.invoiceDetails['invoice'] as Map<String, dynamic>;
+      final items = (state.invoiceDetails['items'] as List)
+          .map((item) => InvoiceItem.fromMap(item))
+          .toList();
+
+      await _pdfService.shareInvoice(
+        invoice: invoice,
+        items: items,
+        clientData: invoiceData,
+      );
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error sharing invoice: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 }

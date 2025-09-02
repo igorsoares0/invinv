@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import '../bloc/invoice_bloc.dart';
 import '../../../shared/models/models.dart';
 import '../../../shared/services/company_service.dart';
+import '../../../shared/services/pdf_service.dart';
 
 class InvoicePreviewScreen extends StatefulWidget {
   final int invoiceId;
@@ -16,7 +17,9 @@ class InvoicePreviewScreen extends StatefulWidget {
 
 class _InvoicePreviewScreenState extends State<InvoicePreviewScreen> {
   final CompanyService _companyService = CompanyService();
+  final PDFService _pdfService = PDFService();
   Company? _company;
+  bool _isGeneratingPdf = false;
 
   @override
   void initState() {
@@ -46,9 +49,15 @@ class _InvoicePreviewScreenState extends State<InvoicePreviewScreen> {
         foregroundColor: Colors.black87,
         actions: [
           TextButton.icon(
-            onPressed: () => _generatePDF(),
-            icon: const Icon(Icons.picture_as_pdf),
-            label: const Text('Generate PDF'),
+            onPressed: _isGeneratingPdf ? null : () => _generatePDF(),
+            icon: _isGeneratingPdf 
+                ? const SizedBox(
+                    width: 16,
+                    height: 16,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : const Icon(Icons.picture_as_pdf),
+            label: Text(_isGeneratingPdf ? 'Generating...' : 'Generate PDF'),
           ),
           PopupMenuButton<String>(
             onSelected: (value) => _handleMenuAction(value),
@@ -520,28 +529,81 @@ class _InvoicePreviewScreenState extends State<InvoicePreviewScreen> {
     }
   }
 
-  void _generatePDF() {
-    // TODO: Implement PDF generation
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('PDF generation coming soon!'),
-        backgroundColor: Colors.blue,
-      ),
-    );
+  Future<void> _generatePDF() async {
+    final state = context.read<InvoiceBloc>().state;
+    if (state is! InvoiceDetailsLoaded) return;
+
+    setState(() => _isGeneratingPdf = true);
+
+    try {
+      final invoiceData = state.invoiceDetails['invoice'] as Map<String, dynamic>;
+      final items = (state.invoiceDetails['items'] as List)
+          .map((item) => InvoiceItem.fromMap(item))
+          .toList();
+
+      final invoice = Invoice.fromMap(invoiceData);
+
+      await _pdfService.printInvoice(
+        invoice: invoice,
+        items: items,
+        clientData: invoiceData,
+      );
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('PDF generated successfully!'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error generating PDF: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isGeneratingPdf = false);
+      }
+    }
   }
 
-  void _shareInvoice() {
-    // TODO: Implement sharing
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Share functionality coming soon!'),
-        backgroundColor: Colors.green,
-      ),
-    );
+  Future<void> _shareInvoice() async {
+    final state = context.read<InvoiceBloc>().state;
+    if (state is! InvoiceDetailsLoaded) return;
+
+    try {
+      final invoiceData = state.invoiceDetails['invoice'] as Map<String, dynamic>;
+      final items = (state.invoiceDetails['items'] as List)
+          .map((item) => InvoiceItem.fromMap(item))
+          .toList();
+
+      final invoice = Invoice.fromMap(invoiceData);
+
+      await _pdfService.shareInvoice(
+        invoice: invoice,
+        items: items,
+        clientData: invoiceData,
+      );
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error sharing invoice: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 
   void _sendByEmail() {
-    // TODO: Implement email sending
+    // TODO: Implement email sending with attachment
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
         content: Text('Email functionality coming soon!'),
@@ -550,13 +612,32 @@ class _InvoicePreviewScreenState extends State<InvoicePreviewScreen> {
     );
   }
 
-  void _printInvoice() {
-    // TODO: Implement printing
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Print functionality coming soon!'),
-        backgroundColor: Colors.purple,
-      ),
-    );
+  Future<void> _printInvoice() async {
+    final state = context.read<InvoiceBloc>().state;
+    if (state is! InvoiceDetailsLoaded) return;
+
+    try {
+      final invoiceData = state.invoiceDetails['invoice'] as Map<String, dynamic>;
+      final items = (state.invoiceDetails['items'] as List)
+          .map((item) => InvoiceItem.fromMap(item))
+          .toList();
+
+      final invoice = Invoice.fromMap(invoiceData);
+
+      await _pdfService.printInvoice(
+        invoice: invoice,
+        items: items,
+        clientData: invoiceData,
+      );
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error printing invoice: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 }
