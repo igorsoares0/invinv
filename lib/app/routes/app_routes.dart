@@ -9,6 +9,7 @@ import '../../features/products/screens/product_form_screen.dart';
 import '../../features/invoices/screens/invoices_screen.dart';
 import '../../features/invoices/screens/invoice_form_screen.dart';
 import '../../features/invoices/screens/invoice_details_screen.dart';
+import '../../features/settings/screens/settings_screen.dart';
 import '../../shared/models/models.dart';
 import '../app.dart';
 
@@ -85,11 +86,7 @@ class AppRoutes {
           ),
           GoRoute(
             path: settings,
-            builder: (context, state) => const Scaffold(
-              body: Center(
-                child: Text('Settings Screen - Coming Soon'),
-              ),
-            ),
+            builder: (context, state) => const SettingsScreen(),
           ),
         ],
       ),

@@ -42,40 +42,29 @@ class _DashboardScreenState extends State<DashboardScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Dashboard'),
-        elevation: 0,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: () {
-              setState(() => _isLoading = true);
-              _loadStats();
-            },
-          ),
-        ],
-      ),
+      backgroundColor: Colors.grey[50],
       body: _isLoading 
           ? const Center(child: CircularProgressIndicator())
-          : SingleChildScrollView(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _buildGreeting(),
-                  const SizedBox(height: 24),
-                  _buildStatsCards(),
-                  const SizedBox(height: 24),
-                  _buildQuickActions(),
-                  const SizedBox(height: 24),
-                  _buildRecentActivity(),
-                ],
+          : RefreshIndicator(
+              onRefresh: _loadStats,
+              child: SingleChildScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                child: Column(
+                  children: [
+                    _buildHeader(),
+                    const SizedBox(height: 20),
+                    _buildStatsOverview(),
+                    const SizedBox(height: 24),
+                    _buildQuickActions(),
+                    const SizedBox(height: 100), // Space for bottom navigation
+                  ],
+                ),
               ),
             ),
     );
   }
 
-  Widget _buildGreeting() {
+  Widget _buildHeader() {
     final hour = DateTime.now().hour;
     String greeting;
     if (hour < 12) {
@@ -86,200 +75,38 @@ class _DashboardScreenState extends State<DashboardScreen> {
       greeting = 'Good Evening';
     }
 
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Row(
-          children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    greeting,
-                    style: const TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    'Here\'s your business overview for ${DateFormat('MMMM yyyy').format(DateTime.now())}',
-                    style: TextStyle(
-                      color: Colors.grey[600],
-                      fontSize: 14,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Icon(
-              Icons.analytics,
-              size: 48,
-              color: Theme.of(context).primaryColor,
-            ),
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Theme.of(context).primaryColor,
+            Theme.of(context).primaryColor.withOpacity(0.8),
           ],
         ),
       ),
-    );
-  }
-
-  Widget _buildStatsCards() {
-    if (_stats == null) return const SizedBox.shrink();
-
-    final totalInvoices = _stats!['total_invoices'] ?? 0;
-    final totalPaid = (_stats!['total_paid'] ?? 0.0).toDouble();
-    final totalPending = (_stats!['total_pending'] ?? 0.0).toDouble();
-    final totalOverdue = (_stats!['total_overdue'] ?? 0.0).toDouble();
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          'This Month',
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        const SizedBox(height: 12),
-        GridView.count(
-          crossAxisCount: 2,
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          childAspectRatio: 1.5,
-          crossAxisSpacing: 12,
-          mainAxisSpacing: 12,
-          children: [
-            _buildStatCard(
-              'Total Invoices',
-              totalInvoices.toString(),
-              Icons.receipt,
-              Colors.blue,
-            ),
-            _buildStatCard(
-              'Paid',
-              NumberFormat.currency(symbol: '\$').format(totalPaid),
-              Icons.check_circle,
-              Colors.green,
-            ),
-            _buildStatCard(
-              'Pending',
-              NumberFormat.currency(symbol: '\$').format(totalPending),
-              Icons.schedule,
-              Colors.orange,
-            ),
-            _buildStatCard(
-              'Overdue',
-              NumberFormat.currency(symbol: '\$').format(totalOverdue),
-              Icons.warning,
-              Colors.red,
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-
-  Widget _buildStatCard(String title, String value, IconData icon, Color color) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(icon, color: color, size: 32),
-            const SizedBox(height: 8),
-            Text(
-              value,
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: color,
-              ),
-            ),
-            Text(
-              title,
-              style: TextStyle(
-                fontSize: 12,
-                color: Colors.grey[600],
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildQuickActions() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          'Quick Actions',
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        const SizedBox(height: 12),
-        GridView.count(
-          crossAxisCount: 2,
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          childAspectRatio: 2.5,
-          crossAxisSpacing: 12,
-          mainAxisSpacing: 12,
-          children: [
-            _buildActionCard(
-              'New Invoice',
-              Icons.add_circle,
-              Colors.blue,
-              () => _navigateToInvoiceForm(),
-            ),
-            _buildActionCard(
-              'Add Client',
-              Icons.person_add,
-              Colors.green,
-              () => _navigateToClientForm(),
-            ),
-            _buildActionCard(
-              'Add Product',
-              Icons.inventory,
-              Colors.purple,
-              () => _navigateToProductForm(),
-            ),
-            _buildActionCard(
-              'View Reports',
-              Icons.analytics,
-              Colors.orange,
-              () => _navigateToReports(),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-
-  Widget _buildActionCard(String title, IconData icon, Color color, VoidCallback onTap) {
-    return Card(
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(8),
+      child: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Row(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Icon(icon, color: color, size: 24),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Text(
-                  title,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
-                  ),
+              Text(
+                greeting,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 28,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                DateFormat('EEEE, MMMM d').format(DateTime.now()),
+                style: TextStyle(
+                  color: Colors.white.withOpacity(0.9),
+                  fontSize: 16,
                 ),
               ),
             ],
@@ -289,94 +116,246 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  Widget _buildRecentActivity() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          'Recent Activity',
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        const SizedBox(height: 12),
-        Card(
-          child: Padding(
-            padding: const EdgeInsets.all(16),
+  Widget _buildStatsOverview() {
+    if (_stats == null) return const SizedBox.shrink();
+
+    final totalPaid = (_stats!['total_paid'] ?? 0.0).toDouble();
+    final totalPending = (_stats!['total_pending'] ?? 0.0).toDouble();
+    final totalOverdue = (_stats!['total_overdue'] ?? 0.0).toDouble();
+    final totalInvoices = _stats!['total_invoices'] ?? 0;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Main revenue card
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.grey.withOpacity(0.1),
+                  blurRadius: 10,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                ListTile(
-                  leading: CircleAvatar(
-                    backgroundColor: Colors.blue.withOpacity(0.1),
-                    child: const Icon(Icons.receipt, color: Colors.blue),
+                Text(
+                  'This Month',
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.grey[600],
+                    fontWeight: FontWeight.w500,
                   ),
-                  title: const Text('Invoice #INV-2024-0001 created'),
-                  subtitle: const Text('2 hours ago'),
-                  trailing: const Icon(Icons.chevron_right),
-                  onTap: () {
-                    // TODO: Navigate to invoice details
-                  },
                 ),
-                const Divider(height: 1),
-                ListTile(
-                  leading: CircleAvatar(
-                    backgroundColor: Colors.green.withOpacity(0.1),
-                    child: const Icon(Icons.person_add, color: Colors.green),
+                const SizedBox(height: 8),
+                Text(
+                  NumberFormat.currency(symbol: '\$').format(totalPaid),
+                  style: const TextStyle(
+                    fontSize: 32,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.green,
                   ),
-                  title: const Text('New client "Acme Corp" added'),
-                  subtitle: const Text('1 day ago'),
-                  trailing: const Icon(Icons.chevron_right),
-                  onTap: () {
-                    // TODO: Navigate to client details
-                  },
                 ),
-                const Divider(height: 1),
-                ListTile(
-                  leading: CircleAvatar(
-                    backgroundColor: Colors.purple.withOpacity(0.1),
-                    child: const Icon(Icons.inventory, color: Colors.purple),
+                const SizedBox(height: 4),
+                Text(
+                  'Received from $totalInvoices invoices',
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.grey[600],
                   ),
-                  title: const Text('Product "Web Development" updated'),
-                  subtitle: const Text('3 days ago'),
-                  trailing: const Icon(Icons.chevron_right),
-                  onTap: () {
-                    // TODO: Navigate to product details
-                  },
                 ),
               ],
             ),
           ),
+          
+          const SizedBox(height: 16),
+          
+          // Summary row
+          Row(
+            children: [
+              Expanded(
+                child: _buildSummaryCard(
+                  'Pending',
+                  NumberFormat.currency(symbol: '\$').format(totalPending),
+                  Colors.orange,
+                  Icons.schedule,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _buildSummaryCard(
+                  'Overdue',
+                  NumberFormat.currency(symbol: '\$').format(totalOverdue),
+                  Colors.red,
+                  Icons.warning_amber,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSummaryCard(String title, String value, Color color, IconData icon) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.08),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: color.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(icon, color: color, size: 20),
+              ),
+              const Spacer(),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Text(
+            value,
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: color,
+            ),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            title,
+            style: TextStyle(
+              fontSize: 12,
+              color: Colors.grey[600],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildQuickActions() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Quick Actions',
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: Colors.grey[800],
+            ),
+          ),
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              Expanded(
+                child: _buildActionCard(
+                  'New Invoice',
+                  Icons.receipt_long,
+                  Colors.blue,
+                  () => _navigateToInvoiceForm(),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _buildActionCard(
+                  'Add Client',
+                  Icons.person_add,
+                  Colors.green,
+                  () => _navigateToClientForm(),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildActionCard(String title, IconData icon, Color color, VoidCallback onTap) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.1),
+              blurRadius: 10,
+              offset: const Offset(0, 2),
+            ),
+          ],
         ),
-      ],
+        child: Column(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: color.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(icon, color: color, size: 24),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              title,
+              style: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
   void _navigateToInvoiceForm() {
-    // TODO: Navigate to invoice form
+    // Navigate to invoice form using the bottom nav
+    // This will be handled by the main navigation
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Invoice form coming soon!')),
+      const SnackBar(
+        content: Text('Use the Invoices tab to create new invoices!'),
+        duration: Duration(seconds: 2),
+      ),
     );
   }
 
   void _navigateToClientForm() {
-    // TODO: Navigate to client form
+    // Navigate to client form using the bottom nav
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Client form coming soon!')),
-    );
-  }
-
-  void _navigateToProductForm() {
-    // TODO: Navigate to product form
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Product form coming soon!')),
-    );
-  }
-
-  void _navigateToReports() {
-    // TODO: Navigate to reports
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Reports coming soon!')),
+      const SnackBar(
+        content: Text('Use the Clients tab to add new clients!'),
+        duration: Duration(seconds: 2),
+      ),
     );
   }
 }
