@@ -117,11 +117,6 @@ class _MainLayoutState extends State<MainLayout> {
 
   final List<NavigationDestination> _destinations = const [
     NavigationDestination(
-      icon: Icon(Icons.dashboard_outlined),
-      selectedIcon: Icon(Icons.dashboard),
-      label: 'Dashboard',
-    ),
-    NavigationDestination(
       icon: Icon(Icons.receipt_outlined),
       selectedIcon: Icon(Icons.receipt),
       label: 'Invoices',
@@ -147,30 +142,76 @@ class _MainLayoutState extends State<MainLayout> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: widget.child,
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: _selectedIndex,
-        onDestinationSelected: (index) {
-          setState(() => _selectedIndex = index);
-          
-          switch (index) {
-            case 0:
-              context.go('/');
-              break;
-            case 1:
-              context.go('/invoices');
-              break;
-            case 2:
-              context.go('/clients');
-              break;
-            case 3:
-              context.go('/products');
-              break;
-            case 4:
-              context.go('/settings');
-              break;
-          }
-        },
-        destinations: _destinations,
+      bottomNavigationBar: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 10,
+              offset: const Offset(0, -5),
+            ),
+          ],
+        ),
+        child: SafeArea(
+          child: Container(
+            height: 80,
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                _buildNavItem(0, Icons.receipt_outlined, Icons.receipt, 'Invoices'),
+                _buildNavItem(1, Icons.people_outlined, Icons.people, 'Clients'),
+                _buildNavItem(2, Icons.inventory_2_outlined, Icons.inventory_2, 'Products'),
+                _buildNavItem(3, Icons.settings_outlined, Icons.settings, 'Settings'),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildNavItem(int index, IconData icon, IconData selectedIcon, String label) {
+    final isSelected = _selectedIndex == index;
+    
+    return GestureDetector(
+      onTap: () {
+        setState(() => _selectedIndex = index);
+        
+        switch (index) {
+          case 0:
+            context.go('/invoices');
+            break;
+          case 1:
+            context.go('/clients');
+            break;
+          case 2:
+            context.go('/products');
+            break;
+          case 3:
+            context.go('/settings');
+            break;
+        }
+      },
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            isSelected ? selectedIcon : icon,
+            color: isSelected ? Colors.blue : Colors.grey.shade600,
+            size: 24,
+          ),
+          const SizedBox(height: 4),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 12,
+              color: isSelected ? Colors.blue : Colors.grey.shade600,
+              fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+            ),
+          ),
+        ],
       ),
     );
   }

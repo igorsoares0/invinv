@@ -22,12 +22,30 @@ class _ClientFormScreenState extends State<ClientFormScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.grey.shade50,
       appBar: AppBar(
-        title: Text(isEditing ? 'Edit Client' : 'Add Client'),
+        title: Text(
+          isEditing ? 'Edit Client' : 'Add Client',
+          style: const TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+            color: Colors.black87,
+          ),
+        ),
+        backgroundColor: Colors.grey.shade50,
         elevation: 0,
+        toolbarHeight: 80,
+        iconTheme: const IconThemeData(color: Colors.black87),
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(1),
+          child: Container(
+            height: 1,
+            color: Colors.grey.shade300,
+          ),
+        ),
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(20),
         child: FormBuilder(
           key: _formKey,
           initialValue: isEditing ? _getInitialValues() : {},
@@ -35,114 +53,196 @@ class _ClientFormScreenState extends State<ClientFormScreen> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               const SizedBox(height: 16),
-              FormBuilderTextField(
+              _buildFormField(
                 name: 'name',
-                decoration: const InputDecoration(
-                  labelText: 'Client Name *',
-                  border: OutlineInputBorder(),
-                  prefixIcon: Icon(Icons.person),
-                ),
+                icon: Icons.person_outline,
+                labelText: 'Client Name *',
                 validator: FormBuilderValidators.compose([
                   FormBuilderValidators.required(),
                 ]),
               ),
-              const SizedBox(height: 16),
-              FormBuilderTextField(
+              const SizedBox(height: 20),
+              _buildFormField(
                 name: 'email',
-                decoration: const InputDecoration(
-                  labelText: 'Email *',
-                  border: OutlineInputBorder(),
-                  prefixIcon: Icon(Icons.email),
-                ),
+                icon: Icons.email_outlined,
+                labelText: 'Email *',
                 validator: FormBuilderValidators.compose([
                   FormBuilderValidators.required(),
                   FormBuilderValidators.email(),
                 ]),
               ),
-              const SizedBox(height: 16),
-              FormBuilderTextField(
+              const SizedBox(height: 20),
+              _buildFormField(
                 name: 'phone',
-                decoration: const InputDecoration(
-                  labelText: 'Phone',
-                  border: OutlineInputBorder(),
-                  prefixIcon: Icon(Icons.phone),
-                ),
+                icon: Icons.phone_outlined,
+                labelText: 'Phone',
               ),
-              const SizedBox(height: 16),
-              FormBuilderTextField(
+              const SizedBox(height: 20),
+              _buildFormField(
                 name: 'address',
-                decoration: const InputDecoration(
-                  labelText: 'Address',
-                  border: OutlineInputBorder(),
-                  prefixIcon: Icon(Icons.location_on),
-                ),
+                icon: Icons.location_on_outlined,
+                labelText: 'Address',
                 maxLines: 2,
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 20),
               Row(
                 children: [
                   Expanded(
-                    child: FormBuilderTextField(
+                    child: _buildFormField(
                       name: 'city',
-                      decoration: const InputDecoration(
-                        labelText: 'City',
-                        border: OutlineInputBorder(),
-                      ),
+                      labelText: 'City',
                     ),
                   ),
                   const SizedBox(width: 16),
                   Expanded(
-                    child: FormBuilderTextField(
+                    child: _buildFormField(
                       name: 'state',
-                      decoration: const InputDecoration(
-                        labelText: 'State',
-                        border: OutlineInputBorder(),
-                      ),
+                      labelText: 'State',
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: 16),
-              FormBuilderTextField(
+              const SizedBox(height: 20),
+              _buildFormField(
                 name: 'zipCode',
-                decoration: const InputDecoration(
-                  labelText: 'ZIP Code',
-                  border: OutlineInputBorder(),
-                  prefixIcon: Icon(Icons.mail),
-                ),
+                icon: Icons.markunread_mailbox_outlined,
+                labelText: 'ZIP Code',
               ),
-              const SizedBox(height: 16),
-              FormBuilderTextField(
+              const SizedBox(height: 20),
+              _buildFormField(
                 name: 'notes',
-                decoration: const InputDecoration(
-                  labelText: 'Notes',
-                  border: OutlineInputBorder(),
-                  prefixIcon: Icon(Icons.note),
-                ),
+                labelText: 'Notes',
                 maxLines: 3,
               ),
-              const SizedBox(height: 32),
+              const SizedBox(height: 60),
               Row(
                 children: [
                   Expanded(
-                    child: OutlinedButton(
-                      onPressed: () => Navigator.pop(context),
-                      child: const Text('Cancel'),
+                    child: Container(
+                      height: 50,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(25),
+                        border: Border.all(color: Colors.grey.shade300),
+                      ),
+                      child: TextButton(
+                        onPressed: () => Navigator.pop(context),
+                        child: Text(
+                          'Cancel',
+                          style: TextStyle(
+                            color: Colors.grey.shade700,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
                     ),
                   ),
                   const SizedBox(width: 16),
                   Expanded(
-                    child: ElevatedButton(
-                      onPressed: _saveClient,
-                      child: Text(isEditing ? 'Update' : 'Save'),
+                    child: Container(
+                      height: 50,
+                      decoration: BoxDecoration(
+                        color: Colors.blue,
+                        borderRadius: BorderRadius.circular(25),
+                      ),
+                      child: TextButton(
+                        onPressed: _saveClient,
+                        child: Text(
+                          isEditing ? 'Update' : 'Save',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
                     ),
                   ),
                 ],
               ),
+              const SizedBox(height: 40),
             ],
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildFormField({
+    required String name,
+    IconData? icon,
+    required String labelText,
+    String? Function(String?)? validator,
+    int maxLines = 1,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (icon != null) ...[
+          Row(
+            children: [
+              Icon(
+                icon,
+                size: 20,
+                color: Colors.grey.shade600,
+              ),
+              const SizedBox(width: 8),
+              Text(
+                labelText,
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.grey.shade700,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+        ] else ...[
+          Text(
+            labelText,
+            style: TextStyle(
+              fontSize: 16,
+              color: Colors.grey.shade700,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          const SizedBox(height: 12),
+        ],
+        Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.05),
+                blurRadius: 10,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: FormBuilderTextField(
+            name: name,
+            validator: validator,
+            maxLines: maxLines,
+            decoration: InputDecoration(
+              border: InputBorder.none,
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 16,
+              ),
+              hintStyle: TextStyle(
+                color: Colors.grey.shade400,
+                fontSize: 16,
+              ),
+            ),
+            style: const TextStyle(
+              fontSize: 16,
+              color: Colors.black87,
+            ),
+          ),
+        ),
+      ],
     );
   }
 

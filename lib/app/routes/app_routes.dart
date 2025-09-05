@@ -1,5 +1,4 @@
 import 'package:go_router/go_router.dart';
-import '../../features/dashboard/screens/dashboard_screen.dart';
 import '../../features/clients/screens/clients_screen.dart';
 import '../../features/clients/screens/client_form_screen.dart';
 import '../../features/clients/screens/client_details_screen.dart';
@@ -23,14 +22,14 @@ class AppRoutes {
   static const String settings = '/settings';
 
   static final GoRouter router = GoRouter(
-    initialLocation: home,
+    initialLocation: invoices,
     routes: [
       ShellRoute(
         builder: (context, state, child) => MainLayout(child: child),
         routes: [
           GoRoute(
             path: home,
-            builder: (context, state) => const DashboardScreen(),
+            builder: (context, state) => const InvoicesScreen(),
           ),
           GoRoute(
             path: clients,
