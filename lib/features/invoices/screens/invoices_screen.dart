@@ -110,11 +110,13 @@ class _InvoicesScreenState extends State<InvoicesScreen> {
           color: isSelected ? Colors.blue : Colors.transparent,
           borderRadius: BorderRadius.circular(25),
         ),
-        child: Text(
-          text,
-          style: TextStyle(
-            color: isSelected ? Colors.white : Colors.grey.shade600,
-            fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+        child: Center(
+          child: Text(
+            text,
+            style: TextStyle(
+              color: isSelected ? Colors.white : Colors.grey.shade600,
+              fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+            ),
           ),
         ),
       ),

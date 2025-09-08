@@ -7,24 +7,39 @@ class SettingsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[50],
+      backgroundColor: Colors.grey.shade50,
       appBar: AppBar(
-        title: const Text('Settings'),
+        title: const Text(
+          'Settings',
+          style: TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+            color: Colors.black87,
+          ),
+        ),
+        backgroundColor: Colors.grey.shade50,
         elevation: 0,
+        toolbarHeight: 80,
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(1),
+          child: Container(
+            height: 1,
+            color: Colors.grey.shade300,
+          ),
+        ),
       ),
       body: SingleChildScrollView(
         child: Padding(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(20),
           child: Column(
             children: [
-              _buildHeader(),
-              const SizedBox(height: 24),
+              const SizedBox(height: 16),
               _buildBusinessSection(context),
-              const SizedBox(height: 16),
+              const SizedBox(height: 20),
               _buildPreferencesSection(context),
-              const SizedBox(height: 16),
+              const SizedBox(height: 20),
               _buildAboutSection(context),
-              const SizedBox(height: 32),
+              const SizedBox(height: 40),
             ],
           ),
         ),
@@ -32,68 +47,16 @@ class SettingsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildHeader() {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            Colors.blue.shade600,
-            Colors.blue.shade800,
-          ],
-        ),
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Column(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.2),
-              borderRadius: BorderRadius.circular(50),
-            ),
-            child: const Icon(
-              Icons.settings,
-              color: Colors.white,
-              size: 32,
-            ),
-          ),
-          const SizedBox(height: 16),
-          const Text(
-            'Settings & Configuration',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            'Customize your invoice app',
-            style: TextStyle(
-              color: Colors.white.withOpacity(0.9),
-              fontSize: 14,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   Widget _buildBusinessSection(BuildContext context) {
     return _buildSection(
       'Business',
-      Icons.business,
-      Colors.green,
+      Icons.business_outlined,
       [
         _buildSettingsTile(
           context,
           title: 'Company Information',
           subtitle: 'Update your business details, logo, and contact info',
-          icon: Icons.business_center,
+          icon: Icons.business_center_outlined,
           onTap: () => Navigator.push(
             context,
             MaterialPageRoute(
@@ -105,14 +68,14 @@ class SettingsScreen extends StatelessWidget {
           context,
           title: 'Invoice Templates',
           subtitle: 'Customize your invoice layout and branding',
-          icon: Icons.receipt_long,
+          icon: Icons.receipt_long_outlined,
           onTap: () => _showComingSoon(context, 'Invoice Templates'),
         ),
         _buildSettingsTile(
           context,
           title: 'Tax Settings',
           subtitle: 'Configure tax rates and calculations',
-          icon: Icons.calculate,
+          icon: Icons.calculate_outlined,
           onTap: () => _showComingSoon(context, 'Tax Settings'),
         ),
       ],
@@ -122,28 +85,27 @@ class SettingsScreen extends StatelessWidget {
   Widget _buildPreferencesSection(BuildContext context) {
     return _buildSection(
       'Preferences',
-      Icons.tune,
-      Colors.blue,
+      Icons.tune_outlined,
       [
         _buildSettingsTile(
           context,
           title: 'Currency & Format',
           subtitle: 'Set default currency and number formats',
-          icon: Icons.attach_money,
+          icon: Icons.attach_money_outlined,
           onTap: () => _showComingSoon(context, 'Currency Settings'),
         ),
         _buildSettingsTile(
           context,
           title: 'Notifications',
           subtitle: 'Configure email and push notifications',
-          icon: Icons.notifications,
+          icon: Icons.notifications_outlined,
           onTap: () => _showComingSoon(context, 'Notification Settings'),
         ),
         _buildSettingsTile(
           context,
           title: 'Backup & Sync',
           subtitle: 'Manage data backup and cloud synchronization',
-          icon: Icons.cloud_sync,
+          icon: Icons.cloud_sync_outlined,
           onTap: () => _showComingSoon(context, 'Backup Settings'),
         ),
       ],
@@ -153,8 +115,7 @@ class SettingsScreen extends StatelessWidget {
   Widget _buildAboutSection(BuildContext context) {
     return _buildSection(
       'About',
-      Icons.info,
-      Colors.orange,
+      Icons.info_outline,
       [
         _buildSettingsTile(
           context,
@@ -182,43 +143,43 @@ class SettingsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildSection(String title, IconData icon, Color color, List<Widget> children) {
-    return Card(
-      elevation: 2,
+  Widget _buildSection(String title, IconData icon, List<Widget> children) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
       child: Column(
         children: [
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: color.withOpacity(0.1),
-              borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(12),
-                topRight: Radius.circular(12),
-              ),
-            ),
+          Padding(
+            padding: const EdgeInsets.all(20),
             child: Row(
               children: [
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: color.withOpacity(0.2),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Icon(icon, color: color, size: 20),
+                Icon(
+                  icon,
+                  size: 20,
+                  color: Colors.grey.shade600,
                 ),
-                const SizedBox(width: 12),
+                const SizedBox(width: 8),
                 Text(
                   title,
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
-                    color: _getDarkerColor(color),
+                    color: Colors.black87,
                   ),
                 ),
               ],
             ),
           ),
+          const Divider(height: 1),
           ...children,
         ],
       ),
@@ -233,30 +194,53 @@ class SettingsScreen extends StatelessWidget {
     bool showArrow = true,
     VoidCallback? onTap,
   }) {
-    return ListTile(
-      leading: Container(
-        padding: const EdgeInsets.all(8),
-        decoration: BoxDecoration(
-          color: Colors.grey.withOpacity(0.1),
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Icon(icon, color: Colors.grey.shade600, size: 20),
-      ),
-      title: Text(
-        title,
-        style: const TextStyle(
-          fontWeight: FontWeight.w500,
+    return Container(
+      decoration: BoxDecoration(
+        border: Border(
+          bottom: BorderSide(
+            color: Colors.grey.shade200,
+            width: 1,
+          ),
         ),
       ),
-      subtitle: Text(
-        subtitle,
-        style: TextStyle(
-          color: Colors.grey.shade600,
-          fontSize: 12,
+      child: ListTile(
+        contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
+        leading: Container(
+          width: 40,
+          height: 40,
+          decoration: BoxDecoration(
+            color: Colors.grey.shade100,
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Icon(
+            icon,
+            color: Colors.grey.shade600,
+            size: 20,
+          ),
         ),
+        title: Text(
+          title,
+          style: const TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w500,
+            color: Colors.black87,
+          ),
+        ),
+        subtitle: Text(
+          subtitle,
+          style: TextStyle(
+            fontSize: 14,
+            color: Colors.grey.shade600,
+          ),
+        ),
+        trailing: showArrow 
+            ? Icon(
+                Icons.chevron_right,
+                color: Colors.grey.shade400,
+              )
+            : null,
+        onTap: onTap,
       ),
-      trailing: showArrow ? const Icon(Icons.chevron_right) : null,
-      onTap: onTap,
     );
   }
 
@@ -264,14 +248,13 @@ class SettingsScreen extends StatelessWidget {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text('$feature - Coming Soon!'),
-        backgroundColor: Colors.orange,
+        backgroundColor: Colors.blue,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
+        ),
         duration: const Duration(seconds: 2),
       ),
     );
-  }
-
-  Color _getDarkerColor(Color color) {
-    final hsl = HSLColor.fromColor(color);
-    return hsl.withLightness(0.3).toColor();
   }
 }

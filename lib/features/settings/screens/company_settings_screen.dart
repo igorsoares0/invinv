@@ -78,6 +78,7 @@ class _CompanySettingsScreenState extends State<CompanySettingsScreen> {
             const SnackBar(
               content: Text('Company settings saved successfully!'),
               backgroundColor: Colors.green,
+              behavior: SnackBarBehavior.floating,
             ),
           );
         }
@@ -90,6 +91,7 @@ class _CompanySettingsScreenState extends State<CompanySettingsScreen> {
             SnackBar(
               content: Text('Error saving company settings: ${e.toString()}'),
               backgroundColor: Colors.red,
+              behavior: SnackBarBehavior.floating,
             ),
           );
         }
@@ -100,37 +102,44 @@ class _CompanySettingsScreenState extends State<CompanySettingsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[50],
+      backgroundColor: Colors.grey.shade50,
       appBar: AppBar(
-        title: const Text('Company Settings'),
+        title: const Text(
+          'Company Settings',
+          style: TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+            color: Colors.black87,
+          ),
+        ),
+        backgroundColor: Colors.grey.shade50,
         elevation: 0,
-        actions: [
-          if (!_isLoading)
-            TextButton(
-              onPressed: _isSaving ? null : _saveCompany,
-              child: _isSaving
-                  ? const SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                  : const Text('Save'),
-            ),
-        ],
+        toolbarHeight: 80,
+        iconTheme: const IconThemeData(color: Colors.black87),
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(1),
+          child: Container(
+            height: 1,
+            color: Colors.grey.shade300,
+          ),
+        ),
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : SingleChildScrollView(
               child: Padding(
-                padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.all(20),
                 child: FormBuilder(
                   key: _formKey,
                   child: Column(
                     children: [
-                      _buildCompanyInfoCard(),
                       const SizedBox(height: 16),
-                      _buildContactInfoCard(),
-                      const SizedBox(height: 32),
+                      _buildCompanyInfoSection(),
+                      const SizedBox(height: 20),
+                      _buildContactInfoSection(),
+                      const SizedBox(height: 60),
+                      _buildActionButtons(),
+                      const SizedBox(height: 40),
                     ],
                   ),
                 ),
@@ -139,9 +148,110 @@ class _CompanySettingsScreenState extends State<CompanySettingsScreen> {
     );
   }
 
-  Widget _buildCompanyInfoCard() {
-    return Card(
-      elevation: 2,
+  Widget _buildCompanyInfoSection() {
+    return _buildSection(
+      title: 'Company Information',
+      icon: Icons.business_outlined,
+      child: Column(
+        children: [
+          _buildFormField(
+            name: 'name',
+            icon: Icons.business_center_outlined,
+            labelText: 'Company Name *',
+            initialValue: _company?.name,
+            validator: FormBuilderValidators.required(),
+          ),
+          const SizedBox(height: 20),
+          _buildFormField(
+            name: 'legalName',
+            icon: Icons.business_outlined,
+            labelText: 'Legal Name',
+            helperText: 'Full legal business name',
+            initialValue: _company?.legalName,
+          ),
+          const SizedBox(height: 20),
+          _buildFormField(
+            name: 'logoPath',
+            icon: Icons.image_outlined,
+            labelText: 'Logo Path',
+            helperText: 'Optional: Path to your company logo',
+            initialValue: _company?.logoPath,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildContactInfoSection() {
+    return _buildSection(
+      title: 'Contact Information',
+      icon: Icons.contact_mail_outlined,
+      child: Column(
+        children: [
+          _buildFormField(
+            name: 'address',
+            icon: Icons.location_on_outlined,
+            labelText: 'Address',
+            initialValue: _company?.address,
+            maxLines: 2,
+          ),
+          const SizedBox(height: 20),
+          _buildFormField(
+            name: 'phone',
+            icon: Icons.phone_outlined,
+            labelText: 'Phone',
+            initialValue: _company?.phone,
+            keyboardType: TextInputType.phone,
+          ),
+          const SizedBox(height: 20),
+          _buildFormField(
+            name: 'email',
+            icon: Icons.email_outlined,
+            labelText: 'Email',
+            initialValue: _company?.email,
+            keyboardType: TextInputType.emailAddress,
+            validator: FormBuilderValidators.email(),
+          ),
+          const SizedBox(height: 20),
+          _buildFormField(
+            name: 'website',
+            icon: Icons.web_outlined,
+            labelText: 'Website',
+            initialValue: _company?.website,
+            keyboardType: TextInputType.url,
+          ),
+          const SizedBox(height: 20),
+          _buildFormField(
+            name: 'taxId',
+            icon: Icons.receipt_long_outlined,
+            labelText: 'Tax ID / EIN',
+            helperText: 'Your business tax identification number',
+            initialValue: _company?.taxId,
+          ),
+          const SizedBox(height: 20),
+          _buildInfoBox(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSection({
+    required String title,
+    required IconData icon,
+    required Widget child,
+  }) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
       child: Padding(
         padding: const EdgeInsets.all(20),
         child: Column(
@@ -149,189 +259,208 @@ class _CompanySettingsScreenState extends State<CompanySettingsScreen> {
           children: [
             Row(
               children: [
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).primaryColor.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Icon(
-                    Icons.business,
-                    color: Theme.of(context).primaryColor,
-                  ),
+                Icon(
+                  icon,
+                  size: 20,
+                  color: Colors.grey.shade600,
                 ),
-                const SizedBox(width: 12),
-                const Text(
-                  'Company Information',
-                  style: TextStyle(
-                    fontSize: 18,
+                const SizedBox(width: 8),
+                Text(
+                  title,
+                  style: const TextStyle(
+                    fontSize: 16,
                     fontWeight: FontWeight.bold,
+                    color: Colors.black87,
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 20),
-            FormBuilderTextField(
-              name: 'name',
-              initialValue: _company?.name,
-              decoration: const InputDecoration(
-                labelText: 'Company Name *',
-                prefixIcon: Icon(Icons.business_center),
-                border: OutlineInputBorder(),
-              ),
-              validator: FormBuilderValidators.compose([
-                FormBuilderValidators.required(),
-              ]),
-            ),
             const SizedBox(height: 16),
-            FormBuilderTextField(
-              name: 'legalName',
-              initialValue: _company?.legalName,
-              decoration: const InputDecoration(
-                labelText: 'Legal Name',
-                prefixIcon: Icon(Icons.business),
-                border: OutlineInputBorder(),
-                helperText: 'Full legal business name',
-              ),
-            ),
-            const SizedBox(height: 16),
-            FormBuilderTextField(
-              name: 'logoPath',
-              initialValue: _company?.logoPath,
-              decoration: const InputDecoration(
-                labelText: 'Logo Path',
-                prefixIcon: Icon(Icons.image),
-                border: OutlineInputBorder(),
-                helperText: 'Optional: Path to your company logo',
-              ),
-            ),
+            child,
           ],
         ),
       ),
     );
   }
 
-  Widget _buildContactInfoCard() {
-    return Card(
-      elevation: 2,
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: Colors.blue.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: const Icon(
-                    Icons.contact_mail,
-                    color: Colors.blue,
-                  ),
+  Widget _buildFormField({
+    required String name,
+    IconData? icon,
+    required String labelText,
+    String? helperText,
+    String? initialValue,
+    String? Function(String?)? validator,
+    int maxLines = 1,
+    TextInputType? keyboardType,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (icon != null) ...[
+          Row(
+            children: [
+              Icon(
+                icon,
+                size: 20,
+                color: Colors.grey.shade600,
+              ),
+              const SizedBox(width: 8),
+              Text(
+                labelText,
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.grey.shade700,
+                  fontWeight: FontWeight.w500,
                 ),
-                const SizedBox(width: 12),
-                const Text(
-                  'Contact Information',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+        ] else ...[
+          Text(
+            labelText,
+            style: TextStyle(
+              fontSize: 16,
+              color: Colors.grey.shade700,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          const SizedBox(height: 12),
+        ],
+        Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.05),
+                blurRadius: 10,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: FormBuilderTextField(
+            name: name,
+            initialValue: initialValue,
+            validator: validator,
+            maxLines: maxLines,
+            keyboardType: keyboardType,
+            decoration: InputDecoration(
+              border: InputBorder.none,
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 16,
+              ),
+              hintStyle: TextStyle(
+                color: Colors.grey.shade400,
+                fontSize: 16,
+              ),
+            ),
+            style: const TextStyle(
+              fontSize: 16,
+              color: Colors.black87,
+            ),
+          ),
+        ),
+        if (helperText != null) ...[
+          const SizedBox(height: 4),
+          Text(
+            helperText,
+            style: TextStyle(
+              fontSize: 12,
+              color: Colors.grey.shade500,
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildInfoBox() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.blue.withOpacity(0.05),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.blue.withOpacity(0.2)),
+      ),
+      child: Row(
+        children: [
+          Icon(
+            Icons.info_outline,
+            color: Colors.blue.shade600,
+            size: 20,
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              'This information will appear on your invoices and estimates.',
+              style: TextStyle(
+                color: Colors.blue.shade700,
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildActionButtons() {
+    return Row(
+      children: [
+        Expanded(
+          child: Container(
+            height: 50,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(25),
+              border: Border.all(color: Colors.grey.shade300),
+            ),
+            child: TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text(
+                'Cancel',
+                style: TextStyle(
+                  color: Colors.grey.shade700,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
                 ),
-              ],
-            ),
-            const SizedBox(height: 20),
-            FormBuilderTextField(
-              name: 'address',
-              initialValue: _company?.address,
-              decoration: const InputDecoration(
-                labelText: 'Address',
-                prefixIcon: Icon(Icons.location_on),
-                border: OutlineInputBorder(),
               ),
             ),
-            const SizedBox(height: 16),
-            const SizedBox(height: 16),
-            FormBuilderTextField(
-              name: 'phone',
-              initialValue: _company?.phone,
-              decoration: const InputDecoration(
-                labelText: 'Phone',
-                prefixIcon: Icon(Icons.phone),
-                border: OutlineInputBorder(),
-              ),
-              keyboardType: TextInputType.phone,
+          ),
+        ),
+        const SizedBox(width: 16),
+        Expanded(
+          child: Container(
+            height: 50,
+            decoration: BoxDecoration(
+              color: Colors.blue,
+              borderRadius: BorderRadius.circular(25),
             ),
-            const SizedBox(height: 16),
-            FormBuilderTextField(
-              name: 'email',
-              initialValue: _company?.email,
-              decoration: const InputDecoration(
-                labelText: 'Email',
-                prefixIcon: Icon(Icons.email),
-                border: OutlineInputBorder(),
-              ),
-              validator: FormBuilderValidators.compose([
-                FormBuilderValidators.email(),
-              ]),
-              keyboardType: TextInputType.emailAddress,
-            ),
-            const SizedBox(height: 16),
-            FormBuilderTextField(
-              name: 'website',
-              initialValue: _company?.website,
-              decoration: const InputDecoration(
-                labelText: 'Website',
-                prefixIcon: Icon(Icons.web),
-                border: OutlineInputBorder(),
-              ),
-              keyboardType: TextInputType.url,
-            ),
-            const SizedBox(height: 16),
-            FormBuilderTextField(
-              name: 'taxId',
-              initialValue: _company?.taxId,
-              decoration: const InputDecoration(
-                labelText: 'Tax ID / EIN',
-                prefixIcon: Icon(Icons.receipt_long),
-                border: OutlineInputBorder(),
-                helperText: 'Your business tax identification number',
-              ),
-            ),
-            const SizedBox(height: 20),
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Colors.blue.withOpacity(0.05),
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: Colors.blue.withOpacity(0.2)),
-              ),
-              child: Row(
-                children: [
-                  Icon(
-                    Icons.info_outline,
-                    color: Colors.blue.shade600,
-                    size: 20,
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      'This information will appear on your invoices and estimates.',
+            child: TextButton(
+              onPressed: _isSaving ? null : _saveCompany,
+              child: _isSaving
+                  ? const SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: Colors.white,
+                      ),
+                    )
+                  : const Text(
+                      'Save',
                       style: TextStyle(
-                        color: Colors.blue.shade700,
-                        fontSize: 12,
+                        color: Colors.white,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
-                  ),
-                ],
-              ),
             ),
-          ],
+          ),
         ),
-      ),
+      ],
     );
   }
-
 }

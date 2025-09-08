@@ -73,29 +73,48 @@ class _InvoiceFormScreenState extends State<InvoiceFormScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.grey.shade50,
       appBar: AppBar(
-        title: Text(title),
+        title: Text(
+          title,
+          style: const TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+            color: Colors.black87,
+          ),
+        ),
+        backgroundColor: Colors.grey.shade50,
         elevation: 0,
+        toolbarHeight: 80,
+        iconTheme: const IconThemeData(color: Colors.black87),
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(1),
+          child: Container(
+            height: 1,
+            color: Colors.grey.shade300,
+          ),
+        ),
       ),
       body: FormBuilder(
         key: _formKey,
         initialValue: _getInitialValues(),
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(20),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               _buildClientSection(),
-              const SizedBox(height: 24),
+              const SizedBox(height: 20),
               _buildInvoiceDetailsSection(),
-              const SizedBox(height: 24),
+              const SizedBox(height: 20),
               _buildItemsSection(),
-              const SizedBox(height: 24),
+              const SizedBox(height: 20),
               _buildTotalsSection(),
-              const SizedBox(height: 24),
+              const SizedBox(height: 20),
               _buildNotesSection(),
-              const SizedBox(height: 32),
+              const SizedBox(height: 60),
               _buildActionButtons(),
+              const SizedBox(height: 40),
             ],
           ),
         ),
@@ -124,126 +143,95 @@ class _InvoiceFormScreenState extends State<InvoiceFormScreen> {
   }
 
   Widget _buildClientSection() {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Client Information',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 12),
-            BlocBuilder<ClientBloc, ClientState>(
-              builder: (context, state) {
-                if (state is ClientLoaded) {
-                  return FormBuilderDropdown<int>(
-                    name: 'clientId',
-                    decoration: const InputDecoration(
-                      labelText: 'Select Client *',
-                      border: OutlineInputBorder(),
-                    ),
-                    validator: FormBuilderValidators.required(),
-                    items: state.clients.map((client) {
-                      return DropdownMenuItem(
-                        value: client.id!,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(client.name, style: const TextStyle(fontWeight: FontWeight.bold)),
-                            Text(client.email, style: const TextStyle(fontSize: 12)),
-                          ],
-                        ),
-                      );
-                    }).toList(),
-                  );
-                }
-                return const CircularProgressIndicator();
-              },
-            ),
-          ],
-        ),
+    return _buildSection(
+      title: 'Client Information',
+      icon: Icons.person_outline,
+      child: BlocBuilder<ClientBloc, ClientState>(
+        builder: (context, state) {
+          if (state is ClientLoaded) {
+            return _buildStyledDropdown(
+              name: 'clientId',
+              labelText: 'Select Client *',
+              validator: FormBuilderValidators.required(),
+              items: state.clients.map((client) {
+                return DropdownMenuItem(
+                  value: client.id!,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(client.name, style: const TextStyle(fontWeight: FontWeight.bold)),
+                      Text(client.email, style: const TextStyle(fontSize: 12)),
+                    ],
+                  ),
+                );
+              }).toList(),
+            );
+          }
+          return const Center(child: CircularProgressIndicator());
+        },
       ),
     );
   }
 
   Widget _buildInvoiceDetailsSection() {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              '${widget.type.value.toUpperCase()} Details',
-              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 12),
-            Row(
-              children: [
-                Expanded(
-                  child: FormBuilderDateTimePicker(
-                    name: 'issueDate',
-                    inputType: InputType.date,
-                    decoration: const InputDecoration(
-                      labelText: 'Issue Date *',
-                      border: OutlineInputBorder(),
-                    ),
-                    validator: FormBuilderValidators.required(),
-                  ),
+    return _buildSection(
+      title: '${widget.type.value.toUpperCase()} Details',
+      icon: Icons.calendar_today_outlined,
+      child: Column(
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: _buildFormField(
+                  name: 'issueDate',
+                  labelText: 'Issue Date *',
+                  isDateField: true,
+                  validator: FormBuilderValidators.required(),
                 ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: FormBuilderDateTimePicker(
-                    name: 'dueDate',
-                    inputType: InputType.date,
-                    decoration: InputDecoration(
-                      labelText: widget.type == InvoiceType.estimate ? 'Valid Until' : 'Due Date',
-                      border: const OutlineInputBorder(),
-                    ),
-                  ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: _buildFormField(
+                  name: 'dueDate',
+                  labelText: widget.type == InvoiceType.estimate ? 'Valid Until' : 'Due Date',
+                  isDateField: true,
                 ),
-              ],
-            ),
-          ],
-        ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
 
   Widget _buildItemsSection() {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text(
-                  'Items',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                ),
-                TextButton.icon(
-                  onPressed: _addEmptyItem,
-                  icon: const Icon(Icons.add),
-                  label: const Text('Add Item'),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            ListView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: _items.length,
-              itemBuilder: (context, index) {
-                return _buildItemRow(index);
-              },
-            ),
-          ],
-        ),
+    return _buildSection(
+      title: 'Items',
+      icon: Icons.list_alt_outlined,
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text('Line Items', style: TextStyle(fontWeight: FontWeight.w500)),
+              TextButton.icon(
+                onPressed: _addEmptyItem,
+                icon: const Icon(Icons.add, size: 20),
+                label: const Text('Add Item'),
+                style: TextButton.styleFrom(foregroundColor: Colors.blue),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          ListView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: _items.length,
+            itemBuilder: (context, index) {
+              return _buildItemRow(index);
+            },
+          ),
+        ],
       ),
     );
   }
@@ -251,117 +239,145 @@ class _InvoiceFormScreenState extends State<InvoiceFormScreen> {
   Widget _buildItemRow(int index) {
     final item = _items[index];
     
-    return Card(
-      margin: const EdgeInsets.only(bottom: 8),
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Column(
-          children: [
-            Row(
-              children: [
-                Expanded(
-                  flex: 3,
-                  child: TextFormField(
-                    initialValue: item.description,
-                    decoration: const InputDecoration(
-                      labelText: 'Description',
-                      border: OutlineInputBorder(),
-                      isDense: true,
-                    ),
-                    onChanged: (value) {
-                      setState(() {
-                        _items[index] = item.copyWith(description: value);
-                      });
-                    },
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: TextFormField(
-                    initialValue: item.quantity.toString(),
-                    decoration: const InputDecoration(
-                      labelText: 'Qty',
-                      border: OutlineInputBorder(),
-                      isDense: true,
-                    ),
-                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                    onChanged: (value) {
-                      final qty = double.tryParse(value) ?? 0.0;
-                      setState(() {
-                        _items[index] = item.copyWith(
-                          quantity: qty,
-                          total: qty * item.unitPrice,
-                        );
-                        _calculateTotals();
-                      });
-                    },
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: TextFormField(
-                    initialValue: item.unitPrice.toString(),
-                    decoration: const InputDecoration(
-                      labelText: 'Price',
-                      border: OutlineInputBorder(),
-                      isDense: true,
-                    ),
-                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                    onChanged: (value) {
-                      final price = double.tryParse(value) ?? 0.0;
-                      setState(() {
-                        _items[index] = item.copyWith(
-                          unitPrice: price,
-                          total: item.quantity * price,
-                        );
-                        _calculateTotals();
-                      });
-                    },
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    NumberFormat.currency(symbol: '\$').format(item.total),
-                    style: const TextStyle(fontWeight: FontWeight.bold),
-                    textAlign: TextAlign.right,
-                  ),
-                ),
-                IconButton(
-                  icon: const Icon(Icons.delete, color: Colors.red),
-                  onPressed: () => _removeItem(index),
-                ),
-              ],
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          TextFormField(
+            initialValue: item.description,
+            decoration: const InputDecoration(
+              labelText: 'Description',
+              border: InputBorder.none,
+              contentPadding: EdgeInsets.symmetric(vertical: 8),
             ),
-          ],
-        ),
+            onChanged: (value) {
+              setState(() {
+                _items[index] = item.copyWith(description: value);
+              });
+            },
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(
+                child: TextFormField(
+                  initialValue: item.quantity.toString(),
+                  decoration: const InputDecoration(
+                    labelText: 'Quantity',
+                    border: InputBorder.none,
+                    contentPadding: EdgeInsets.symmetric(vertical: 8),
+                  ),
+                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                  onChanged: (value) {
+                    final qty = double.tryParse(value) ?? 0.0;
+                    setState(() {
+                      _items[index] = item.copyWith(
+                        quantity: qty,
+                        total: qty * item.unitPrice,
+                      );
+                      _calculateTotals();
+                    });
+                  },
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: TextFormField(
+                  initialValue: item.unitPrice.toString(),
+                  decoration: const InputDecoration(
+                    labelText: 'Unit Price',
+                    border: InputBorder.none,
+                    contentPadding: EdgeInsets.symmetric(vertical: 8),
+                  ),
+                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                  onChanged: (value) {
+                    final price = double.tryParse(value) ?? 0.0;
+                    setState(() {
+                      _items[index] = item.copyWith(
+                        unitPrice: price,
+                        total: item.quantity * price,
+                      );
+                      _calculateTotals();
+                    });
+                  },
+                ),
+              ),
+              const SizedBox(width: 16),
+              Container(
+                width: 80,
+                child: Column(
+                  children: [
+                    Text(
+                      'Total',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey.shade600,
+                      ),
+                    ),
+                    Text(
+                      NumberFormat.currency(symbol: '\$').format(item.total),
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              IconButton(
+                icon: const Icon(Icons.delete_outline, color: Colors.red),
+                onPressed: () => _removeItem(index),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
 
   Widget _buildTotalsSection() {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text('Subtotal:'),
-                Text(NumberFormat.currency(symbol: '\$').format(_subtotal)),
-              ],
-            ),
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                const Expanded(child: Text('Discount:')),
-                Expanded(
+    return _buildSection(
+      title: 'Totals',
+      icon: Icons.calculate_outlined,
+      child: Column(
+        children: [
+          _buildTotalRow('Subtotal', _subtotal, isBold: false),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  'Discount',
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Colors.grey.shade700,
+                  ),
+                ),
+              ),
+              Expanded(
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: Colors.grey.shade300),
+                  ),
                   child: TextFormField(
                     initialValue: _discount.toString(),
                     decoration: const InputDecoration(
-                      border: OutlineInputBorder(),
-                      isDense: true,
+                      border: InputBorder.none,
+                      contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                       prefixText: '\$ ',
                     ),
                     keyboardType: const TextInputType.numberWithOptions(decimal: true),
@@ -373,18 +389,33 @@ class _InvoiceFormScreenState extends State<InvoiceFormScreen> {
                     },
                   ),
                 ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                const Expanded(child: Text('Tax:')),
-                Expanded(
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  'Tax',
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Colors.grey.shade700,
+                  ),
+                ),
+              ),
+              Expanded(
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: Colors.grey.shade300),
+                  ),
                   child: TextFormField(
                     initialValue: _tax.toString(),
                     decoration: const InputDecoration(
-                      border: OutlineInputBorder(),
-                      isDense: true,
+                      border: InputBorder.none,
+                      contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                       prefixText: '\$ ',
                     ),
                     keyboardType: const TextInputType.numberWithOptions(decimal: true),
@@ -396,55 +427,191 @@ class _InvoiceFormScreenState extends State<InvoiceFormScreen> {
                     },
                   ),
                 ),
-              ],
-            ),
-            const Divider(),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text('Total:', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                Text(
-                  NumberFormat.currency(symbol: '\$').format(_total),
-                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          const Divider(),
+          const SizedBox(height: 8),
+          _buildTotalRow('Total', _total, isBold: true),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTotalRow(String label, double amount, {bool isBold = false}) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          '$label:',
+          style: TextStyle(
+            fontSize: isBold ? 18 : 16,
+            fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
+            color: Colors.grey.shade700,
+          ),
+        ),
+        Text(
+          NumberFormat.currency(symbol: '\$').format(amount),
+          style: TextStyle(
+            fontSize: isBold ? 18 : 16,
+            fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
+            color: Colors.black87,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildNotesSection() {
+    return _buildSection(
+      title: 'Additional Information',
+      icon: Icons.note_outlined,
+      child: Column(
+        children: [
+          _buildFormField(
+            name: 'notes',
+            labelText: 'Notes',
+            maxLines: 3,
+          ),
+          const SizedBox(height: 16),
+          _buildFormField(
+            name: 'terms',
+            labelText: 'Terms & Conditions',
+            maxLines: 3,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSection({
+    required String title,
+    IconData? icon,
+    required Widget child,
+  }) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (icon != null) ...[
+              Row(
+                children: [
+                  Icon(
+                    icon,
+                    size: 20,
+                    color: Colors.grey.shade600,
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black87,
+                    ),
+                  ),
+                ],
+              ),
+            ] else ...[
+              Text(
+                title,
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black87,
                 ),
-              ],
-            ),
+              ),
+            ],
+            const SizedBox(height: 16),
+            child,
           ],
         ),
       ),
     );
   }
 
-  Widget _buildNotesSection() {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Additional Information',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 12),
-            FormBuilderTextField(
-              name: 'notes',
-              decoration: const InputDecoration(
-                labelText: 'Notes',
-                border: OutlineInputBorder(),
-              ),
-              maxLines: 3,
-            ),
-            const SizedBox(height: 16),
-            FormBuilderTextField(
-              name: 'terms',
-              decoration: const InputDecoration(
-                labelText: 'Terms & Conditions',
-                border: OutlineInputBorder(),
-              ),
-              maxLines: 3,
-            ),
-          ],
+  Widget _buildFormField({
+    required String name,
+    required String labelText,
+    String? Function(String?)? validator,
+    int maxLines = 1,
+    bool isDateField = false,
+  }) {
+    if (isDateField) {
+      return Container(
+        decoration: BoxDecoration(
+          color: Colors.grey.shade50,
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: Colors.grey.shade300),
+        ),
+        child: FormBuilderDateTimePicker(
+          name: name,
+          inputType: InputType.date,
+          validator: validator != null ? (DateTime? value) {
+            return validator(value?.toString());
+          } : null,
+          decoration: InputDecoration(
+            labelText: labelText,
+            border: InputBorder.none,
+            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+          ),
+        ),
+      );
+    }
+
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.grey.shade50,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: Colors.grey.shade300),
+      ),
+      child: FormBuilderTextField(
+        name: name,
+        validator: validator,
+        maxLines: maxLines,
+        decoration: InputDecoration(
+          labelText: labelText,
+          border: InputBorder.none,
+          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildStyledDropdown({
+    required String name,
+    required String labelText,
+    String? Function(int?)? validator,
+    required List<DropdownMenuItem<int>> items,
+  }) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.grey.shade50,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: Colors.grey.shade300),
+      ),
+      child: FormBuilderDropdown<int>(
+        name: name,
+        validator: validator,
+        items: items,
+        decoration: InputDecoration(
+          labelText: labelText,
+          border: InputBorder.none,
+          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
         ),
       ),
     );
@@ -454,16 +621,44 @@ class _InvoiceFormScreenState extends State<InvoiceFormScreen> {
     return Row(
       children: [
         Expanded(
-          child: OutlinedButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+          child: Container(
+            height: 50,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(25),
+              border: Border.all(color: Colors.grey.shade300),
+            ),
+            child: TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text(
+                'Cancel',
+                style: TextStyle(
+                  color: Colors.grey.shade700,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
           ),
         ),
         const SizedBox(width: 16),
         Expanded(
-          child: ElevatedButton(
-            onPressed: _saveInvoice,
-            child: Text(isEditing ? 'Update' : 'Create'),
+          child: Container(
+            height: 50,
+            decoration: BoxDecoration(
+              color: Colors.blue,
+              borderRadius: BorderRadius.circular(25),
+            ),
+            child: TextButton(
+              onPressed: _saveInvoice,
+              child: Text(
+                isEditing ? 'Update' : 'Create',
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
           ),
         ),
       ],
