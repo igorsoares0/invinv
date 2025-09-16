@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
-import 'package:share_plus/share_plus.dart';
 import '../bloc/invoice_bloc.dart';
 import '../../../shared/models/models.dart';
 import '../../../shared/services/pdf_service.dart';
+import '../../../shared/services/invoice_service.dart';
 import 'invoice_form_screen.dart';
 import 'invoice_details_screen.dart';
 import 'invoice_preview_screen.dart';
@@ -421,14 +421,12 @@ class _InvoicesScreenState extends State<InvoicesScreen> {
         ),
       );
 
-      context.read<InvoiceBloc>().add(LoadInvoiceDetails(invoice.id!));
+      final invoiceService = InvoiceService();
+      final invoiceDetails = await invoiceService.getInvoiceWithDetails(invoice.id!);
 
-      await Future.delayed(const Duration(milliseconds: 1000));
-      
-      final state = context.read<InvoiceBloc>().state;
-      if (state is InvoiceDetailsLoaded) {
-        final invoiceData = state.invoiceDetails['invoice'] as Map<String, dynamic>;
-        final items = (state.invoiceDetails['items'] as List)
+      if (invoiceDetails != null) {
+        final invoiceData = invoiceDetails['invoice'] as Map<String, dynamic>;
+        final items = (invoiceDetails['items'] as List)
             .map((item) => InvoiceItem.fromMap(item))
             .toList();
 
@@ -439,8 +437,6 @@ class _InvoicesScreenState extends State<InvoicesScreen> {
           clientData: invoiceData,
         );
 
-        context.read<InvoiceBloc>().add(LoadInvoices());
-
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('PDF shared successfully!'),
@@ -448,8 +444,6 @@ class _InvoicesScreenState extends State<InvoicesScreen> {
           ),
         );
       } else {
-        context.read<InvoiceBloc>().add(LoadInvoices());
-        
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Error loading invoice details for PDF generation'),
@@ -458,8 +452,6 @@ class _InvoicesScreenState extends State<InvoicesScreen> {
         );
       }
     } catch (e) {
-      context.read<InvoiceBloc>().add(LoadInvoices());
-      
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Error sharing invoice: ${e.toString()}'),
