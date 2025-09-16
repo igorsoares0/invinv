@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
-import '../bloc/invoice_bloc.dart';
 import '../../../shared/models/models.dart';
 import '../../../shared/services/company_service.dart';
 import '../../../shared/services/pdf_service.dart';
+import '../../../shared/services/invoice_service.dart';
 
 class InvoicePreviewScreen extends StatefulWidget {
   final int invoiceId;
@@ -18,26 +17,45 @@ class InvoicePreviewScreen extends StatefulWidget {
 class _InvoicePreviewScreenState extends State<InvoicePreviewScreen> {
   final CompanyService _companyService = CompanyService();
   final PDFService _pdfService = PDFService();
+  final InvoiceService _invoiceService = InvoiceService();
+  
   Company? _company;
+  Map<String, dynamic>? _invoiceDetails;
   bool _isGeneratingPdf = false;
+  bool _isLoading = true;
+  String? _errorMessage;
 
   @override
   void initState() {
     super.initState();
-    context.read<InvoiceBloc>().add(LoadInvoiceDetails(widget.invoiceId));
-    _loadCompanyInfo();
+    _loadData();
   }
 
-  Future<void> _loadCompanyInfo() async {
+  Future<void> _loadData() async {
     try {
-      final company = await _companyService.getCompany();
       setState(() {
-        _company = company;
+        _isLoading = true;
+        _errorMessage = null;
+      });
+
+      final results = await Future.wait([
+        _companyService.getCompany(),
+        _invoiceService.getInvoiceWithDetails(widget.invoiceId),
+      ]);
+
+      setState(() {
+        _company = results[0] as Company?;
+        _invoiceDetails = results[1] as Map<String, dynamic>?;
+        _isLoading = false;
       });
     } catch (e) {
-      // Handle error
+      setState(() {
+        _errorMessage = 'Error loading invoice: ${e.toString()}';
+        _isLoading = false;
+      });
     }
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -90,20 +108,36 @@ class _InvoicePreviewScreenState extends State<InvoicePreviewScreen> {
           ),
         ],
       ),
-      body: BlocBuilder<InvoiceBloc, InvoiceState>(
-        builder: (context, state) {
-          if (state is InvoiceLoading) {
-            return const Center(child: CircularProgressIndicator());
-          }
-
-          if (state is InvoiceDetailsLoaded) {
-            return _buildPreview(state.invoiceDetails);
-          }
-
-          return const Center(child: Text('Error loading invoice'));
-        },
-      ),
+      body: _buildBody(),
     );
+  }
+
+  Widget _buildBody() {
+    if (_isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    if (_errorMessage != null) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(_errorMessage!),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: _loadData,
+              child: const Text('Retry'),
+            ),
+          ],
+        ),
+      );
+    }
+
+    if (_invoiceDetails == null) {
+      return const Center(child: Text('Invoice not found'));
+    }
+
+    return _buildPreview(_invoiceDetails!);
   }
 
   Widget _buildPreview(Map<String, dynamic> details) {
@@ -530,14 +564,13 @@ class _InvoicePreviewScreenState extends State<InvoicePreviewScreen> {
   }
 
   Future<void> _generatePDF() async {
-    final state = context.read<InvoiceBloc>().state;
-    if (state is! InvoiceDetailsLoaded) return;
+    if (_invoiceDetails == null) return;
 
     setState(() => _isGeneratingPdf = true);
 
     try {
-      final invoiceData = state.invoiceDetails['invoice'] as Map<String, dynamic>;
-      final items = (state.invoiceDetails['items'] as List)
+      final invoiceData = _invoiceDetails!['invoice'] as Map<String, dynamic>;
+      final items = (_invoiceDetails!['items'] as List)
           .map((item) => InvoiceItem.fromMap(item))
           .toList();
 
@@ -574,12 +607,11 @@ class _InvoicePreviewScreenState extends State<InvoicePreviewScreen> {
   }
 
   Future<void> _shareInvoice() async {
-    final state = context.read<InvoiceBloc>().state;
-    if (state is! InvoiceDetailsLoaded) return;
+    if (_invoiceDetails == null) return;
 
     try {
-      final invoiceData = state.invoiceDetails['invoice'] as Map<String, dynamic>;
-      final items = (state.invoiceDetails['items'] as List)
+      final invoiceData = _invoiceDetails!['invoice'] as Map<String, dynamic>;
+      final items = (_invoiceDetails!['items'] as List)
           .map((item) => InvoiceItem.fromMap(item))
           .toList();
 
@@ -613,12 +645,11 @@ class _InvoicePreviewScreenState extends State<InvoicePreviewScreen> {
   }
 
   Future<void> _printInvoice() async {
-    final state = context.read<InvoiceBloc>().state;
-    if (state is! InvoiceDetailsLoaded) return;
+    if (_invoiceDetails == null) return;
 
     try {
-      final invoiceData = state.invoiceDetails['invoice'] as Map<String, dynamic>;
-      final items = (state.invoiceDetails['items'] as List)
+      final invoiceData = _invoiceDetails!['invoice'] as Map<String, dynamic>;
+      final items = (_invoiceDetails!['items'] as List)
           .map((item) => InvoiceItem.fromMap(item))
           .toList();
 
