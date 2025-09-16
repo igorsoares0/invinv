@@ -54,8 +54,20 @@ class _InvoiceFormScreenState extends State<InvoiceFormScreen> {
   }
 
   Future<void> _loadExistingInvoice() async {
-    // TODO: Load invoice items from database
-    _addEmptyItem();
+    try {
+      final items = await _invoiceService.getInvoiceItems(widget.invoice!.id!);
+      setState(() {
+        _items = items.isNotEmpty ? items : [];
+        if (_items.isEmpty) {
+          _addEmptyItem();
+        }
+        _discount = widget.invoice!.discountAmount;
+        _tax = widget.invoice!.taxAmount;
+        _calculateTotals();
+      });
+    } catch (e) {
+      _addEmptyItem();
+    }
   }
 
   void _addEmptyItem() {
