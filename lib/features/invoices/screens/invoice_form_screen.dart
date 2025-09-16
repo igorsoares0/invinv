@@ -95,29 +95,34 @@ class _InvoiceFormScreenState extends State<InvoiceFormScreen> {
           ),
         ),
       ),
-      body: FormBuilder(
-        key: _formKey,
-        initialValue: _getInitialValues(),
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              _buildClientSection(),
-              const SizedBox(height: 20),
-              _buildInvoiceDetailsSection(),
-              const SizedBox(height: 20),
-              _buildItemsSection(),
-              const SizedBox(height: 20),
-              _buildTotalsSection(),
-              const SizedBox(height: 20),
-              _buildNotesSection(),
-              const SizedBox(height: 60),
-              _buildActionButtons(),
-              const SizedBox(height: 40),
-            ],
+      body: Column(
+        children: [
+          Expanded(
+            child: FormBuilder(
+              key: _formKey,
+              initialValue: _getInitialValues(),
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    _buildClientSection(),
+                    const SizedBox(height: 20),
+                    _buildInvoiceDetailsSection(),
+                    const SizedBox(height: 20),
+                    _buildItemsSection(),
+                    const SizedBox(height: 20),
+                    _buildTotalsSection(),
+                    const SizedBox(height: 20),
+                    _buildNotesSection(),
+                    const SizedBox(height: 120),
+                  ],
+                ),
+              ),
+            ),
           ),
-        ),
+          _buildActionButtons(),
+        ],
       ),
     );
   }
@@ -214,11 +219,29 @@ class _InvoiceFormScreenState extends State<InvoiceFormScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               const Text('Line Items', style: TextStyle(fontWeight: FontWeight.w500)),
-              TextButton.icon(
-                onPressed: _addEmptyItem,
-                icon: const Icon(Icons.add, size: 20),
-                label: const Text('Add Item'),
-                style: TextButton.styleFrom(foregroundColor: Colors.blue),
+              Container(
+                decoration: BoxDecoration(
+                  color: Colors.blue.shade50,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.blue.shade200),
+                ),
+                child: TextButton.icon(
+                  onPressed: _addEmptyItem,
+                  icon: Icon(Icons.add_circle_outline, size: 18, color: Colors.blue.shade700),
+                  label: Text(
+                    'Add Line Item',
+                    style: TextStyle(
+                      color: Colors.blue.shade700,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  style: TextButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                ),
               ),
             ],
           ),
@@ -255,18 +278,61 @@ class _InvoiceFormScreenState extends State<InvoiceFormScreen> {
       ),
       child: Column(
         children: [
-          TextFormField(
-            initialValue: item.description,
-            decoration: const InputDecoration(
-              labelText: 'Description',
-              border: InputBorder.none,
-              contentPadding: EdgeInsets.symmetric(vertical: 8),
-            ),
-            onChanged: (value) {
-              setState(() {
-                _items[index] = item.copyWith(description: value);
-              });
-            },
+          Row(
+            children: [
+              Expanded(
+                flex: 4,
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade50,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: Colors.grey.shade300),
+                  ),
+                  child: TextFormField(
+                    initialValue: item.description,
+                    decoration: const InputDecoration(
+                      labelText: 'Description *',
+                      hintText: 'Enter item description...',
+                      border: InputBorder.none,
+                      contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+                    ),
+                    onChanged: (value) {
+                      setState(() {
+                        _items[index] = item.copyWith(description: value);
+                      });
+                    },
+                    validator: (value) {
+                      if (value == null || value.trim().isEmpty) {
+                        return 'Description is required';
+                      }
+                      return null;
+                    },
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Container(
+                decoration: BoxDecoration(
+                  color: Colors.green.shade50,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.green.shade200),
+                ),
+                child: IconButton(
+                  onPressed: () => _showProductSelector(index),
+                  icon: Icon(
+                    Icons.inventory_2_outlined,
+                    color: Colors.green.shade700,
+                    size: 20,
+                  ),
+                  tooltip: 'Select from products',
+                  padding: const EdgeInsets.all(12),
+                  constraints: const BoxConstraints(
+                    minWidth: 44,
+                    minHeight: 44,
+                  ),
+                ),
+              ),
+            ],
           ),
           const SizedBox(height: 12),
           Row(
@@ -677,6 +743,285 @@ class _InvoiceFormScreenState extends State<InvoiceFormScreen> {
   void _calculateTotals() {
     _subtotal = _items.fold(0.0, (sum, item) => sum + item.total);
     _total = _subtotal - _discount + _tax;
+  }
+
+  void _showProductSelector(int itemIndex) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => _buildProductSelectorSheet(itemIndex),
+    );
+  }
+
+  Widget _buildProductSelectorSheet(int itemIndex) {
+    return Container(
+      height: MediaQuery.of(context).size.height * 0.75,
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(20),
+          topRight: Radius.circular(20),
+        ),
+      ),
+      child: Column(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: Colors.grey.shade50,
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(20),
+                topRight: Radius.circular(20),
+              ),
+            ),
+            child: Column(
+              children: [
+                Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade300,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    Icon(Icons.inventory_2, color: Colors.blue.shade600),
+                    const SizedBox(width: 12),
+                    const Expanded(
+                      child: Text(
+                        'Select Product',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    TextButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: const Text('Close'),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: Colors.grey.shade300),
+                  ),
+                  child: TextField(
+                    decoration: InputDecoration(
+                      hintText: 'Search products...',
+                      prefixIcon: Icon(Icons.search, color: Colors.grey.shade400),
+                      border: InputBorder.none,
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    ),
+                    onChanged: (query) {
+                      context.read<ProductBloc>().add(SearchProducts(query));
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Expanded(
+            child: BlocBuilder<ProductBloc, ProductState>(
+              builder: (context, state) {
+                if (state is ProductLoaded) {
+                  if (state.products.isEmpty) {
+                    return Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.inventory_2_outlined,
+                            size: 64,
+                            color: Colors.grey.shade400,
+                          ),
+                          const SizedBox(height: 16),
+                          Text(
+                            'No products found',
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: Colors.grey.shade600,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          TextButton(
+                            onPressed: () {
+                              // Navigate to create product
+                            },
+                            child: const Text('Add your first product'),
+                          ),
+                        ],
+                      ),
+                    );
+                  }
+                  return ListView.builder(
+                    padding: const EdgeInsets.all(20),
+                    itemCount: state.products.length,
+                    itemBuilder: (context, index) {
+                      final product = state.products[index];
+                      return Container(
+                        margin: const EdgeInsets.only(bottom: 12),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: Colors.grey.shade200),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.04),
+                              blurRadius: 4,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: ListTile(
+                          contentPadding: const EdgeInsets.all(16),
+                          leading: Container(
+                            width: 48,
+                            height: 48,
+                            decoration: BoxDecoration(
+                              color: Colors.blue.shade50,
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Icon(
+                              Icons.inventory_2,
+                              color: Colors.blue.shade600,
+                            ),
+                          ),
+                          title: Text(
+                            product.name,
+                            style: const TextStyle(
+                              fontWeight: FontWeight.w600,
+                              fontSize: 16,
+                            ),
+                          ),
+                          subtitle: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              if (product.description != null && product.description!.isNotEmpty) ...[
+                                const SizedBox(height: 4),
+                                Text(
+                                  product.description!,
+                                  style: TextStyle(
+                                    color: Colors.grey.shade600,
+                                    fontSize: 14,
+                                  ),
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ],
+                              const SizedBox(height: 8),
+                              Row(
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                    decoration: BoxDecoration(
+                                      color: Colors.green.shade50,
+                                      borderRadius: BorderRadius.circular(6),
+                                    ),
+                                    child: Text(
+                                      NumberFormat.currency(symbol: '\$').format(product.price),
+                                      style: TextStyle(
+                                        color: Colors.green.shade700,
+                                        fontWeight: FontWeight.w600,
+                                        fontSize: 14,
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                    decoration: BoxDecoration(
+                                      color: Colors.grey.shade100,
+                                      borderRadius: BorderRadius.circular(6),
+                                    ),
+                                    child: Text(
+                                      product.unit,
+                                      style: TextStyle(
+                                        color: Colors.grey.shade700,
+                                        fontSize: 12,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                          trailing: Container(
+                            decoration: BoxDecoration(
+                              color: Colors.blue.shade600,
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: IconButton(
+                              onPressed: () {
+                                _selectProduct(itemIndex, product);
+                                Navigator.pop(context);
+                              },
+                              icon: const Icon(
+                                Icons.add,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                  );
+                }
+                if (state is ProductError) {
+                  return Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.error_outline,
+                          size: 64,
+                          color: Colors.red.shade400,
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          'Failed to load products',
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: Colors.red.shade600,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        TextButton(
+                          onPressed: () {
+                            context.read<ProductBloc>().add(LoadProducts());
+                          },
+                          child: const Text('Try again'),
+                        ),
+                      ],
+                    ),
+                  );
+                }
+                return const Center(
+                  child: CircularProgressIndicator(),
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _selectProduct(int itemIndex, Product product) {
+    setState(() {
+      _items[itemIndex] = _items[itemIndex].copyWith(
+        description: '${product.name}${product.description != null ? ' - ${product.description}' : ''}',
+        unitPrice: product.price,
+        total: _items[itemIndex].quantity * product.price,
+      );
+      _calculateTotals();
+    });
   }
 
   Future<void> _saveInvoice() async {
