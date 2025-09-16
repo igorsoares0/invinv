@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
+import 'package:share_plus/share_plus.dart';
 import '../bloc/invoice_bloc.dart';
 import '../../../shared/models/models.dart';
 import '../../../shared/services/pdf_service.dart';
@@ -415,18 +416,50 @@ class _InvoicesScreenState extends State<InvoicesScreen> {
     try {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Preparing invoice for sharing...'),
+          content: Text('Preparing PDF for sharing...'),
           duration: Duration(seconds: 1),
         ),
       );
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Share feature will be available after loading invoice details'),
-          backgroundColor: Colors.orange,
-        ),
-      );
+      context.read<InvoiceBloc>().add(LoadInvoiceDetails(invoice.id!));
+
+      await Future.delayed(const Duration(milliseconds: 1000));
+      
+      final state = context.read<InvoiceBloc>().state;
+      if (state is InvoiceDetailsLoaded) {
+        final invoiceData = state.invoiceDetails['invoice'] as Map<String, dynamic>;
+        final items = (state.invoiceDetails['items'] as List)
+            .map((item) => InvoiceItem.fromMap(item))
+            .toList();
+
+        final pdfService = PDFService();
+        await pdfService.shareInvoice(
+          invoice: invoice,
+          items: items,
+          clientData: invoiceData,
+        );
+
+        context.read<InvoiceBloc>().add(LoadInvoices());
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('PDF shared successfully!'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      } else {
+        context.read<InvoiceBloc>().add(LoadInvoices());
+        
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Error loading invoice details for PDF generation'),
+            backgroundColor: Colors.orange,
+          ),
+        );
+      }
     } catch (e) {
+      context.read<InvoiceBloc>().add(LoadInvoices());
+      
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Error sharing invoice: ${e.toString()}'),
