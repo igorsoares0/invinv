@@ -6,7 +6,6 @@ import '../../features/products/screens/products_screen.dart';
 import '../../features/products/screens/product_form_screen.dart';
 import '../../features/invoices/screens/invoices_screen.dart';
 import '../../features/invoices/screens/invoice_form_screen.dart';
-import '../../features/invoices/screens/invoice_details_screen.dart';
 import '../../features/settings/screens/settings_screen.dart';
 import '../../shared/models/models.dart';
 import '../app.dart';
@@ -73,13 +72,6 @@ class AppRoutes {
             builder: (context, state) {
               final type = state.extra as InvoiceType? ?? InvoiceType.invoice;
               return InvoiceFormScreen(type: type);
-            },
-          ),
-          GoRoute(
-            path: '/invoices/details/:id',
-            builder: (context, state) {
-              final invoiceId = int.parse(state.pathParameters['id']!);
-              return InvoiceDetailsScreen(invoiceId: invoiceId);
             },
           ),
           GoRoute(

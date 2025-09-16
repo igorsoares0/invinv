@@ -6,7 +6,6 @@ import '../../../shared/models/models.dart';
 import '../../../shared/services/pdf_service.dart';
 import '../../../shared/services/invoice_service.dart';
 import 'invoice_form_screen.dart';
-import 'invoice_details_screen.dart';
 import 'invoice_preview_screen.dart';
 
 class InvoicesScreen extends StatefulWidget {
@@ -251,7 +250,6 @@ class _InvoicesScreenState extends State<InvoicesScreen> {
             onSelected: (value) => _handleInvoiceAction(value, invoice),
             icon: const Icon(Icons.more_horiz, color: Colors.grey),
             itemBuilder: (context) => [
-              const PopupMenuItem(value: 'view', child: Text('View Details')),
               const PopupMenuItem(value: 'preview', child: Text('Preview')),
               const PopupMenuItem(value: 'pdf', child: Text('Generate PDF')),
               const PopupMenuItem(value: 'share', child: Text('Share')),
@@ -291,9 +289,6 @@ class _InvoicesScreenState extends State<InvoicesScreen> {
 
   void _handleInvoiceAction(String action, Invoice invoice) {
     switch (action) {
-      case 'view':
-        _navigateToInvoiceDetails(invoice.id!);
-        break;
       case 'preview':
         _navigateToInvoicePreview(invoice.id!);
         break;
@@ -367,14 +362,6 @@ class _InvoicesScreenState extends State<InvoicesScreen> {
     );
   }
 
-  void _navigateToInvoiceDetails(int invoiceId) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => InvoiceDetailsScreen(invoiceId: invoiceId),
-      ),
-    );
-  }
 
   void _navigateToInvoicePreview(int invoiceId) {
     Navigator.push(
