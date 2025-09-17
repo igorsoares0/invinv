@@ -26,9 +26,10 @@ class CreateInvoice extends InvoiceEvent {
 }
 class UpdateInvoice extends InvoiceEvent {
   final Invoice invoice;
-  UpdateInvoice(this.invoice);
+  final List<InvoiceItem> items;
+  UpdateInvoice(this.invoice, this.items);
   @override
-  List<Object?> get props => [invoice];
+  List<Object?> get props => [invoice, items];
 }
 class UpdateInvoiceStatus extends InvoiceEvent {
   final int invoiceId;
@@ -133,7 +134,7 @@ class InvoiceBloc extends Bloc<InvoiceEvent, InvoiceState> {
 
   Future<void> _onUpdateInvoice(UpdateInvoice event, Emitter<InvoiceState> emit) async {
     try {
-      await _invoiceService.updateInvoice(event.invoice);
+      await _invoiceService.updateInvoice(event.invoice, event.items);
       emit(InvoiceOperationSuccess('Invoice updated successfully'));
       add(LoadInvoices());
     } catch (e) {

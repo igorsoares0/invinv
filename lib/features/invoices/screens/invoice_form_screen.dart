@@ -1059,7 +1059,7 @@ class _InvoiceFormScreenState extends State<InvoiceFormScreen> {
         );
 
         if (isEditing) {
-          context.read<InvoiceBloc>().add(UpdateInvoice(invoice));
+          context.read<InvoiceBloc>().add(UpdateInvoice(invoice, _items));
         } else {
           context.read<InvoiceBloc>().add(CreateInvoice(invoice, _items));
         }

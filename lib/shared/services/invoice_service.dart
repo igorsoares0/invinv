@@ -105,13 +105,34 @@ class InvoiceService {
     return maps.map((map) => Invoice.fromMap(map)).toList();
   }
 
-  Future<int> updateInvoice(Invoice invoice) async {
-    return await _db.update(
-      'invoices',
-      invoice.toMap(),
-      where: 'id = ?',
-      whereArgs: [invoice.id],
-    );
+  Future<int> updateInvoice(Invoice invoice, List<InvoiceItem> items) async {
+    final db = await _db.database;
+
+    return await db.transaction((txn) async {
+      // Update the invoice
+      final updateCount = await txn.update(
+        'invoices',
+        invoice.toMap(),
+        where: 'id = ?',
+        whereArgs: [invoice.id],
+      );
+
+      // Delete existing items
+      await txn.delete(
+        'invoice_items',
+        where: 'invoice_id = ?',
+        whereArgs: [invoice.id],
+      );
+
+      // Insert updated items
+      for (final item in items) {
+        final itemMap = item.copyWith(invoiceId: invoice.id!).toMap();
+        itemMap.remove('id');
+        await txn.insert('invoice_items', itemMap);
+      }
+
+      return updateCount;
+    });
   }
 
   Future<int> updateInvoiceStatus(int id, InvoiceStatus status) async {
