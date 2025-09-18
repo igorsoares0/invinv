@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../../shared/models/models.dart';
@@ -245,23 +246,64 @@ class _InvoicePreviewScreenState extends State<InvoicePreviewScreen> {
             ),
           ],
         ),
-        if (_company?.logoPath != null)
-          Container(
-            width: 60,
-            height: 60,
-            decoration: BoxDecoration(
-              border: Border.all(color: Colors.grey[300]!),
-              borderRadius: BorderRadius.circular(8),
+        _buildCompanyLogo(),
+      ],
+    );
+  }
+
+  Widget _buildCompanyLogo() {
+    if (_company?.logoPath != null &&
+        _company!.logoPath!.isNotEmpty &&
+        File(_company!.logoPath!).existsSync()) {
+      try {
+        return Container(
+          width: 80,
+          height: 80,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(8),
+            child: Image.file(
+              File(_company!.logoPath!),
+              fit: BoxFit.contain,
             ),
-            child: const Center(
-              child: Icon(
+          ),
+        );
+      } catch (e) {
+        return _buildTextLogo();
+      }
+    } else if (_company?.name != null) {
+      return _buildTextLogo();
+    }
+
+    return const SizedBox(width: 80, height: 80);
+  }
+
+  Widget _buildTextLogo() {
+    return Container(
+      width: 80,
+      height: 80,
+      decoration: BoxDecoration(
+        border: Border.all(color: Colors.grey[300]!),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Center(
+        child: _company?.name != null
+            ? Text(
+                _company!.name.substring(0, 1).toUpperCase(),
+                style: const TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.blue,
+                ),
+              )
+            : const Icon(
                 Icons.business,
                 size: 30,
                 color: Colors.grey,
               ),
-            ),
-          ),
-      ],
+      ),
     );
   }
 
