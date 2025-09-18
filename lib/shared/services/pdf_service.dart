@@ -1,4 +1,5 @@
 import 'dart:typed_data';
+import 'dart:io';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
@@ -76,26 +77,59 @@ class PDFService {
             ),
           ],
         ),
-        if (company?.name != null)
-          pw.Container(
-            width: 100,
-            height: 100,
-            decoration: pw.BoxDecoration(
-              border: pw.Border.all(color: PdfColors.grey300),
-              borderRadius: pw.BorderRadius.circular(8),
-            ),
-            child: pw.Center(
-              child: pw.Text(
-                company!.name.substring(0, 1).toUpperCase(),
-                style: pw.TextStyle(
-                  fontSize: 36,
-                  fontWeight: pw.FontWeight.bold,
-                  color: PdfColors.blue700,
-                ),
-              ),
-            ),
-          ),
+        _buildCompanyLogo(company),
       ],
+    );
+  }
+
+  pw.Widget _buildCompanyLogo(Company? company) {
+    if (company?.logoPath != null &&
+        company!.logoPath!.isNotEmpty &&
+        File(company.logoPath!).existsSync()) {
+      try {
+        final logoBytes = File(company.logoPath!).readAsBytesSync();
+        final logoImage = pw.MemoryImage(logoBytes);
+
+        return pw.Container(
+          width: 100,
+          height: 100,
+          decoration: pw.BoxDecoration(
+            borderRadius: pw.BorderRadius.circular(8),
+          ),
+          child: pw.Image(
+            logoImage,
+            fit: pw.BoxFit.contain,
+          ),
+        );
+      } catch (e) {
+        // Fallback to text logo if image fails to load
+        return _buildTextLogo(company);
+      }
+    } else if (company?.name != null) {
+      return _buildTextLogo(company!);
+    }
+
+    return pw.SizedBox(width: 100, height: 100);
+  }
+
+  pw.Widget _buildTextLogo(Company company) {
+    return pw.Container(
+      width: 100,
+      height: 100,
+      decoration: pw.BoxDecoration(
+        border: pw.Border.all(color: PdfColors.grey300),
+        borderRadius: pw.BorderRadius.circular(8),
+      ),
+      child: pw.Center(
+        child: pw.Text(
+          company.name.substring(0, 1).toUpperCase(),
+          style: pw.TextStyle(
+            fontSize: 36,
+            fontWeight: pw.FontWeight.bold,
+            color: PdfColors.blue700,
+          ),
+        ),
+      ),
     );
   }
 

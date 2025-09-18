@@ -12,7 +12,7 @@ class CompanyService {
 
   Future<Company?> getCompany() async {
     final maps = await _db.query('companies', limit: 1);
-    
+
     if (maps.isEmpty) return null;
     return Company.fromMap(maps.first);
   }
@@ -21,7 +21,7 @@ class CompanyService {
     if (company.id == null) {
       return await createCompany(company);
     }
-    
+
     return await _db.update(
       'companies',
       company.toMap(),

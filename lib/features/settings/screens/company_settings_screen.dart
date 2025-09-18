@@ -1,6 +1,10 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:path/path.dart' as path;
 import '../../../shared/models/models.dart';
 import '../../../shared/services/company_service.dart';
 
@@ -14,14 +18,24 @@ class CompanySettingsScreen extends StatefulWidget {
 class _CompanySettingsScreenState extends State<CompanySettingsScreen> {
   final _formKey = GlobalKey<FormBuilderState>();
   final CompanyService _companyService = CompanyService();
+  final ImagePicker _picker = ImagePicker();
   Company? _company;
   bool _isLoading = true;
   bool _isSaving = false;
+  String? _selectedLogoPath;
+  late TextEditingController _logoPathController;
 
   @override
   void initState() {
     super.initState();
+    _logoPathController = TextEditingController();
     _loadCompany();
+  }
+
+  @override
+  void dispose() {
+    _logoPathController.dispose();
+    super.dispose();
   }
 
   Future<void> _loadCompany() async {
@@ -29,6 +43,8 @@ class _CompanySettingsScreenState extends State<CompanySettingsScreen> {
       final company = await _companyService.getCompany();
       setState(() {
         _company = company;
+        _selectedLogoPath = company?.logoPath;
+        _logoPathController.text = _selectedLogoPath ?? '';
         _isLoading = false;
       });
     } catch (e) {
@@ -39,6 +55,47 @@ class _CompanySettingsScreenState extends State<CompanySettingsScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Error loading company settings: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _pickImage() async {
+    try {
+      final XFile? pickedFile = await _picker.pickImage(
+        source: ImageSource.gallery,
+        maxWidth: 1024,
+        maxHeight: 1024,
+        imageQuality: 85,
+      );
+
+      if (pickedFile != null) {
+        final Directory appDir = await getApplicationDocumentsDirectory();
+        final String logoDir = path.join(appDir.path, 'logos');
+
+        await Directory(logoDir).create(recursive: true);
+
+        final String fileName = 'company_logo_${DateTime.now().millisecondsSinceEpoch}.${path.extension(pickedFile.path).replaceAll('.', '')}';
+        final String newPath = path.join(logoDir, fileName);
+
+        await File(pickedFile.path).copy(newPath);
+
+        setState(() {
+          _selectedLogoPath = newPath;
+          _logoPathController.text = newPath;
+        });
+
+        if (_formKey.currentState != null) {
+          _formKey.currentState!.fields['logoPath']?.didChange(newPath);
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error selecting image: ${e.toString()}'),
             backgroundColor: Colors.red,
           ),
         );
@@ -70,6 +127,8 @@ class _CompanySettingsScreenState extends State<CompanySettingsScreen> {
         final updatedCompany = await _companyService.getCompany();
         setState(() {
           _company = updatedCompany;
+          _selectedLogoPath = updatedCompany?.logoPath;
+          _logoPathController.text = _selectedLogoPath ?? '';
           _isSaving = false;
         });
 
@@ -170,13 +229,7 @@ class _CompanySettingsScreenState extends State<CompanySettingsScreen> {
             initialValue: _company?.legalName,
           ),
           const SizedBox(height: 20),
-          _buildFormField(
-            name: 'logoPath',
-            icon: Icons.image_outlined,
-            labelText: 'Logo Path',
-            helperText: 'Optional: Path to your company logo',
-            initialValue: _company?.logoPath,
-          ),
+          _buildLogoSection(),
         ],
       ),
     );
@@ -458,6 +511,158 @@ class _CompanySettingsScreenState extends State<CompanySettingsScreen> {
                       ),
                     ),
             ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildLogoSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Icon(
+              Icons.image_outlined,
+              size: 20,
+              color: Colors.grey.shade600,
+            ),
+            const SizedBox(width: 8),
+            Text(
+              'Company Logo',
+              style: TextStyle(
+                fontSize: 16,
+                color: Colors.grey.shade700,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.05),
+                blurRadius: 10,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: Column(
+            children: [
+              if (_selectedLogoPath != null && _selectedLogoPath!.isNotEmpty) ...[
+                ClipRRect(
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(12),
+                    topRight: Radius.circular(12),
+                  ),
+                  child: Container(
+                    width: double.infinity,
+                    height: 120,
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade100,
+                    ),
+                    child: File(_selectedLogoPath!).existsSync()
+                        ? Image.file(
+                            File(_selectedLogoPath!),
+                            fit: BoxFit.contain,
+                          )
+                        : Icon(
+                            Icons.image_not_supported_outlined,
+                            size: 40,
+                            color: Colors.grey.shade400,
+                          ),
+                  ),
+                ),
+                Divider(height: 1, color: Colors.grey.shade200),
+              ],
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            _selectedLogoPath != null && _selectedLogoPath!.isNotEmpty
+                                ? 'Logo selecionada'
+                                : 'Selecione uma logo',
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w500,
+                              color: Colors.grey.shade700,
+                            ),
+                          ),
+                          if (_selectedLogoPath != null && _selectedLogoPath!.isNotEmpty) ...[
+                            const SizedBox(height: 4),
+                            Text(
+                              path.basename(_selectedLogoPath!),
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.grey.shade500,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    ElevatedButton.icon(
+                      onPressed: _pickImage,
+                      icon: Icon(
+                        _selectedLogoPath != null && _selectedLogoPath!.isNotEmpty
+                            ? Icons.edit_outlined
+                            : Icons.add_photo_alternate_outlined,
+                        size: 18,
+                      ),
+                      label: Text(
+                        _selectedLogoPath != null && _selectedLogoPath!.isNotEmpty
+                            ? 'Alterar'
+                            : 'Selecionar',
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.blue,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 8,
+                        ),
+                        textStyle: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          'Selecione uma imagem da galeria para usar como logo da empresa',
+          style: TextStyle(
+            fontSize: 12,
+            color: Colors.grey.shade500,
+          ),
+        ),
+        const SizedBox(height: 8),
+        SizedBox(
+          height: 0,
+          child: FormBuilderTextField(
+            name: 'logoPath',
+            controller: _logoPathController,
+            decoration: const InputDecoration.collapsed(hintText: ''),
+            style: const TextStyle(fontSize: 0, height: 0),
+            maxLines: 1,
           ),
         ),
       ],
