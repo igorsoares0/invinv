@@ -1,7 +1,6 @@
 import 'package:go_router/go_router.dart';
 import '../../features/clients/screens/clients_screen.dart';
 import '../../features/clients/screens/client_form_screen.dart';
-import '../../features/clients/screens/client_details_screen.dart';
 import '../../features/products/screens/products_screen.dart';
 import '../../features/products/screens/product_form_screen.dart';
 import '../../features/invoices/screens/invoices_screen.dart';
@@ -14,7 +13,6 @@ class AppRoutes {
   static const String home = '/';
   static const String clients = '/clients';
   static const String clientForm = '/clients/form';
-  static const String clientDetails = '/clients/details';
   static const String products = '/products';
   static const String productForm = '/products/form';
   static const String invoices = '/invoices';
@@ -41,13 +39,6 @@ class AppRoutes {
               return ClientFormScreen(
                 client: clientId != null ? null : null, // TODO: Load client by ID
               );
-            },
-          ),
-          GoRoute(
-            path: '$clientDetails/:id',
-            builder: (context, state) {
-              final clientId = int.parse(state.pathParameters['id']!);
-              return ClientDetailsScreen(clientId: clientId);
             },
           ),
           GoRoute(

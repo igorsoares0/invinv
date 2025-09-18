@@ -5,7 +5,6 @@ import '../bloc/client_event.dart';
 import '../bloc/client_state.dart';
 import '../../../shared/models/models.dart';
 import 'client_form_screen.dart';
-import 'client_details_screen.dart';
 
 class ClientsScreen extends StatefulWidget {
   const ClientsScreen({Key? key}) : super(key: key);
@@ -249,10 +248,6 @@ class _ClientsScreenState extends State<ClientsScreen> {
             icon: const Icon(Icons.more_horiz, color: Colors.grey),
             itemBuilder: (context) => [
               const PopupMenuItem(
-                value: 'view',
-                child: Text('View Details'),
-              ),
-              const PopupMenuItem(
                 value: 'edit',
                 child: Text('Edit'),
               ),
@@ -269,9 +264,6 @@ class _ClientsScreenState extends State<ClientsScreen> {
 
   void _handleMenuAction(String action, Client client) {
     switch (action) {
-      case 'view':
-        _navigateToClientDetails(client.id!);
-        break;
       case 'edit':
         _navigateToClientForm(client: client);
         break;
@@ -309,15 +301,6 @@ class _ClientsScreenState extends State<ClientsScreen> {
       context,
       MaterialPageRoute(
         builder: (context) => ClientFormScreen(client: client),
-      ),
-    );
-  }
-
-  void _navigateToClientDetails(int clientId) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => ClientDetailsScreen(clientId: clientId),
       ),
     );
   }
