@@ -248,19 +248,56 @@ class _InvoicesScreenState extends State<InvoicesScreen> {
           ),
           PopupMenuButton<String>(
             onSelected: (value) => _handleInvoiceAction(value, invoice),
-            icon: const Icon(Icons.more_horiz, color: Colors.grey),
+            icon: Icon(Icons.more_horiz, color: Colors.grey.shade600),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            elevation: 8,
+            color: Colors.white,
             itemBuilder: (context) => [
-              const PopupMenuItem(value: 'preview', child: Text('Preview')),
-              const PopupMenuItem(value: 'pdf', child: Text('Generate PDF')),
-              const PopupMenuItem(value: 'share', child: Text('Share')),
-              const PopupMenuItem(value: 'edit', child: Text('Edit')),
+              _buildPopupMenuItem(
+                value: 'preview',
+                icon: Icons.visibility_outlined,
+                text: 'Preview',
+                color: Colors.blue,
+              ),
+              _buildPopupMenuItem(
+                value: 'pdf',
+                icon: Icons.picture_as_pdf_outlined,
+                text: 'Generate PDF',
+                color: Colors.orange,
+              ),
+              _buildPopupMenuItem(
+                value: 'share',
+                icon: Icons.share_outlined,
+                text: 'Share',
+                color: Colors.green,
+              ),
+              _buildPopupMenuItem(
+                value: 'edit',
+                icon: Icons.edit_outlined,
+                text: 'Edit',
+                color: Colors.grey.shade700,
+              ),
               if (invoice.type == InvoiceType.estimate)
-                const PopupMenuItem(value: 'convert', child: Text('Convert to Invoice')),
+                _buildPopupMenuItem(
+                  value: 'convert',
+                  icon: Icons.transform_outlined,
+                  text: 'Convert to Invoice',
+                  color: Colors.purple,
+                ),
               if (invoice.status != InvoiceStatus.paid)
-                const PopupMenuItem(value: 'mark_paid', child: Text('Mark as Paid')),
-              const PopupMenuItem(
+                _buildPopupMenuItem(
+                  value: 'mark_paid',
+                  icon: Icons.check_circle_outline,
+                  text: 'Mark as Paid',
+                  color: Colors.green,
+                ),
+              _buildPopupMenuItem(
                 value: 'delete',
-                child: Text('Delete', style: TextStyle(color: Colors.red)),
+                icon: Icons.delete_outline,
+                text: 'Delete',
+                color: Colors.red,
               ),
             ],
           ),
@@ -282,6 +319,49 @@ class _InvoicesScreenState extends State<InvoicesScreen> {
           fontSize: 12,
           color: Colors.white,
           fontWeight: FontWeight.w500,
+        ),
+      ),
+    );
+  }
+
+  PopupMenuItem<String> _buildPopupMenuItem({
+    required String value,
+    required IconData icon,
+    required String text,
+    required Color color,
+  }) {
+    return PopupMenuItem(
+      value: value,
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 4),
+        child: Row(
+          children: [
+            Container(
+              width: 32,
+              height: 32,
+              decoration: BoxDecoration(
+                color: color.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Icon(
+                icon,
+                size: 18,
+                color: color,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                text,
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                  color: Colors.grey.shade800,
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
