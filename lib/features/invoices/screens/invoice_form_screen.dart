@@ -10,6 +10,7 @@ import '../../clients/bloc/client_state.dart';
 import '../../products/bloc/product_bloc.dart';
 import '../../../shared/models/models.dart';
 import '../../../shared/services/invoice_service.dart';
+import 'invoice_preview_screen.dart';
 
 class InvoiceFormScreen extends StatefulWidget {
   final InvoiceType type;
@@ -82,6 +83,24 @@ class _InvoiceFormScreenState extends State<InvoiceFormScreen> {
     });
   }
 
+  void _showPreview() {
+    if (widget.invoice?.id != null) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => InvoicePreviewScreen(invoiceId: widget.invoice!.id!),
+        ),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please save the invoice first to see preview'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -99,6 +118,28 @@ class _InvoiceFormScreenState extends State<InvoiceFormScreen> {
         elevation: 0,
         toolbarHeight: 80,
         iconTheme: const IconThemeData(color: Colors.black87),
+        actions: [
+          Container(
+            margin: const EdgeInsets.only(right: 16),
+            child: IconButton(
+              onPressed: _showPreview,
+              icon: Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: Colors.blue.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Icon(
+                  Icons.visibility_outlined,
+                  color: Colors.blue,
+                  size: 22,
+                ),
+              ),
+              tooltip: 'Preview Invoice',
+            ),
+          ),
+        ],
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1),
           child: Container(
