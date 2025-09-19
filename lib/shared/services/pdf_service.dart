@@ -274,16 +274,18 @@ class PDFService {
       columnWidths: {
         0: const pw.FlexColumnWidth(3),
         1: const pw.FlexColumnWidth(1),
-        2: const pw.FlexColumnWidth(1.5),
+        2: const pw.FlexColumnWidth(1),
         3: const pw.FlexColumnWidth(1.5),
+        4: const pw.FlexColumnWidth(1.5),
       },
       children: [
         // Header
         pw.TableRow(
           decoration: pw.BoxDecoration(color: PdfColors.grey100),
           children: [
-            _buildTableCell('Description', isHeader: true),
+            _buildTableCell('Product/Service', isHeader: true),
             _buildTableCell('Qty', isHeader: true, alignment: pw.Alignment.center),
+            _buildTableCell('Unit', isHeader: true, alignment: pw.Alignment.center),
             _buildTableCell('Rate', isHeader: true, alignment: pw.Alignment.centerRight),
             _buildTableCell('Amount', isHeader: true, alignment: pw.Alignment.centerRight),
           ],
@@ -291,8 +293,9 @@ class PDFService {
         // Items
         ...items.map((item) => pw.TableRow(
           children: [
-            _buildTableCell(item.description),
+            _buildProductCell(item),
             _buildTableCell(item.quantity.toString(), alignment: pw.Alignment.center),
+            _buildTableCell(item.unit, alignment: pw.Alignment.center),
             _buildTableCell(NumberFormat.currency(symbol: '\$').format(item.unitPrice), alignment: pw.Alignment.centerRight),
             _buildTableCell(NumberFormat.currency(symbol: '\$').format(item.total), alignment: pw.Alignment.centerRight),
           ],
@@ -311,6 +314,56 @@ class PDFService {
           fontWeight: isHeader ? pw.FontWeight.bold : pw.FontWeight.normal,
           fontSize: isHeader ? 12 : 11,
         ),
+      ),
+    );
+  }
+
+  pw.Widget _buildProductCell(InvoiceItem item) {
+    return pw.Container(
+      padding: const pw.EdgeInsets.all(12),
+      alignment: pw.Alignment.centerLeft,
+      child: pw.Column(
+        crossAxisAlignment: pw.CrossAxisAlignment.start,
+        mainAxisSize: pw.MainAxisSize.min,
+        children: [
+          pw.Text(
+            item.name,
+            style: pw.TextStyle(
+              fontWeight: pw.FontWeight.bold,
+              fontSize: 11,
+            ),
+          ),
+          if (item.description.isNotEmpty) ...[
+            pw.SizedBox(height: 3),
+            pw.Text(
+              item.description,
+              style: pw.TextStyle(
+                fontSize: 10,
+                color: PdfColors.grey600,
+                fontStyle: pw.FontStyle.italic,
+              ),
+            ),
+          ],
+          if (item.category != null && item.category!.isNotEmpty) ...[
+            pw.SizedBox(height: 3),
+            pw.Container(
+              padding: const pw.EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+              decoration: pw.BoxDecoration(
+                color: PdfColors.blue50,
+                borderRadius: pw.BorderRadius.circular(4),
+                border: pw.Border.all(color: PdfColors.blue200, width: 0.5),
+              ),
+              child: pw.Text(
+                item.category!,
+                style: pw.TextStyle(
+                  fontSize: 9,
+                  color: PdfColors.blue700,
+                  fontWeight: pw.FontWeight.bold,
+                ),
+              ),
+            ),
+          ],
+        ],
       ),
     );
   }

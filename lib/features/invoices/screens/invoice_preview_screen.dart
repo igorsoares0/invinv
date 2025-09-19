@@ -462,16 +462,18 @@ class _InvoicePreviewScreenState extends State<InvoicePreviewScreen> {
           columnWidths: const {
             0: FlexColumnWidth(3),
             1: FlexColumnWidth(1),
-            2: FlexColumnWidth(1.5),
+            2: FlexColumnWidth(1),
             3: FlexColumnWidth(1.5),
+            4: FlexColumnWidth(1.5),
           },
           children: [
             // Header
             TableRow(
               decoration: BoxDecoration(color: Colors.grey[100]),
               children: [
-                _buildTableCell('Description', isHeader: true),
+                _buildTableCell('Product/Service', isHeader: true),
                 _buildTableCell('Qty', isHeader: true, alignment: Alignment.center),
+                _buildTableCell('Unit', isHeader: true, alignment: Alignment.center),
                 _buildTableCell('Rate', isHeader: true, alignment: Alignment.centerRight),
                 _buildTableCell('Amount', isHeader: true, alignment: Alignment.centerRight),
               ],
@@ -479,8 +481,9 @@ class _InvoicePreviewScreenState extends State<InvoicePreviewScreen> {
             // Items
             ...items.map((item) => TableRow(
               children: [
-                _buildTableCell(item.description),
+                _buildProductCell(item),
                 _buildTableCell(item.quantity.toString(), alignment: Alignment.center),
+                _buildTableCell(item.unit, alignment: Alignment.center),
                 _buildTableCell(NumberFormat.currency(symbol: '\$').format(item.unitPrice), alignment: Alignment.centerRight),
                 _buildTableCell(NumberFormat.currency(symbol: '\$').format(item.total), alignment: Alignment.centerRight),
               ],
@@ -501,6 +504,56 @@ class _InvoicePreviewScreenState extends State<InvoicePreviewScreen> {
           fontWeight: isHeader ? FontWeight.bold : FontWeight.normal,
           fontSize: isHeader ? 12 : 11,
         ),
+      ),
+    );
+  }
+
+  Widget _buildProductCell(InvoiceItem item) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      alignment: Alignment.centerLeft,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            item.name,
+            style: const TextStyle(
+              fontWeight: FontWeight.w600,
+              fontSize: 11,
+            ),
+          ),
+          if (item.description.isNotEmpty) ...[
+            const SizedBox(height: 2),
+            Text(
+              item.description,
+              style: TextStyle(
+                fontSize: 10,
+                color: Colors.grey[600],
+                fontStyle: FontStyle.italic,
+              ),
+            ),
+          ],
+          if (item.category != null && item.category!.isNotEmpty) ...[
+            const SizedBox(height: 2),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+              decoration: BoxDecoration(
+                color: Colors.blue.shade50,
+                borderRadius: BorderRadius.circular(4),
+                border: Border.all(color: Colors.blue.shade200, width: 0.5),
+              ),
+              child: Text(
+                item.category!,
+                style: TextStyle(
+                  fontSize: 9,
+                  color: Colors.blue.shade700,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+          ],
+        ],
       ),
     );
   }
