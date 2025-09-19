@@ -75,9 +75,12 @@ class _InvoiceFormScreenState extends State<InvoiceFormScreen> {
     setState(() {
       _items.add(InvoiceItem(
         invoiceId: 0,
+        name: '',
         description: '',
         quantity: 1.0,
+        unit: 'un',
         unitPrice: 0.0,
+        category: null,
         total: 0.0,
       ));
     });
@@ -216,9 +219,20 @@ class _InvoiceFormScreenState extends State<InvoiceFormScreen> {
                   value: client.id!,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
                     children: [
-                      Text(client.name, style: const TextStyle(fontWeight: FontWeight.bold)),
-                      Text(client.email, style: const TextStyle(fontSize: 12)),
+                      Text(
+                        client.name,
+                        style: const TextStyle(fontWeight: FontWeight.bold),
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 1,
+                      ),
+                      Text(
+                        client.email,
+                        style: const TextStyle(fontSize: 12),
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 1,
+                      ),
                     ],
                   ),
                 );
@@ -314,7 +328,8 @@ class _InvoiceFormScreenState extends State<InvoiceFormScreen> {
 
   Widget _buildItemRow(int index) {
     final item = _items[index];
-    
+    final List<String> _units = ['un', 'hr', 'kg', 'lb', 'm', 'ft', 'L', 'gal', 'piece', 'box'];
+
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
@@ -334,7 +349,7 @@ class _InvoiceFormScreenState extends State<InvoiceFormScreen> {
           Row(
             children: [
               Expanded(
-                flex: 4,
+                flex: 2,
                 child: Container(
                   decoration: BoxDecoration(
                     color: Colors.grey.shade50,
@@ -342,10 +357,43 @@ class _InvoiceFormScreenState extends State<InvoiceFormScreen> {
                     border: Border.all(color: Colors.grey.shade300),
                   ),
                   child: TextFormField(
+                    key: ValueKey('name_${index}_${item.name}'),
+                    initialValue: item.name,
+                    decoration: const InputDecoration(
+                      labelText: 'Product/Service Name *',
+                      hintText: 'Enter name...',
+                      border: InputBorder.none,
+                      contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+                    ),
+                    onChanged: (value) {
+                      setState(() {
+                        _items[index] = item.copyWith(name: value);
+                      });
+                    },
+                    validator: (value) {
+                      if (value == null || value.trim().isEmpty) {
+                        return 'Name is required';
+                      }
+                      return null;
+                    },
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                flex: 2,
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade50,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: Colors.grey.shade300),
+                  ),
+                  child: TextFormField(
+                    key: ValueKey('description_${index}_${item.description}'),
                     initialValue: item.description,
                     decoration: const InputDecoration(
-                      labelText: 'Description *',
-                      hintText: 'Enter item description...',
+                      labelText: 'Description',
+                      hintText: 'Optional details...',
                       border: InputBorder.none,
                       contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 16),
                     ),
@@ -353,12 +401,6 @@ class _InvoiceFormScreenState extends State<InvoiceFormScreen> {
                       setState(() {
                         _items[index] = item.copyWith(description: value);
                       });
-                    },
-                    validator: (value) {
-                      if (value == null || value.trim().isEmpty) {
-                        return 'Description is required';
-                      }
-                      return null;
                     },
                   ),
                 ),
@@ -391,46 +433,122 @@ class _InvoiceFormScreenState extends State<InvoiceFormScreen> {
           Row(
             children: [
               Expanded(
-                child: TextFormField(
-                  initialValue: item.quantity.toString(),
-                  decoration: const InputDecoration(
-                    labelText: 'Quantity',
-                    border: InputBorder.none,
-                    contentPadding: EdgeInsets.symmetric(vertical: 8),
+                flex: 2,
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade50,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: Colors.grey.shade300),
                   ),
-                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                  onChanged: (value) {
-                    final qty = double.tryParse(value) ?? 0.0;
-                    setState(() {
-                      _items[index] = item.copyWith(
-                        quantity: qty,
-                        total: qty * item.unitPrice,
-                      );
-                      _calculateTotals();
-                    });
-                  },
+                  child: TextFormField(
+                    key: ValueKey('quantity_${index}_${item.quantity}'),
+                    initialValue: item.quantity.toString(),
+                    decoration: const InputDecoration(
+                      labelText: 'Quantity',
+                      border: InputBorder.none,
+                      contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                    ),
+                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                    onChanged: (value) {
+                      final qty = double.tryParse(value) ?? 0.0;
+                      setState(() {
+                        _items[index] = item.copyWith(
+                          quantity: qty,
+                          total: qty * item.unitPrice,
+                        );
+                        _calculateTotals();
+                      });
+                    },
+                  ),
                 ),
               ),
-              const SizedBox(width: 16),
+              const SizedBox(width: 12),
               Expanded(
-                child: TextFormField(
-                  initialValue: item.unitPrice.toString(),
-                  decoration: const InputDecoration(
-                    labelText: 'Unit Price',
-                    border: InputBorder.none,
-                    contentPadding: EdgeInsets.symmetric(vertical: 8),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade50,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: Colors.grey.shade300),
                   ),
-                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                  onChanged: (value) {
-                    final price = double.tryParse(value) ?? 0.0;
-                    setState(() {
-                      _items[index] = item.copyWith(
-                        unitPrice: price,
-                        total: item.quantity * price,
-                      );
-                      _calculateTotals();
-                    });
-                  },
+                  child: DropdownButtonFormField<String>(
+                    key: ValueKey('unit_${index}_${item.unit}'),
+                    value: _units.contains(item.unit) ? item.unit : 'un',
+                    decoration: const InputDecoration(
+                      labelText: 'Unit',
+                      border: InputBorder.none,
+                      contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                    ),
+                    items: _units.map((unit) => DropdownMenuItem(
+                      value: unit,
+                      child: Text(unit),
+                    )).toList(),
+                    onChanged: (value) {
+                      setState(() {
+                        _items[index] = item.copyWith(unit: value ?? 'un');
+                      });
+                    },
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                flex: 2,
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade50,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: Colors.grey.shade300),
+                  ),
+                  child: TextFormField(
+                    key: ValueKey('unitPrice_${index}_${item.unitPrice}'),
+                    initialValue: item.unitPrice.toString(),
+                    decoration: const InputDecoration(
+                      labelText: 'Unit Price',
+                      border: InputBorder.none,
+                      contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                    ),
+                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                    onChanged: (value) {
+                      final price = double.tryParse(value) ?? 0.0;
+                      setState(() {
+                        _items[index] = item.copyWith(
+                          unitPrice: price,
+                          total: item.quantity * price,
+                        );
+                        _calculateTotals();
+                      });
+                    },
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(
+                flex: 3,
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade50,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: Colors.grey.shade300),
+                  ),
+                  child: TextFormField(
+                    key: ValueKey('category_${index}_${item.category ?? ""}'),
+                    initialValue: item.category ?? '',
+                    decoration: const InputDecoration(
+                      labelText: 'Category',
+                      hintText: 'Optional category...',
+                      border: InputBorder.none,
+                      contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                    ),
+                    onChanged: (value) {
+                      setState(() {
+                        _items[index] = item.copyWith(category: value.isEmpty ? null : value);
+                      });
+                    },
+                  ),
                 ),
               ),
               const SizedBox(width: 16),
@@ -1069,8 +1187,12 @@ class _InvoiceFormScreenState extends State<InvoiceFormScreen> {
   void _selectProduct(int itemIndex, Product product) {
     setState(() {
       _items[itemIndex] = _items[itemIndex].copyWith(
-        description: '${product.name}${product.description != null ? ' - ${product.description}' : ''}',
+        productId: product.id,
+        name: product.name,
+        description: product.description ?? '',
+        unit: product.unit,
         unitPrice: product.price,
+        category: product.category,
         total: _items[itemIndex].quantity * product.price,
       );
       _calculateTotals();

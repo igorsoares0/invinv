@@ -20,8 +20,9 @@ class DatabaseHelper {
 
     return await openDatabase(
       path,
-      version: 1,
+      version: 3,
       onCreate: _createDatabase,
+      onUpgrade: _upgradeDatabase,
     );
   }
 
@@ -93,9 +94,12 @@ class DatabaseHelper {
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         invoice_id INTEGER NOT NULL,
         product_id INTEGER,
-        description TEXT NOT NULL,
+        name TEXT NOT NULL,
+        description TEXT,
         quantity REAL NOT NULL,
+        unit TEXT DEFAULT 'un',
         unit_price REAL NOT NULL,
+        category TEXT,
         total REAL NOT NULL,
         FOREIGN KEY (invoice_id) REFERENCES invoices (id) ON DELETE CASCADE,
         FOREIGN KEY (product_id) REFERENCES products (id) ON DELETE SET NULL
@@ -117,6 +121,22 @@ class DatabaseHelper {
     await db.execute('''
       CREATE INDEX idx_invoice_items_invoice_id ON invoice_items(invoice_id)
     ''');
+  }
+
+  Future<void> _upgradeDatabase(Database db, int oldVersion, int newVersion) async {
+    if (oldVersion < 2) {
+      // Add unit and category columns to invoice_items table
+      await db.execute('ALTER TABLE invoice_items ADD COLUMN unit TEXT DEFAULT "un"');
+      await db.execute('ALTER TABLE invoice_items ADD COLUMN category TEXT');
+    }
+    if (oldVersion < 3) {
+      // Add name column to invoice_items table
+      await db.execute('ALTER TABLE invoice_items ADD COLUMN name TEXT DEFAULT ""');
+      // Update existing records to move description to name field if name is empty
+      await db.execute('UPDATE invoice_items SET name = description WHERE name = "" OR name IS NULL');
+      // Clear description field for existing records since it's now separate
+      await db.execute('UPDATE invoice_items SET description = ""');
+    }
   }
 
   Future<int> insert(String table, Map<String, dynamic> values) async {

@@ -4,18 +4,24 @@ class InvoiceItem {
   final int? id;
   final int invoiceId;
   final int? productId;
+  final String name;
   final String description;
   final double quantity;
+  final String unit;
   final double unitPrice;
+  final String? category;
   final double total;
 
   InvoiceItem({
     this.id,
     required this.invoiceId,
     this.productId,
+    required this.name,
     required this.description,
     required this.quantity,
+    this.unit = 'un',
     required this.unitPrice,
+    this.category,
     required this.total,
   });
 
@@ -24,9 +30,12 @@ class InvoiceItem {
       'id': id,
       'invoice_id': invoiceId,
       'product_id': productId,
+      'name': name,
       'description': description,
       'quantity': quantity,
+      'unit': unit,
       'unit_price': unitPrice,
+      'category': category,
       'total': total,
     };
   }
@@ -36,9 +45,12 @@ class InvoiceItem {
       id: map['id'],
       invoiceId: map['invoice_id'],
       productId: map['product_id'],
-      description: map['description'],
+      name: map['name'] ?? '',
+      description: map['description'] ?? '',
       quantity: map['quantity']?.toDouble() ?? 0.0,
+      unit: map['unit'] ?? 'un',
       unitPrice: map['unit_price']?.toDouble() ?? 0.0,
+      category: map['category'],
       total: map['total']?.toDouble() ?? 0.0,
     );
   }
@@ -51,9 +63,12 @@ class InvoiceItem {
     return InvoiceItem(
       invoiceId: invoiceId,
       productId: product.id,
-      description: product.name,
+      name: product.name,
+      description: product.description ?? '',
       quantity: quantity,
+      unit: product.unit,
       unitPrice: product.price,
+      category: product.category,
       total: total,
     );
   }
@@ -62,18 +77,24 @@ class InvoiceItem {
     int? id,
     int? invoiceId,
     int? productId,
+    String? name,
     String? description,
     double? quantity,
+    String? unit,
     double? unitPrice,
+    String? category,
     double? total,
   }) {
     return InvoiceItem(
       id: id ?? this.id,
       invoiceId: invoiceId ?? this.invoiceId,
       productId: productId ?? this.productId,
+      name: name ?? this.name,
       description: description ?? this.description,
       quantity: quantity ?? this.quantity,
+      unit: unit ?? this.unit,
       unitPrice: unitPrice ?? this.unitPrice,
+      category: category ?? this.category,
       total: total ?? this.total,
     );
   }
