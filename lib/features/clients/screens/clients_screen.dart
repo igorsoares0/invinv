@@ -245,19 +245,71 @@ class _ClientsScreenState extends State<ClientsScreen> {
           ),
           PopupMenuButton<String>(
             onSelected: (value) => _handleMenuAction(value, client),
-            icon: const Icon(Icons.more_horiz, color: Colors.grey),
+            icon: Icon(Icons.more_horiz, color: Colors.grey.shade600),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            elevation: 8,
+            color: Colors.white,
             itemBuilder: (context) => [
-              const PopupMenuItem(
+              _buildPopupMenuItem(
                 value: 'edit',
-                child: Text('Edit'),
+                icon: Icons.edit_outlined,
+                text: 'Edit',
+                color: Colors.blue,
               ),
-              const PopupMenuItem(
+              _buildPopupMenuItem(
                 value: 'delete',
-                child: Text('Delete', style: TextStyle(color: Colors.red)),
+                icon: Icons.delete_outline,
+                text: 'Delete',
+                color: Colors.red,
               ),
             ],
           ),
         ],
+      ),
+    );
+  }
+
+  PopupMenuItem<String> _buildPopupMenuItem({
+    required String value,
+    required IconData icon,
+    required String text,
+    required Color color,
+  }) {
+    return PopupMenuItem(
+      value: value,
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 4),
+        child: Row(
+          children: [
+            Container(
+              width: 32,
+              height: 32,
+              decoration: BoxDecoration(
+                color: color.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Icon(
+                icon,
+                size: 18,
+                color: color,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                text,
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                  color: Colors.grey.shade800,
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
