@@ -86,6 +86,24 @@ class _InvoiceFormScreenState extends State<InvoiceFormScreen> {
     });
   }
 
+  void _showAddItemModal() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => _buildAddItemModal(),
+    );
+  }
+
+  void _editItem(int index) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => _buildAddItemModal(editingIndex: index),
+    );
+  }
+
   void _showPreview() {
     if (widget.invoice?.id != null) {
       Navigator.push(
@@ -282,44 +300,212 @@ class _InvoiceFormScreenState extends State<InvoiceFormScreen> {
       icon: Icons.list_alt_outlined,
       child: Column(
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Text('Line Items', style: TextStyle(fontWeight: FontWeight.w500)),
-              Container(
-                decoration: BoxDecoration(
-                  color: Colors.blue.shade50,
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: Colors.blue.shade200),
-                ),
-                child: TextButton.icon(
-                  onPressed: _addEmptyItem,
-                  icon: Icon(Icons.add_circle_outline, size: 18, color: Colors.blue.shade700),
-                  label: Text(
-                    'Add Line Item',
+          if (_items.isEmpty) ...[
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(32),
+              decoration: BoxDecoration(
+                color: Colors.grey.shade50,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Colors.grey.shade200, style: BorderStyle.solid),
+              ),
+              child: Column(
+                children: [
+                  Icon(
+                    Icons.inventory_2_outlined,
+                    size: 48,
+                    color: Colors.grey.shade400,
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    'No items added yet',
                     style: TextStyle(
-                      color: Colors.blue.shade700,
-                      fontWeight: FontWeight.w600,
+                      fontSize: 16,
+                      color: Colors.grey.shade600,
+                      fontWeight: FontWeight.w500,
                     ),
                   ),
-                  style: TextButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Add products or services to this invoice',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.grey.shade500,
                     ),
                   ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
+          ] else ...[
+            // Show added items as cards
+            ...List.generate(_items.length, (index) => _buildItemCard(index)),
+            const SizedBox(height: 16),
+          ],
+          // Add Item button
+          Container(
+            width: double.infinity,
+            height: 50,
+            decoration: BoxDecoration(
+              color: Colors.blue,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: TextButton.icon(
+              onPressed: _showAddItemModal,
+              icon: const Icon(Icons.add, color: Colors.white, size: 20),
+              label: Text(
+                _items.isEmpty ? 'Add First Item' : 'Add Another Item',
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
                 ),
+              ),
+              style: TextButton.styleFrom(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildItemCard(int index) {
+    final item = _items[index];
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.grey.shade200),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      item.name,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.black87,
+                      ),
+                    ),
+                    if (item.description.isNotEmpty) ...[
+                      const SizedBox(height: 4),
+                      Text(
+                        item.description,
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.grey.shade600,
+                        ),
+                      ),
+                    ],
+                    if (item.category != null && item.category!.isNotEmpty) ...[
+                      const SizedBox(height: 8),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: Colors.blue.shade50,
+                          borderRadius: BorderRadius.circular(6),
+                          border: Border.all(color: Colors.blue.shade200),
+                        ),
+                        child: Text(
+                          item.category!,
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.blue.shade700,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+              const SizedBox(width: 16),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text(
+                    NumberFormat.currency(symbol: '\$').format(item.total),
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.green,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    '${item.quantity} ${item.unit} × \$${item.unitPrice.toStringAsFixed(2)}',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.grey.shade600,
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
           const SizedBox(height: 12),
-          ListView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            itemCount: _items.length,
-            itemBuilder: (context, index) {
-              return _buildItemRow(index);
-            },
+          Row(
+            children: [
+              Expanded(
+                child: Container(
+                  height: 36,
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.grey.shade300),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: TextButton.icon(
+                    onPressed: () => _editItem(index),
+                    icon: Icon(Icons.edit_outlined, size: 16, color: Colors.grey.shade700),
+                    label: Text(
+                      'Edit',
+                      style: TextStyle(
+                        color: Colors.grey.shade700,
+                        fontSize: 14,
+                      ),
+                    ),
+                    style: TextButton.styleFrom(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Container(
+                width: 36,
+                height: 36,
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.red.shade300),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: IconButton(
+                  onPressed: () => _removeItem(index),
+                  icon: Icon(Icons.delete_outline, size: 16, color: Colors.red.shade600),
+                  padding: EdgeInsets.zero,
+                ),
+              ),
+            ],
           ),
         ],
       ),
@@ -916,7 +1102,7 @@ class _InvoiceFormScreenState extends State<InvoiceFormScreen> {
     _total = _subtotal - _discount + _tax;
   }
 
-  void _showProductSelector(int itemIndex) {
+  void _showProductSelector(int? itemIndex) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -925,7 +1111,477 @@ class _InvoiceFormScreenState extends State<InvoiceFormScreen> {
     );
   }
 
-  Widget _buildProductSelectorSheet(int itemIndex) {
+  void _showManualItemForm({int? editingIndex}) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => _buildManualItemForm(editingIndex: editingIndex),
+    );
+  }
+
+  Widget _buildAddItemModal({int? editingIndex}) {
+    return Container(
+      height: MediaQuery.of(context).size.height * 0.9,
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(20),
+          topRight: Radius.circular(20),
+        ),
+      ),
+      child: Column(
+        children: [
+          // Modal Header
+          Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: Colors.grey.shade50,
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(20),
+                topRight: Radius.circular(20),
+              ),
+            ),
+            child: Column(
+              children: [
+                Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade300,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    Icon(Icons.add_shopping_cart, color: Colors.blue.shade600),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        editingIndex != null ? 'Edit Item' : 'Add Item',
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    TextButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: const Text('Close'),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          // Options
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                children: [
+                  // Option 1: Create Manually
+                  Container(
+                    width: double.infinity,
+                    height: 80,
+                    margin: const EdgeInsets.only(bottom: 16),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: Colors.blue.shade200),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.05),
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: TextButton(
+                      onPressed: () {
+                        Navigator.pop(context);
+                        _showManualItemForm(editingIndex: editingIndex);
+                      },
+                      style: TextButton.styleFrom(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      child: Row(
+                        children: [
+                          Container(
+                            width: 48,
+                            height: 48,
+                            decoration: BoxDecoration(
+                              color: Colors.blue.shade50,
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Icon(
+                              Icons.edit_outlined,
+                              color: Colors.blue.shade600,
+                              size: 24,
+                            ),
+                          ),
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                const Text(
+                                  'Create Manually',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w600,
+                                    color: Colors.black87,
+                                  ),
+                                ),
+                                Text(
+                                  'Enter product/service details manually',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: Colors.grey.shade600,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          Icon(
+                            Icons.arrow_forward_ios,
+                            color: Colors.grey.shade400,
+                            size: 16,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  // Option 2: Select from Products
+                  Container(
+                    width: double.infinity,
+                    height: 80,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: Colors.green.shade200),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.05),
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: TextButton(
+                      onPressed: () {
+                        Navigator.pop(context);
+                        _showProductSelector(editingIndex);
+                      },
+                      style: TextButton.styleFrom(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      child: Row(
+                        children: [
+                          Container(
+                            width: 48,
+                            height: 48,
+                            decoration: BoxDecoration(
+                              color: Colors.green.shade50,
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Icon(
+                              Icons.inventory_2_outlined,
+                              color: Colors.green.shade600,
+                              size: 24,
+                            ),
+                          ),
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                const Text(
+                                  'Select from Products',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w600,
+                                    color: Colors.black87,
+                                  ),
+                                ),
+                                Text(
+                                  'Choose from your existing products',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: Colors.grey.shade600,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          Icon(
+                            Icons.arrow_forward_ios,
+                            color: Colors.grey.shade400,
+                            size: 16,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildManualItemForm({int? editingIndex}) {
+    final _manualFormKey = GlobalKey<FormBuilderState>();
+    final List<String> _units = ['un', 'hr', 'kg', 'lb', 'm', 'ft', 'L', 'gal', 'piece', 'box'];
+
+    final isEditing = editingIndex != null;
+    final initialValues = isEditing ? {
+      'name': _items[editingIndex].name,
+      'description': _items[editingIndex].description,
+      'quantity': _items[editingIndex].quantity.toString(),
+      'unit': _items[editingIndex].unit,
+      'unitPrice': _items[editingIndex].unitPrice.toString(),
+      'category': _items[editingIndex].category,
+    } : {
+      'quantity': '1',
+      'unit': 'un',
+      'unitPrice': '0',
+    };
+
+    return Container(
+      height: MediaQuery.of(context).size.height * 0.9,
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(20),
+          topRight: Radius.circular(20),
+        ),
+      ),
+      child: Column(
+        children: [
+          // Header
+          Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: Colors.grey.shade50,
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(20),
+                topRight: Radius.circular(20),
+              ),
+            ),
+            child: Column(
+              children: [
+                Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade300,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    Icon(Icons.edit_outlined, color: Colors.blue.shade600),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        isEditing ? 'Edit Item' : 'Create Item Manually',
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    TextButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: const Text('Cancel'),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          // Form
+          Expanded(
+            child: FormBuilder(
+              key: _manualFormKey,
+              initialValue: initialValues,
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    _buildManualFormField(
+                      name: 'name',
+                      icon: Icons.inventory_2_outlined,
+                      labelText: 'Product/Service Name *',
+                      validator: FormBuilderValidators.required(),
+                    ),
+                    const SizedBox(height: 20),
+                    _buildManualFormField(
+                      name: 'description',
+                      icon: Icons.description_outlined,
+                      labelText: 'Description',
+                      maxLines: 3,
+                    ),
+                    const SizedBox(height: 20),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: _buildManualFormField(
+                            name: 'quantity',
+                            icon: Icons.numbers,
+                            labelText: 'Quantity *',
+                            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                            validator: FormBuilderValidators.compose([
+                              FormBuilderValidators.required(),
+                              FormBuilderValidators.numeric(),
+                              FormBuilderValidators.min(0.01),
+                            ]),
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  Icon(
+                                    Icons.straighten,
+                                    size: 20,
+                                    color: Colors.grey.shade600,
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    'Unit',
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      color: Colors.grey.shade700,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 12),
+                              Container(
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(12),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withOpacity(0.05),
+                                      blurRadius: 10,
+                                      offset: const Offset(0, 2),
+                                    ),
+                                  ],
+                                ),
+                                child: FormBuilderDropdown<String>(
+                                  name: 'unit',
+                                  items: _units.map((unit) => DropdownMenuItem(
+                                    value: unit,
+                                    child: Text(unit),
+                                  )).toList(),
+                                  decoration: const InputDecoration(
+                                    border: InputBorder.none,
+                                    contentPadding: EdgeInsets.symmetric(
+                                      horizontal: 16,
+                                      vertical: 16,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 20),
+                    _buildManualFormField(
+                      name: 'unitPrice',
+                      icon: Icons.attach_money,
+                      labelText: 'Unit Price *',
+                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                      validator: FormBuilderValidators.compose([
+                        FormBuilderValidators.required(),
+                        FormBuilderValidators.numeric(),
+                        FormBuilderValidators.min(0),
+                      ]),
+                    ),
+                    const SizedBox(height: 20),
+                    _buildManualFormField(
+                      name: 'category',
+                      icon: Icons.category_outlined,
+                      labelText: 'Category',
+                    ),
+                    const SizedBox(height: 40),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Container(
+                            height: 50,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(25),
+                              border: Border.all(color: Colors.grey.shade300),
+                            ),
+                            child: TextButton(
+                              onPressed: () => Navigator.pop(context),
+                              child: Text(
+                                'Cancel',
+                                style: TextStyle(
+                                  color: Colors.grey.shade700,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: Container(
+                            height: 50,
+                            decoration: BoxDecoration(
+                              color: Colors.blue,
+                              borderRadius: BorderRadius.circular(25),
+                            ),
+                            child: TextButton(
+                              onPressed: () => _saveManualItem(_manualFormKey, editingIndex),
+                              child: Text(
+                                isEditing ? 'Update Item' : 'Add Item',
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 40),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildProductSelectorSheet(int? itemIndex) {
     return Container(
       height: MediaQuery.of(context).size.height * 0.75,
       decoration: const BoxDecoration(
@@ -1184,17 +1840,133 @@ class _InvoiceFormScreenState extends State<InvoiceFormScreen> {
     );
   }
 
-  void _selectProduct(int itemIndex, Product product) {
-    setState(() {
-      _items[itemIndex] = _items[itemIndex].copyWith(
-        productId: product.id,
-        name: product.name,
-        description: product.description ?? '',
-        unit: product.unit,
-        unitPrice: product.price,
-        category: product.category,
-        total: _items[itemIndex].quantity * product.price,
+  Widget _buildManualFormField({
+    required String name,
+    IconData? icon,
+    required String labelText,
+    String? Function(String?)? validator,
+    int maxLines = 1,
+    TextInputType? keyboardType,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (icon != null) ...[
+          Row(
+            children: [
+              Icon(
+                icon,
+                size: 20,
+                color: Colors.grey.shade600,
+              ),
+              const SizedBox(width: 8),
+              Text(
+                labelText,
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.grey.shade700,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+        ] else ...[
+          Text(
+            labelText,
+            style: TextStyle(
+              fontSize: 16,
+              color: Colors.grey.shade700,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          const SizedBox(height: 12),
+        ],
+        Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.05),
+                blurRadius: 10,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: FormBuilderTextField(
+            name: name,
+            validator: validator,
+            maxLines: maxLines,
+            keyboardType: keyboardType,
+            decoration: InputDecoration(
+              border: InputBorder.none,
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 16,
+              ),
+              hintStyle: TextStyle(
+                color: Colors.grey.shade400,
+                fontSize: 16,
+              ),
+            ),
+            style: const TextStyle(
+              fontSize: 16,
+              color: Colors.black87,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  void _saveManualItem(GlobalKey<FormBuilderState> formKey, int? editingIndex) {
+    if (formKey.currentState?.saveAndValidate() ?? false) {
+      final values = formKey.currentState!.value;
+
+      final item = InvoiceItem(
+        invoiceId: 0,
+        name: values['name'],
+        description: values['description'] ?? '',
+        quantity: double.parse(values['quantity']),
+        unit: values['unit'] ?? 'un',
+        unitPrice: double.parse(values['unitPrice']),
+        category: values['category']?.isEmpty == true ? null : values['category'],
+        total: double.parse(values['quantity']) * double.parse(values['unitPrice']),
       );
+
+      setState(() {
+        if (editingIndex != null) {
+          _items[editingIndex] = item;
+        } else {
+          _items.add(item);
+        }
+        _calculateTotals();
+      });
+
+      Navigator.pop(context);
+    }
+  }
+
+  void _selectProduct(int? itemIndex, Product product) {
+    final newItem = InvoiceItem(
+      invoiceId: 0,
+      productId: product.id,
+      name: product.name,
+      description: product.description ?? '',
+      quantity: itemIndex != null ? _items[itemIndex].quantity : 1.0,
+      unit: product.unit,
+      unitPrice: product.price,
+      category: product.category,
+      total: (itemIndex != null ? _items[itemIndex].quantity : 1.0) * product.price,
+    );
+
+    setState(() {
+      if (itemIndex != null) {
+        _items[itemIndex] = newItem;
+      } else {
+        _items.add(newItem);
+      }
       _calculateTotals();
     });
   }
