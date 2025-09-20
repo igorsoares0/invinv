@@ -54,6 +54,8 @@ class _InvoiceFormScreenState extends State<InvoiceFormScreen> {
       setState(() {
         _items.clear();
       });
+      // Generate initial invoice number for new invoices
+      _generateInitialInvoiceNumber();
     }
   }
 
@@ -212,6 +214,7 @@ class _InvoiceFormScreenState extends State<InvoiceFormScreen> {
     final invoice = widget.invoice!;
     return {
       'clientId': invoice.clientId,
+      'number': invoice.number,
       'issueDate': invoice.issueDate,
       'dueDate': invoice.dueDate,
       'notes': invoice.notes,
@@ -260,6 +263,22 @@ class _InvoiceFormScreenState extends State<InvoiceFormScreen> {
       icon: Icons.calendar_today_outlined,
       child: Column(
         children: [
+          // Invoice Number field
+          _buildFormField(
+            name: 'number',
+            labelText: '${widget.type.value.toUpperCase()} Number *',
+            hintText: 'Edit number if needed',
+            validator: (value) {
+              if (value == null || value.trim().isEmpty) {
+                return 'Number is required';
+              }
+              if (value.trim().length < 3) {
+                return 'Number must be at least 3 characters';
+              }
+              return null;
+            },
+          ),
+          const SizedBox(height: 16),
           Row(
             children: [
               Expanded(
@@ -961,6 +980,7 @@ class _InvoiceFormScreenState extends State<InvoiceFormScreen> {
   Widget _buildFormField({
     required String name,
     required String labelText,
+    String? hintText,
     String? Function(String?)? validator,
     int maxLines = 1,
     bool isDateField = false,
@@ -999,6 +1019,7 @@ class _InvoiceFormScreenState extends State<InvoiceFormScreen> {
         maxLines: maxLines,
         decoration: InputDecoration(
           labelText: labelText,
+          hintText: hintText,
           border: InputBorder.none,
           contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
         ),
@@ -1093,6 +1114,18 @@ class _InvoiceFormScreenState extends State<InvoiceFormScreen> {
   void _calculateTotals() {
     _subtotal = _items.fold(0.0, (sum, item) => sum + item.total);
     _total = _subtotal - _discount + _tax;
+  }
+
+  Future<void> _generateInitialInvoiceNumber() async {
+    try {
+      final invoiceNumber = await _invoiceService.generateInvoiceNumber(widget.type);
+      // Wait for the form to be built before setting the initial value
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _formKey.currentState?.fields['number']?.didChange(invoiceNumber);
+      });
+    } catch (e) {
+      // Silently fail for initial generation, user can manually enter number
+    }
   }
 
   void _showProductSelector(int? itemIndex) {
@@ -1969,11 +2002,9 @@ class _InvoiceFormScreenState extends State<InvoiceFormScreen> {
       final values = _formKey.currentState!.value;
       
       try {
-        final invoiceNumber = await _invoiceService.generateInvoiceNumber(widget.type);
-        
         final invoice = Invoice(
           id: isEditing ? widget.invoice!.id : null,
-          number: isEditing ? widget.invoice!.number : invoiceNumber,
+          number: values['number'].toString().trim(),
           type: widget.type,
           clientId: values['clientId'],
           issueDate: values['issueDate'],
