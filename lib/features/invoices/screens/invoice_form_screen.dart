@@ -46,11 +46,14 @@ class _InvoiceFormScreenState extends State<InvoiceFormScreen> {
     super.initState();
     context.read<ClientBloc>().add(LoadClients());
     context.read<ProductBloc>().add(LoadProducts());
-    
+
     if (isEditing) {
       _loadExistingInvoice();
     } else {
-      _addEmptyItem();
+      // Ensure list is empty for new invoices
+      setState(() {
+        _items.clear();
+      });
     }
   }
 
@@ -59,15 +62,12 @@ class _InvoiceFormScreenState extends State<InvoiceFormScreen> {
       final items = await _invoiceService.getInvoiceItems(widget.invoice!.id!);
       setState(() {
         _items = items.isNotEmpty ? items : [];
-        if (_items.isEmpty) {
-          _addEmptyItem();
-        }
         _discount = widget.invoice!.discountAmount;
         _tax = widget.invoice!.taxAmount;
         _calculateTotals();
       });
     } catch (e) {
-      _addEmptyItem();
+      // No items to load, start with empty list
     }
   }
 
@@ -235,23 +235,14 @@ class _InvoiceFormScreenState extends State<InvoiceFormScreen> {
               items: state.clients.map((client) {
                 return DropdownMenuItem(
                   value: client.id!,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        client.name,
-                        style: const TextStyle(fontWeight: FontWeight.bold),
-                        overflow: TextOverflow.ellipsis,
-                        maxLines: 1,
-                      ),
-                      Text(
-                        client.email,
-                        style: const TextStyle(fontSize: 12),
-                        overflow: TextOverflow.ellipsis,
-                        maxLines: 1,
-                      ),
-                    ],
+                  child: SizedBox(
+                    width: double.infinity,
+                    child: Text(
+                      '${client.name} • ${client.email}',
+                      style: const TextStyle(fontSize: 14),
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 1,
+                    ),
                   ),
                 );
               }).toList(),
@@ -1031,10 +1022,12 @@ class _InvoiceFormScreenState extends State<InvoiceFormScreen> {
         name: name,
         validator: validator,
         items: items,
+        itemHeight: null,
+        menuMaxHeight: 300,
         decoration: InputDecoration(
           labelText: labelText,
           border: InputBorder.none,
-          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
         ),
       ),
     );
