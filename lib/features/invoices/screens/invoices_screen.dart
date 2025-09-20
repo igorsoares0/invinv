@@ -535,28 +535,83 @@ class _InvoicesScreenState extends State<InvoicesScreen> {
 
   Future<void> _generatePDF(Invoice invoice) async {
     try {
-      context.read<InvoiceBloc>().add(LoadInvoiceDetails(invoice.id!));
-      
+      // Show loading snackbar
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Generating PDF...'),
-          duration: Duration(seconds: 1),
+        SnackBar(
+          content: Row(
+            children: [
+              SizedBox(
+                width: 16,
+                height: 16,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                ),
+              ),
+              const SizedBox(width: 16),
+              const Text('Generating PDF...'),
+            ],
+          ),
+          duration: Duration(seconds: 3),
+          backgroundColor: Colors.blue,
         ),
       );
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('PDF generation will be available after loading invoice details'),
-          backgroundColor: Colors.orange,
-        ),
+      // Get invoice details and items
+      final invoiceService = InvoiceService();
+      final pdfService = PDFService();
+
+      final invoiceDetails = await invoiceService.getInvoiceWithDetails(invoice.id!);
+
+      if (invoiceDetails == null) {
+        throw Exception('Invoice details not found');
+      }
+
+      final items = (invoiceDetails['items'] as List? ?? [])
+          .map((item) => InvoiceItem.fromMap(item))
+          .toList();
+
+      // Generate and save PDF
+      await pdfService.printInvoice(
+        invoice: invoice,
+        items: items,
+        clientData: invoiceDetails['invoice'] as Map<String, dynamic>? ?? {},
       );
+
+      // Show success message
+      if (mounted) {
+        ScaffoldMessenger.of(context).hideCurrentSnackBar();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                Icon(Icons.check_circle, color: Colors.white, size: 20),
+                const SizedBox(width: 16),
+                const Text('PDF saved successfully!'),
+              ],
+            ),
+            backgroundColor: Colors.green,
+            duration: Duration(seconds: 2),
+          ),
+        );
+      }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Error generating PDF: ${e.toString()}'),
-          backgroundColor: Colors.red,
-        ),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).hideCurrentSnackBar();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                Icon(Icons.error, color: Colors.white, size: 20),
+                const SizedBox(width: 16),
+                Expanded(child: Text('Error generating PDF: ${e.toString()}')),
+              ],
+            ),
+            backgroundColor: Colors.red,
+            duration: Duration(seconds: 3),
+          ),
+        );
+      }
     }
   }
 
