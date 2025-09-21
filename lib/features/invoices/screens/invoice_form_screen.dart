@@ -993,17 +993,95 @@ class _InvoiceFormScreenState extends State<InvoiceFormScreen> {
           borderRadius: BorderRadius.circular(8),
           border: Border.all(color: Colors.grey.shade300),
         ),
-        child: FormBuilderDateTimePicker(
-          name: name,
-          inputType: InputType.date,
-          validator: validator != null ? (DateTime? value) {
-            return validator(value?.toString());
-          } : null,
-          decoration: InputDecoration(
-            labelText: labelText,
-            hintText: hintText,
-            border: InputBorder.none,
-            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+        child: Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: Theme.of(context).colorScheme.copyWith(
+              primary: Colors.blue,
+              secondary: Colors.blue.shade100,
+              surface: Colors.white,
+              onSurface: Colors.black87,
+              onPrimary: Colors.white,
+            ),
+            dialogBackgroundColor: Colors.white,
+            dialogTheme: DialogThemeData(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+              elevation: 8,
+              shadowColor: Colors.black.withOpacity(0.1),
+            ),
+            datePickerTheme: DatePickerThemeData(
+              backgroundColor: Colors.white,
+              headerBackgroundColor: Colors.blue,
+              headerForegroundColor: Colors.white,
+              dayStyle: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+              ),
+              todayBackgroundColor: MaterialStateProperty.all(Colors.blue.shade50),
+              todayForegroundColor: MaterialStateProperty.all(Colors.blue.shade700),
+              dayForegroundColor: MaterialStateProperty.resolveWith((states) {
+                if (states.contains(MaterialState.selected)) {
+                  return Colors.white;
+                }
+                return Colors.black87;
+              }),
+              dayBackgroundColor: MaterialStateProperty.resolveWith((states) {
+                if (states.contains(MaterialState.selected)) {
+                  return Colors.blue;
+                }
+                return null;
+              }),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+              dayShape: MaterialStateProperty.all(
+                RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+            ),
+            textButtonTheme: TextButtonThemeData(
+              style: TextButton.styleFrom(
+                foregroundColor: Colors.blue,
+                textStyle: const TextStyle(
+                  fontWeight: FontWeight.w600,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+            ),
+          ),
+          child: FormBuilderDateTimePicker(
+            name: name,
+            inputType: InputType.date,
+            validator: validator != null ? (DateTime? value) {
+              return validator(value?.toString());
+            } : null,
+            style: const TextStyle(
+              fontSize: 16,
+              color: Colors.black87,
+            ),
+            decoration: InputDecoration(
+              labelText: labelText,
+              hintText: hintText,
+              border: InputBorder.none,
+              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+              suffixIcon: Container(
+                margin: const EdgeInsets.all(8),
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.blue.shade50,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(
+                  Icons.calendar_today,
+                  size: 20,
+                  color: Colors.blue.shade700,
+                ),
+              ),
+            ),
           ),
         ),
       );
