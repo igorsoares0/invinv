@@ -1123,12 +1123,20 @@ class _InvoiceFormScreenState extends State<InvoiceFormScreen> {
         name: name,
         validator: validator,
         items: items,
-        itemHeight: null,
+        itemHeight: 56,
         menuMaxHeight: 300,
+        dropdownColor: Colors.white,
+        iconEnabledColor: Colors.blue.shade700,
+        iconSize: 20,
         decoration: InputDecoration(
           labelText: labelText,
           border: InputBorder.none,
-          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+        ),
+        style: const TextStyle(
+          fontSize: 14,
+          color: Colors.black87,
+          fontWeight: FontWeight.w500,
         ),
       ),
     );
