@@ -349,6 +349,10 @@ class _InvoicePreviewScreenState extends State<InvoicePreviewScreen> {
                   const SizedBox(height: 2),
                   Text('Tax ID: ${_company!.taxId!}'),
                 ],
+                if (_company?.website != null) ...[
+                  const SizedBox(height: 2),
+                  Text('Website: ${_company!.website!}'),
+                ],
               ],
             ),
           ),

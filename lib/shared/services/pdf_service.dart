@@ -173,6 +173,10 @@ class PDFService {
                 pw.SizedBox(height: 2),
                 pw.Text('Tax ID: ${company!.taxId!}'),
               ],
+              if (company?.website != null) ...[
+                pw.SizedBox(height: 2),
+                pw.Text('Website: ${company!.website!}'),
+              ],
             ],
           ),
         ),
