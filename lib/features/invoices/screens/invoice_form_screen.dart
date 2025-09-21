@@ -207,7 +207,7 @@ class _InvoiceFormScreenState extends State<InvoiceFormScreen> {
     if (!isEditing) {
       return {
         'issueDate': DateTime.now(),
-        'dueDate': DateTime.now().add(const Duration(days: 30)),
+        // Due date is optional - no default value
       };
     }
     
@@ -293,7 +293,8 @@ class _InvoiceFormScreenState extends State<InvoiceFormScreen> {
               Expanded(
                 child: _buildFormField(
                   name: 'dueDate',
-                  labelText: widget.type == InvoiceType.estimate ? 'Valid Until' : 'Due Date',
+                  labelText: widget.type == InvoiceType.estimate ? 'Valid Until (Optional)' : 'Due Date (Optional)',
+                  hintText: 'Leave blank if no due date',
                   isDateField: true,
                 ),
               ),
@@ -1000,6 +1001,7 @@ class _InvoiceFormScreenState extends State<InvoiceFormScreen> {
           } : null,
           decoration: InputDecoration(
             labelText: labelText,
+            hintText: hintText,
             border: InputBorder.none,
             contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
           ),
