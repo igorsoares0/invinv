@@ -304,6 +304,8 @@ class _InvoiceTemplatesScreenState extends State<InvoiceTemplatesScreen> {
         return Icons.description_outlined;
       case InvoiceTemplateType.modern:
         return Icons.auto_awesome_outlined;
+      case InvoiceTemplateType.elegant:
+        return Icons.diamond_outlined;
     }
   }
 
@@ -313,6 +315,8 @@ class _InvoiceTemplatesScreenState extends State<InvoiceTemplatesScreen> {
         return 'Traditional layout • Clean typography • Professional appearance';
       case InvoiceTemplateType.modern:
         return 'Contemporary design • Enhanced colors • Visual hierarchy';
+      case InvoiceTemplateType.elegant:
+        return 'Sophisticated design • Premium aesthetics • Minimalist borders';
     }
   }
 }

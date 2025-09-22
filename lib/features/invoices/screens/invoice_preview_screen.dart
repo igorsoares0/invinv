@@ -176,7 +176,9 @@ class _InvoicePreviewScreenState extends State<InvoicePreviewScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: _templateType == InvoiceTemplateType.modern
                       ? _buildModernLayout(invoice, invoiceData, items)
-                      : _buildClassicLayout(invoice, invoiceData, items),
+                      : _templateType == InvoiceTemplateType.elegant
+                          ? _buildElegantLayout(invoice, invoiceData, items)
+                          : _buildClassicLayout(invoice, invoiceData, items),
                 ),
                   ),
                 ),
@@ -1457,6 +1459,610 @@ class _InvoicePreviewScreenState extends State<InvoicePreviewScreen> {
                 size: 30,
                 color: Colors.blue.shade700,
               ),
+      ),
+    );
+  }
+
+  List<Widget> _buildElegantLayout(Invoice invoice, Map<String, dynamic> invoiceData, List<InvoiceItem> items) {
+    return [
+      _buildElegantHeader(invoice),
+      const SizedBox(height: 28),
+      _buildElegantCompanyAndClientInfo(invoiceData),
+      const SizedBox(height: 28),
+      _buildElegantInvoiceDetails(invoice),
+      const SizedBox(height: 28),
+      _buildElegantItemsTable(items),
+      const SizedBox(height: 24),
+      _buildElegantTotalsSection(invoice),
+      if (invoice.notes != null && invoice.notes!.isNotEmpty) ...[
+        const SizedBox(height: 28),
+        _buildElegantNotesSection(invoice.notes!),
+      ],
+      if (invoice.terms != null && invoice.terms!.isNotEmpty) ...[
+        const SizedBox(height: 24),
+        _buildElegantTermsSection(invoice.terms!),
+      ],
+      const SizedBox(height: 20),
+      _buildElegantFooter(),
+    ];
+  }
+
+  Widget _buildElegantHeader(Invoice invoice) {
+    return Container(
+      decoration: BoxDecoration(
+        border: Border(
+          bottom: BorderSide(color: Colors.grey.shade800, width: 3),
+        ),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.only(bottom: 20),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  invoice.type.value.toUpperCase(),
+                  style: TextStyle(
+                    fontSize: 36,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.grey.shade800,
+                    letterSpacing: 2,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade800,
+                  ),
+                  child: Text(
+                    invoice.number,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            _buildElegantCompanyLogoPreview(),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildElegantCompanyLogoPreview() {
+    if (_company?.logoPath != null &&
+        _company!.logoPath!.isNotEmpty &&
+        File(_company!.logoPath!).existsSync()) {
+      try {
+        return Container(
+          width: 90,
+          height: 90,
+          decoration: BoxDecoration(
+            border: Border.all(color: Colors.grey.shade800, width: 2),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(6),
+            child: Image.file(
+              File(_company!.logoPath!),
+              fit: BoxFit.contain,
+            ),
+          ),
+        );
+      } catch (e) {
+        return _buildElegantTextLogoPreview();
+      }
+    } else if (_company?.name != null) {
+      return _buildElegantTextLogoPreview();
+    }
+
+    return const SizedBox(width: 90, height: 90);
+  }
+
+  Widget _buildElegantTextLogoPreview() {
+    return Container(
+      width: 90,
+      height: 90,
+      decoration: BoxDecoration(
+        border: Border.all(color: Colors.grey.shade800, width: 2),
+      ),
+      child: Center(
+        child: _company?.name != null
+            ? Text(
+                _company!.name.substring(0, 1).toUpperCase(),
+                style: TextStyle(
+                  fontSize: 36,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.grey.shade800,
+                ),
+              )
+            : Icon(
+                Icons.business,
+                size: 36,
+                color: Colors.grey.shade800,
+              ),
+      ),
+    );
+  }
+
+  Widget _buildElegantCompanyAndClientInfo(Map<String, dynamic> invoiceData) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.only(bottom: 8),
+                decoration: BoxDecoration(
+                  border: Border(
+                    bottom: BorderSide(color: Colors.grey.shade600, width: 1),
+                  ),
+                ),
+                child: Text(
+                  'FROM',
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.grey.shade600,
+                    letterSpacing: 1,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                _company?.name ?? 'Your Company Name',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.grey.shade800,
+                ),
+              ),
+              if (_company?.address != null) ...[
+                const SizedBox(height: 4),
+                Text(
+                  _company!.address!,
+                  style: TextStyle(fontSize: 12, color: Colors.grey.shade700),
+                ),
+              ],
+              if (_company?.phone != null) ...[
+                const SizedBox(height: 4),
+                Text(
+                  'Phone: ${_company!.phone!}',
+                  style: TextStyle(fontSize: 12, color: Colors.grey.shade700),
+                ),
+              ],
+              if (_company?.email != null) ...[
+                const SizedBox(height: 4),
+                Text(
+                  'Email: ${_company!.email!}',
+                  style: TextStyle(fontSize: 12, color: Colors.grey.shade700),
+                ),
+              ],
+              if (_company?.taxId != null) ...[
+                const SizedBox(height: 4),
+                Text(
+                  'Tax ID: ${_company!.taxId!}',
+                  style: TextStyle(fontSize: 12, color: Colors.grey.shade700),
+                ),
+              ],
+              if (_company?.website != null) ...[
+                const SizedBox(height: 4),
+                Text(
+                  'Website: ${_company!.website!}',
+                  style: TextStyle(fontSize: 12, color: Colors.grey.shade700),
+                ),
+              ],
+            ],
+          ),
+        ),
+        const SizedBox(width: 40),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.only(bottom: 8),
+                decoration: BoxDecoration(
+                  border: Border(
+                    bottom: BorderSide(color: Colors.grey.shade600, width: 1),
+                  ),
+                ),
+                child: Text(
+                  'BILL TO',
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.grey.shade600,
+                    letterSpacing: 1,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                invoiceData['client_name'] ?? 'Unknown Client',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.grey.shade800,
+                ),
+              ),
+              if (invoiceData['client_email'] != null) ...[
+                const SizedBox(height: 4),
+                Text(
+                  invoiceData['client_email'],
+                  style: TextStyle(fontSize: 12, color: Colors.grey.shade700),
+                ),
+              ],
+              if (invoiceData['client_phone'] != null) ...[
+                const SizedBox(height: 4),
+                Text(
+                  invoiceData['client_phone'],
+                  style: TextStyle(fontSize: 12, color: Colors.grey.shade700),
+                ),
+              ],
+              if (invoiceData['client_address'] != null) ...[
+                const SizedBox(height: 4),
+                Text(
+                  _buildFullAddress(invoiceData),
+                  style: TextStyle(fontSize: 12, color: Colors.grey.shade700),
+                ),
+              ],
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildElegantInvoiceDetails(Invoice invoice) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildElegantDetailRow('Issue Date', DateFormat('MMM dd, yyyy').format(invoice.issueDate)),
+              if (invoice.dueDate != null) ...[
+                const SizedBox(height: 8),
+                _buildElegantDetailRow(
+                  invoice.type == InvoiceType.estimate ? 'Valid Until' : 'Due Date',
+                  DateFormat('MMM dd, yyyy').format(invoice.dueDate!),
+                ),
+              ],
+            ],
+          ),
+        ),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+          decoration: BoxDecoration(
+            color: _getStatusColor(invoice.status),
+            border: Border.all(color: Colors.grey.shade800, width: 1),
+          ),
+          child: Text(
+            invoice.status.value.toUpperCase(),
+            style: const TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+              fontSize: 12,
+              letterSpacing: 1,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildElegantDetailRow(String label, String value) {
+    return Row(
+      children: [
+        SizedBox(
+          width: 80,
+          child: Text(
+            '$label:',
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              color: Colors.grey.shade600,
+              fontSize: 12,
+            ),
+          ),
+        ),
+        Text(
+          value,
+          style: TextStyle(
+            fontSize: 12,
+            color: Colors.grey.shade800,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildElegantItemsTable(List<InvoiceItem> items) {
+    return Table(
+      border: TableBorder(
+        top: BorderSide(color: Colors.grey.shade800, width: 2),
+        bottom: BorderSide(color: Colors.grey.shade800, width: 2),
+        horizontalInside: BorderSide(color: Colors.grey.shade400, width: 0.5),
+      ),
+      columnWidths: const {
+        0: FlexColumnWidth(3),
+        1: FlexColumnWidth(1),
+        2: FlexColumnWidth(1.5),
+        3: FlexColumnWidth(1.5),
+      },
+      children: [
+        // Header
+        TableRow(
+          decoration: BoxDecoration(color: Colors.grey.shade800),
+          children: [
+            _buildElegantTableCell('PRODUCT/SERVICE', isHeader: true),
+            _buildElegantTableCell('QTY', isHeader: true, alignment: Alignment.center),
+            _buildElegantTableCell('RATE', isHeader: true, alignment: Alignment.centerRight),
+            _buildElegantTableCell('AMOUNT', isHeader: true, alignment: Alignment.centerRight),
+          ],
+        ),
+        // Items
+        ...items.map((item) => TableRow(
+          children: [
+            _buildElegantProductCell(item),
+            _buildElegantTableCell(item.quantity.toString(), alignment: Alignment.center),
+            _buildElegantTableCell(NumberFormat.currency(symbol: '\$').format(item.unitPrice), alignment: Alignment.centerRight),
+            _buildElegantTableCell(NumberFormat.currency(symbol: '\$').format(item.total), alignment: Alignment.centerRight),
+          ],
+        )),
+      ],
+    );
+  }
+
+  Widget _buildElegantTableCell(String text, {bool isHeader = false, Alignment? alignment}) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      alignment: alignment ?? Alignment.centerLeft,
+      child: Text(
+        text,
+        style: TextStyle(
+          fontWeight: isHeader ? FontWeight.bold : FontWeight.normal,
+          fontSize: 11,
+          color: isHeader ? Colors.white : Colors.grey.shade800,
+          letterSpacing: isHeader ? 1 : 0,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildElegantProductCell(InvoiceItem item) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      alignment: Alignment.centerLeft,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            item.name,
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 11,
+              color: Colors.grey.shade800,
+            ),
+          ),
+          if (item.description.isNotEmpty) ...[
+            const SizedBox(height: 2),
+            Text(
+              item.description,
+              style: TextStyle(
+                fontSize: 10,
+                color: Colors.grey.shade600,
+                fontStyle: FontStyle.italic,
+              ),
+            ),
+          ],
+          if (item.category != null && item.category!.isNotEmpty) ...[
+            const SizedBox(height: 3),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+              decoration: BoxDecoration(
+                border: Border.all(color: Colors.grey.shade600, width: 0.5),
+              ),
+              child: Text(
+                item.category!,
+                style: TextStyle(
+                  fontSize: 8,
+                  color: Colors.grey.shade600,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildElegantTotalsSection(Invoice invoice) {
+    return Align(
+      alignment: Alignment.centerRight,
+      child: Container(
+        width: 240,
+        decoration: BoxDecoration(
+          border: Border.all(color: Colors.grey.shade800, width: 1),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.grey.shade800,
+              ),
+              child: const Text(
+                'SUMMARY',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 12,
+                  letterSpacing: 1,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                children: [
+                  _buildElegantTotalRow('Subtotal', NumberFormat.currency(symbol: '\$').format(invoice.subtotal)),
+                  if (invoice.discountAmount > 0)
+                    _buildElegantTotalRow('Discount', '-${NumberFormat.currency(symbol: '\$').format(invoice.discountAmount)}'),
+                  if (invoice.taxAmount > 0)
+                    _buildElegantTotalRow('Tax', NumberFormat.currency(symbol: '\$').format(invoice.taxAmount)),
+                  Container(
+                    margin: const EdgeInsets.symmetric(vertical: 8),
+                    height: 1,
+                    color: Colors.grey.shade800,
+                  ),
+                  _buildElegantTotalRow(
+                    'TOTAL',
+                    NumberFormat.currency(symbol: '\$').format(invoice.total),
+                    isTotal: true,
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildElegantTotalRow(String label, String amount, {bool isTotal = false}) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            label,
+            style: TextStyle(
+              fontWeight: isTotal ? FontWeight.bold : FontWeight.normal,
+              fontSize: isTotal ? 14 : 12,
+              color: Colors.grey.shade800,
+              letterSpacing: isTotal ? 1 : 0,
+            ),
+          ),
+          Text(
+            amount,
+            style: TextStyle(
+              fontWeight: isTotal ? FontWeight.bold : FontWeight.normal,
+              fontSize: isTotal ? 14 : 12,
+              color: Colors.grey.shade800,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildElegantNotesSection(String notes) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.only(bottom: 8),
+          decoration: BoxDecoration(
+            border: Border(
+              bottom: BorderSide(color: Colors.grey.shade600, width: 1),
+            ),
+          ),
+          child: Text(
+            'NOTES',
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+              color: Colors.grey.shade600,
+              letterSpacing: 1,
+            ),
+          ),
+        ),
+        const SizedBox(height: 12),
+        Text(
+          notes,
+          style: TextStyle(
+            fontSize: 11,
+            color: Colors.grey.shade700,
+            height: 1.5,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildElegantTermsSection(String terms) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.only(bottom: 8),
+          decoration: BoxDecoration(
+            border: Border(
+              bottom: BorderSide(color: Colors.grey.shade600, width: 1),
+            ),
+          ),
+          child: Text(
+            'TERMS & CONDITIONS',
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+              color: Colors.grey.shade600,
+              letterSpacing: 1,
+            ),
+          ),
+        ),
+        const SizedBox(height: 12),
+        Text(
+          terms,
+          style: TextStyle(
+            fontSize: 10,
+            color: Colors.grey.shade600,
+            height: 1.5,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildElegantFooter() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(vertical: 16),
+      decoration: BoxDecoration(
+        border: Border(
+          top: BorderSide(color: Colors.grey.shade800, width: 2),
+        ),
+      ),
+      child: Center(
+        child: Text(
+          'Thank you for your business!',
+          style: TextStyle(
+            fontSize: 14,
+            color: Colors.grey.shade600,
+            fontStyle: FontStyle.italic,
+            letterSpacing: 1,
+          ),
+        ),
       ),
     );
   }

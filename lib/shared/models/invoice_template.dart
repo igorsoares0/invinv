@@ -1,6 +1,7 @@
 enum InvoiceTemplateType {
   classic,
   modern,
+  elegant,
 }
 
 class InvoiceTemplate {
@@ -27,6 +28,11 @@ class InvoiceTemplate {
       name: 'Modern',
       description: 'Contemporary design with enhanced visual hierarchy',
     ),
+    InvoiceTemplate(
+      type: InvoiceTemplateType.elegant,
+      name: 'Elegant',
+      description: 'Sophisticated design with premium aesthetics and refined details',
+    ),
   ];
 
   static InvoiceTemplate getTemplate(InvoiceTemplateType type) {
@@ -41,6 +47,8 @@ extension InvoiceTemplateTypeExtension on InvoiceTemplateType {
         return 'classic';
       case InvoiceTemplateType.modern:
         return 'modern';
+      case InvoiceTemplateType.elegant:
+        return 'elegant';
     }
   }
 
@@ -50,6 +58,8 @@ extension InvoiceTemplateTypeExtension on InvoiceTemplateType {
         return InvoiceTemplateType.classic;
       case 'modern':
         return InvoiceTemplateType.modern;
+      case 'elegant':
+        return InvoiceTemplateType.elegant;
       default:
         return InvoiceTemplateType.classic;
     }
