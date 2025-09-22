@@ -231,7 +231,7 @@ class _InvoicePreviewScreenState extends State<InvoicePreviewScreen> {
             Text(
               invoice.type.value.toUpperCase(),
               style: const TextStyle(
-                fontSize: 24,
+                fontSize: 20,
                 fontWeight: FontWeight.bold,
                 color: Colors.blue,
               ),
@@ -240,7 +240,7 @@ class _InvoicePreviewScreenState extends State<InvoicePreviewScreen> {
             Text(
               invoice.number,
               style: TextStyle(
-                fontSize: 14,
+                fontSize: 12,
                 color: Colors.grey[600],
               ),
             ),
@@ -320,7 +320,7 @@ class _InvoicePreviewScreenState extends State<InvoicePreviewScreen> {
                 Text(
                   'From:',
                   style: TextStyle(
-                    fontSize: 14,
+                    fontSize: 12,
                     fontWeight: FontWeight.bold,
                     color: Colors.grey[600],
                   ),
@@ -329,29 +329,44 @@ class _InvoicePreviewScreenState extends State<InvoicePreviewScreen> {
                 Text(
                   _company?.name ?? 'Your Company Name',
                   style: const TextStyle(
-                    fontSize: 16,
+                    fontSize: 14,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
                 if (_company?.address != null) ...[
                   const SizedBox(height: 2),
-                  Text(_company!.address!),
+                  Text(
+                    _company!.address!,
+                    style: const TextStyle(fontSize: 12),
+                  ),
                 ],
                 if (_company?.phone != null) ...[
                   const SizedBox(height: 2),
-                  Text('Phone: ${_company!.phone!}'),
+                  Text(
+                    'Phone: ${_company!.phone!}',
+                    style: const TextStyle(fontSize: 12),
+                  ),
                 ],
                 if (_company?.email != null) ...[
                   const SizedBox(height: 2),
-                  Text('Email: ${_company!.email!}'),
+                  Text(
+                    'Email: ${_company!.email!}',
+                    style: const TextStyle(fontSize: 12),
+                  ),
                 ],
                 if (_company?.taxId != null) ...[
                   const SizedBox(height: 2),
-                  Text('Tax ID: ${_company!.taxId!}'),
+                  Text(
+                    'Tax ID: ${_company!.taxId!}',
+                    style: const TextStyle(fontSize: 12),
+                  ),
                 ],
                 if (_company?.website != null) ...[
                   const SizedBox(height: 2),
-                  Text('Website: ${_company!.website!}'),
+                  Text(
+                    'Website: ${_company!.website!}',
+                    style: const TextStyle(fontSize: 12),
+                  ),
                 ],
               ],
             ),
@@ -365,7 +380,7 @@ class _InvoicePreviewScreenState extends State<InvoicePreviewScreen> {
                 Text(
                   'Bill To:',
                   style: TextStyle(
-                    fontSize: 14,
+                    fontSize: 12,
                     fontWeight: FontWeight.bold,
                     color: Colors.grey[600],
                   ),
@@ -374,17 +389,23 @@ class _InvoicePreviewScreenState extends State<InvoicePreviewScreen> {
                 Text(
                   invoiceData['client_name'] ?? 'Unknown Client',
                   style: const TextStyle(
-                    fontSize: 16,
+                    fontSize: 14,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
                 if (invoiceData['client_email'] != null) ...[
                   const SizedBox(height: 2),
-                  Text(invoiceData['client_email']),
+                  Text(
+                    invoiceData['client_email'],
+                    style: const TextStyle(fontSize: 12),
+                  ),
                 ],
                 if (invoiceData['client_phone'] != null) ...[
                   const SizedBox(height: 2),
-                  Text(invoiceData['client_phone']),
+                  Text(
+                    invoiceData['client_phone'],
+                    style: const TextStyle(fontSize: 12),
+                  ),
                 ],
                 if (invoiceData['client_address'] != null) ...[
                   const SizedBox(height: 2),
@@ -428,7 +449,7 @@ class _InvoicePreviewScreenState extends State<InvoicePreviewScreen> {
             style: const TextStyle(
               color: Colors.white,
               fontWeight: FontWeight.bold,
-              fontSize: 12,
+              fontSize: 11,
             ),
           ),
         ),
@@ -445,6 +466,7 @@ class _InvoicePreviewScreenState extends State<InvoicePreviewScreen> {
           style: TextStyle(
             fontWeight: FontWeight.bold,
             color: Colors.grey[600],
+            fontSize: 12,
           ),
         ),
         const SizedBox(width: 8),
@@ -452,6 +474,7 @@ class _InvoicePreviewScreenState extends State<InvoicePreviewScreen> {
           child: Text(
             value,
             overflow: TextOverflow.ellipsis,
+            style: const TextStyle(fontSize: 12),
           ),
         ),
       ],
@@ -466,9 +489,8 @@ class _InvoicePreviewScreenState extends State<InvoicePreviewScreen> {
           columnWidths: const {
             0: FlexColumnWidth(3),
             1: FlexColumnWidth(1),
-            2: FlexColumnWidth(1),
+            2: FlexColumnWidth(1.5),
             3: FlexColumnWidth(1.5),
-            4: FlexColumnWidth(1.5),
           },
           children: [
             // Header
@@ -477,7 +499,6 @@ class _InvoicePreviewScreenState extends State<InvoicePreviewScreen> {
               children: [
                 _buildTableCell('Product/Service', isHeader: true),
                 _buildTableCell('Qty', isHeader: true, alignment: Alignment.center),
-                _buildTableCell('Unit', isHeader: true, alignment: Alignment.center),
                 _buildTableCell('Rate', isHeader: true, alignment: Alignment.centerRight),
                 _buildTableCell('Amount', isHeader: true, alignment: Alignment.centerRight),
               ],
@@ -487,7 +508,6 @@ class _InvoicePreviewScreenState extends State<InvoicePreviewScreen> {
               children: [
                 _buildProductCell(item),
                 _buildTableCell(item.quantity.toString(), alignment: Alignment.center),
-                _buildTableCell(item.unit, alignment: Alignment.center),
                 _buildTableCell(NumberFormat.currency(symbol: '\$').format(item.unitPrice), alignment: Alignment.centerRight),
                 _buildTableCell(NumberFormat.currency(symbol: '\$').format(item.total), alignment: Alignment.centerRight),
               ],
@@ -597,7 +617,7 @@ class _InvoicePreviewScreenState extends State<InvoicePreviewScreen> {
             label,
             style: TextStyle(
               fontWeight: isTotal ? FontWeight.bold : FontWeight.normal,
-              fontSize: isTotal ? 16 : 14,
+              fontSize: isTotal ? 14 : 12,
               color: isTotal ? Colors.blue : Colors.black,
             ),
           ),
@@ -605,7 +625,7 @@ class _InvoicePreviewScreenState extends State<InvoicePreviewScreen> {
             amount,
             style: TextStyle(
               fontWeight: isTotal ? FontWeight.bold : FontWeight.normal,
-              fontSize: isTotal ? 16 : 14,
+              fontSize: isTotal ? 14 : 12,
               color: isTotal ? Colors.blue : Colors.black,
             ),
           ),
@@ -621,7 +641,7 @@ class _InvoicePreviewScreenState extends State<InvoicePreviewScreen> {
         Text(
           'Notes:',
           style: TextStyle(
-            fontSize: 14,
+            fontSize: 12,
             fontWeight: FontWeight.bold,
             color: Colors.grey[600],
           ),
@@ -642,7 +662,7 @@ class _InvoicePreviewScreenState extends State<InvoicePreviewScreen> {
         Text(
           'Terms & Conditions:',
           style: TextStyle(
-            fontSize: 14,
+            fontSize: 12,
             fontWeight: FontWeight.bold,
             color: Colors.grey[600],
           ),
@@ -650,7 +670,7 @@ class _InvoicePreviewScreenState extends State<InvoicePreviewScreen> {
         const SizedBox(height: 8),
         Text(
           terms,
-          style: const TextStyle(fontSize: 10),
+          style: const TextStyle(fontSize: 11),
         ),
       ],
     );

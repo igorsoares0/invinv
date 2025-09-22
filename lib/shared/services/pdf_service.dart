@@ -278,9 +278,8 @@ class PDFService {
       columnWidths: {
         0: const pw.FlexColumnWidth(3),
         1: const pw.FlexColumnWidth(1),
-        2: const pw.FlexColumnWidth(1),
+        2: const pw.FlexColumnWidth(1.5),
         3: const pw.FlexColumnWidth(1.5),
-        4: const pw.FlexColumnWidth(1.5),
       },
       children: [
         // Header
@@ -289,7 +288,6 @@ class PDFService {
           children: [
             _buildTableCell('Product/Service', isHeader: true),
             _buildTableCell('Qty', isHeader: true, alignment: pw.Alignment.center),
-            _buildTableCell('Unit', isHeader: true, alignment: pw.Alignment.center),
             _buildTableCell('Rate', isHeader: true, alignment: pw.Alignment.centerRight),
             _buildTableCell('Amount', isHeader: true, alignment: pw.Alignment.centerRight),
           ],
@@ -299,7 +297,6 @@ class PDFService {
           children: [
             _buildProductCell(item),
             _buildTableCell(item.quantity.toString(), alignment: pw.Alignment.center),
-            _buildTableCell(item.unit, alignment: pw.Alignment.center),
             _buildTableCell(NumberFormat.currency(symbol: '\$').format(item.unitPrice), alignment: pw.Alignment.centerRight),
             _buildTableCell(NumberFormat.currency(symbol: '\$').format(item.total), alignment: pw.Alignment.centerRight),
           ],
