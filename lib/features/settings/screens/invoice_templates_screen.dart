@@ -176,45 +176,7 @@ class _InvoiceTemplatesScreenState extends State<InvoiceTemplatesScreen> {
           child: Row(
             children: [
               // Template Preview
-              Container(
-                width: 80,
-                height: 100,
-                decoration: BoxDecoration(
-                  color: isSelected ? Colors.blue.shade50 : Colors.grey.shade100,
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(
-                    color: isSelected ? Colors.blue.shade300 : Colors.grey.shade300,
-                  ),
-                ),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      _getTemplateIcon(template.type),
-                      size: 32,
-                      color: isSelected ? Colors.blue.shade600 : Colors.grey.shade600,
-                    ),
-                    const SizedBox(height: 8),
-                    Container(
-                      width: 50,
-                      height: 2,
-                      color: isSelected ? Colors.blue.shade400 : Colors.grey.shade400,
-                    ),
-                    const SizedBox(height: 4),
-                    Container(
-                      width: 60,
-                      height: 2,
-                      color: isSelected ? Colors.blue.shade300 : Colors.grey.shade300,
-                    ),
-                    const SizedBox(height: 4),
-                    Container(
-                      width: 40,
-                      height: 2,
-                      color: isSelected ? Colors.blue.shade300 : Colors.grey.shade300,
-                    ),
-                  ],
-                ),
-              ),
+              _buildTemplatePreview(template.type, isSelected),
               const SizedBox(width: 20),
               // Template Details
               Expanded(
@@ -318,5 +280,381 @@ class _InvoiceTemplatesScreenState extends State<InvoiceTemplatesScreen> {
       case InvoiceTemplateType.elegant:
         return 'Sophisticated design • Premium aesthetics • Minimalist borders';
     }
+  }
+
+  Widget _buildTemplatePreview(InvoiceTemplateType type, bool isSelected) {
+    switch (type) {
+      case InvoiceTemplateType.classic:
+        return _buildClassicPreview(isSelected);
+      case InvoiceTemplateType.modern:
+        return _buildModernPreview(isSelected);
+      case InvoiceTemplateType.elegant:
+        return _buildElegantPreview(isSelected);
+    }
+  }
+
+  Widget _buildClassicPreview(bool isSelected) {
+    return Container(
+      width: 80,
+      height: 100,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          color: isSelected ? Colors.blue.shade400 : Colors.grey.shade300,
+          width: isSelected ? 2 : 1,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(6),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Header
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Container(
+                  width: 20,
+                  height: 3,
+                  color: Colors.blue.shade600,
+                ),
+                Container(
+                  width: 12,
+                  height: 12,
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.grey.shade400),
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 4),
+            // Company info
+            Container(
+              width: 25,
+              height: 2,
+              color: Colors.grey.shade600,
+            ),
+            const SizedBox(height: 2),
+            Container(
+              width: 30,
+              height: 1,
+              color: Colors.grey.shade400,
+            ),
+            const SizedBox(height: 6),
+            // Table
+            Container(
+              width: double.infinity,
+              height: 12,
+              decoration: BoxDecoration(
+                border: Border.all(color: Colors.grey.shade300),
+              ),
+              child: Container(
+                color: Colors.grey.shade100,
+              ),
+            ),
+            const SizedBox(height: 2),
+            // Rows
+            ...List.generate(3, (index) => Container(
+              margin: const EdgeInsets.only(bottom: 1),
+              width: double.infinity,
+              height: 4,
+              color: Colors.grey.shade50,
+            )),
+            const Spacer(),
+            // Total
+            Align(
+              alignment: Alignment.centerRight,
+              child: Container(
+                width: 20,
+                height: 8,
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.grey.shade300),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildModernPreview(bool isSelected) {
+    return Container(
+      width: 80,
+      height: 100,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          color: isSelected ? Colors.blue.shade400 : Colors.grey.shade300,
+          width: isSelected ? 2 : 1,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(6),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Gradient Header
+            Container(
+              width: double.infinity,
+              height: 12,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [Colors.blue.shade600, Colors.blue.shade800],
+                ),
+                borderRadius: BorderRadius.circular(2),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 2),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Container(
+                      width: 15,
+                      height: 2,
+                      color: Colors.white,
+                    ),
+                    Container(
+                      width: 8,
+                      height: 8,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(1),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 4),
+            // Colored boxes
+            Row(
+              children: [
+                Container(
+                  width: 25,
+                  height: 10,
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade100,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+                const SizedBox(width: 4),
+                Container(
+                  width: 25,
+                  height: 10,
+                  decoration: BoxDecoration(
+                    color: Colors.blue.shade100,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 6),
+            // Gradient Table
+            Container(
+              width: double.infinity,
+              height: 10,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [Colors.blue.shade600, Colors.blue.shade700],
+                ),
+              ),
+            ),
+            const SizedBox(height: 2),
+            // Alternating rows
+            Container(
+              width: double.infinity,
+              height: 4,
+              color: Colors.white,
+            ),
+            const SizedBox(height: 1),
+            Container(
+              width: double.infinity,
+              height: 4,
+              color: Colors.grey.shade50,
+            ),
+            const SizedBox(height: 1),
+            Container(
+              width: double.infinity,
+              height: 4,
+              color: Colors.white,
+            ),
+            const Spacer(),
+            // Gradient Total
+            Align(
+              alignment: Alignment.centerRight,
+              child: Container(
+                width: 22,
+                height: 10,
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade100,
+                  borderRadius: BorderRadius.circular(2),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.1),
+                      blurRadius: 2,
+                      offset: const Offset(0, 1),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildElegantPreview(bool isSelected) {
+    return Container(
+      width: 80,
+      height: 100,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          color: isSelected ? Colors.blue.shade400 : Colors.grey.shade300,
+          width: isSelected ? 2 : 1,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(6),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Bold Header with underline
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  width: 30,
+                  height: 3,
+                  color: Colors.grey.shade800,
+                ),
+                const SizedBox(height: 1),
+                Container(
+                  width: double.infinity,
+                  height: 2,
+                  color: Colors.grey.shade800,
+                ),
+              ],
+            ),
+            const SizedBox(height: 4),
+            // Sections with underlines
+            Column(
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      width: 15,
+                      height: 1,
+                      color: Colors.grey.shade600,
+                    ),
+                    const SizedBox(width: 8),
+                    Container(
+                      width: 15,
+                      height: 1,
+                      color: Colors.grey.shade600,
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 2),
+                Container(
+                  width: 20,
+                  height: 1,
+                  color: Colors.grey.shade700,
+                ),
+              ],
+            ),
+            const SizedBox(height: 6),
+            // Bold table
+            Container(
+              width: double.infinity,
+              decoration: BoxDecoration(
+                border: Border(
+                  top: BorderSide(color: Colors.grey.shade800, width: 1.5),
+                  bottom: BorderSide(color: Colors.grey.shade800, width: 1.5),
+                ),
+              ),
+              child: Column(
+                children: [
+                  Container(
+                    width: double.infinity,
+                    height: 8,
+                    color: Colors.grey.shade800,
+                  ),
+                  const SizedBox(height: 2),
+                  Container(
+                    width: double.infinity,
+                    height: 3,
+                    color: Colors.white,
+                  ),
+                  Container(
+                    width: double.infinity,
+                    height: 0.5,
+                    color: Colors.grey.shade400,
+                  ),
+                  Container(
+                    width: double.infinity,
+                    height: 3,
+                    color: Colors.white,
+                  ),
+                ],
+              ),
+            ),
+            const Spacer(),
+            // Bordered Total
+            Align(
+              alignment: Alignment.centerRight,
+              child: Container(
+                width: 22,
+                height: 12,
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.grey.shade800, width: 1),
+                ),
+                child: Column(
+                  children: [
+                    Container(
+                      width: double.infinity,
+                      height: 6,
+                      color: Colors.grey.shade800,
+                    ),
+                    Container(
+                      width: double.infinity,
+                      height: 4,
+                      color: Colors.white,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
