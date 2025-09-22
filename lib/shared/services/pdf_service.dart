@@ -6,9 +6,11 @@ import 'package:printing/printing.dart';
 import 'package:intl/intl.dart';
 import '../models/models.dart';
 import 'company_service.dart';
+import 'template_service.dart';
 
 class PDFService {
   final CompanyService _companyService = CompanyService();
+  final TemplateService _templateService = TemplateService();
 
   Future<Uint8List> generateInvoicePDF({
     required Invoice invoice,
@@ -17,7 +19,22 @@ class PDFService {
   }) async {
     final pdf = pw.Document();
     final company = await _companyService.getCompany();
+    final templateType = await _templateService.getSelectedTemplate();
 
+    if (templateType == InvoiceTemplateType.modern) {
+      return _generateModernTemplate(pdf, invoice, items, clientData, company);
+    } else {
+      return _generateClassicTemplate(pdf, invoice, items, clientData, company);
+    }
+  }
+
+  Future<Uint8List> _generateClassicTemplate(
+    pw.Document pdf,
+    Invoice invoice,
+    List<InvoiceItem> items,
+    Map<String, dynamic> clientData,
+    Company? company,
+  ) async {
     pdf.addPage(
       pw.MultiPage(
         pageFormat: PdfPageFormat.a4,
@@ -43,6 +60,46 @@ class PDFService {
             ],
             pw.Spacer(),
             _buildFooter(),
+          ];
+        },
+      ),
+    );
+
+    return pdf.save();
+  }
+
+  Future<Uint8List> _generateModernTemplate(
+    pw.Document pdf,
+    Invoice invoice,
+    List<InvoiceItem> items,
+    Map<String, dynamic> clientData,
+    Company? company,
+  ) async {
+    pdf.addPage(
+      pw.MultiPage(
+        pageFormat: PdfPageFormat.a4,
+        margin: const pw.EdgeInsets.all(24),
+        build: (pw.Context context) {
+          return [
+            _buildModernHeader(invoice, company),
+            pw.SizedBox(height: 24),
+            _buildModernCompanyAndClientInfo(company, clientData),
+            pw.SizedBox(height: 24),
+            _buildModernInvoiceDetails(invoice),
+            pw.SizedBox(height: 24),
+            _buildModernItemsTable(items),
+            pw.SizedBox(height: 20),
+            _buildModernTotalsSection(invoice),
+            if (invoice.notes != null && invoice.notes!.isNotEmpty) ...[
+              pw.SizedBox(height: 24),
+              _buildModernNotesSection(invoice.notes!),
+            ],
+            if (invoice.terms != null && invoice.terms!.isNotEmpty) ...[
+              pw.SizedBox(height: 20),
+              _buildModernTermsSection(invoice.terms!),
+            ],
+            pw.Spacer(),
+            _buildModernFooter(),
           ];
         },
       ),
@@ -537,6 +594,530 @@ class PDFService {
     await Printing.sharePdf(
       bytes: pdfData,
       filename: '${invoice.number}.pdf',
+    );
+  }
+
+  // Modern Template Methods
+  pw.Widget _buildModernHeader(Invoice invoice, Company? company) {
+    return pw.Container(
+      padding: const pw.EdgeInsets.all(24),
+      decoration: pw.BoxDecoration(
+        gradient: pw.LinearGradient(
+          colors: [PdfColors.blue600, PdfColors.blue800],
+        ),
+        borderRadius: pw.BorderRadius.circular(12),
+      ),
+      child: pw.Row(
+        mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+        children: [
+          pw.Column(
+            crossAxisAlignment: pw.CrossAxisAlignment.start,
+            children: [
+              pw.Text(
+                invoice.type.value.toUpperCase(),
+                style: pw.TextStyle(
+                  fontSize: 28,
+                  fontWeight: pw.FontWeight.bold,
+                  color: PdfColors.white,
+                ),
+              ),
+              pw.SizedBox(height: 4),
+              pw.Text(
+                invoice.number,
+                style: pw.TextStyle(
+                  fontSize: 16,
+                  color: PdfColors.blue100,
+                ),
+              ),
+            ],
+          ),
+          _buildModernCompanyLogo(company),
+        ],
+      ),
+    );
+  }
+
+  pw.Widget _buildModernCompanyAndClientInfo(Company? company, Map<String, dynamic> clientData) {
+    return pw.Row(
+      crossAxisAlignment: pw.CrossAxisAlignment.start,
+      children: [
+        pw.Expanded(
+          child: pw.Container(
+            padding: const pw.EdgeInsets.all(20),
+            decoration: pw.BoxDecoration(
+              color: PdfColors.grey50,
+              borderRadius: pw.BorderRadius.circular(8),
+              border: pw.Border.all(color: PdfColors.grey200),
+            ),
+            child: pw.Column(
+              crossAxisAlignment: pw.CrossAxisAlignment.start,
+              children: [
+                pw.Text(
+                  'From:',
+                  style: pw.TextStyle(
+                    fontSize: 12,
+                    fontWeight: pw.FontWeight.bold,
+                    color: PdfColors.blue700,
+                  ),
+                ),
+                pw.SizedBox(height: 12),
+                pw.Text(
+                  company?.name ?? 'Your Company Name',
+                  style: pw.TextStyle(
+                    fontSize: 16,
+                    fontWeight: pw.FontWeight.bold,
+                  ),
+                ),
+                if (company?.address != null) ...[
+                  pw.SizedBox(height: 4),
+                  pw.Text(company!.address!, style: const pw.TextStyle(fontSize: 12)),
+                ],
+                if (company?.phone != null) ...[
+                  pw.SizedBox(height: 4),
+                  pw.Text('Phone: ${company!.phone!}', style: const pw.TextStyle(fontSize: 12)),
+                ],
+                if (company?.email != null) ...[
+                  pw.SizedBox(height: 4),
+                  pw.Text('Email: ${company!.email!}', style: const pw.TextStyle(fontSize: 12)),
+                ],
+                if (company?.taxId != null) ...[
+                  pw.SizedBox(height: 4),
+                  pw.Text('Tax ID: ${company!.taxId!}', style: const pw.TextStyle(fontSize: 12)),
+                ],
+                if (company?.website != null) ...[
+                  pw.SizedBox(height: 4),
+                  pw.Text('Website: ${company!.website!}', style: const pw.TextStyle(fontSize: 12)),
+                ],
+              ],
+            ),
+          ),
+        ),
+        pw.SizedBox(width: 20),
+        pw.Expanded(
+          child: pw.Container(
+            padding: const pw.EdgeInsets.all(20),
+            decoration: pw.BoxDecoration(
+              color: PdfColors.blue50,
+              borderRadius: pw.BorderRadius.circular(8),
+              border: pw.Border.all(color: PdfColors.blue200),
+            ),
+            child: pw.Column(
+              crossAxisAlignment: pw.CrossAxisAlignment.start,
+              children: [
+                pw.Text(
+                  'Bill To:',
+                  style: pw.TextStyle(
+                    fontSize: 12,
+                    fontWeight: pw.FontWeight.bold,
+                    color: PdfColors.blue700,
+                  ),
+                ),
+                pw.SizedBox(height: 12),
+                pw.Text(
+                  clientData['client_name'] ?? 'Unknown Client',
+                  style: pw.TextStyle(
+                    fontSize: 16,
+                    fontWeight: pw.FontWeight.bold,
+                  ),
+                ),
+                if (clientData['client_email'] != null) ...[
+                  pw.SizedBox(height: 4),
+                  pw.Text(clientData['client_email'], style: const pw.TextStyle(fontSize: 12)),
+                ],
+                if (clientData['client_phone'] != null) ...[
+                  pw.SizedBox(height: 4),
+                  pw.Text(clientData['client_phone'], style: const pw.TextStyle(fontSize: 12)),
+                ],
+                if (clientData['client_address'] != null) ...[
+                  pw.SizedBox(height: 4),
+                  pw.Text(_buildFullAddress(clientData), style: const pw.TextStyle(fontSize: 12)),
+                ],
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  pw.Widget _buildModernInvoiceDetails(Invoice invoice) {
+    return pw.Container(
+      padding: const pw.EdgeInsets.all(16),
+      decoration: pw.BoxDecoration(
+        color: PdfColors.white,
+        borderRadius: pw.BorderRadius.circular(8),
+        border: pw.Border.all(color: PdfColors.grey300),
+      ),
+      child: pw.Row(
+        mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+        children: [
+          pw.Column(
+            crossAxisAlignment: pw.CrossAxisAlignment.start,
+            children: [
+              _buildModernDetailRow('Issue Date:', DateFormat('MMM dd, yyyy').format(invoice.issueDate)),
+              if (invoice.dueDate != null) ...[
+                pw.SizedBox(height: 8),
+                _buildModernDetailRow(
+                  invoice.type == InvoiceType.estimate ? 'Valid Until:' : 'Due Date:',
+                  DateFormat('MMM dd, yyyy').format(invoice.dueDate!),
+                ),
+              ],
+            ],
+          ),
+          pw.Container(
+            padding: const pw.EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            decoration: pw.BoxDecoration(
+              color: _getStatusColor(invoice.status),
+              borderRadius: pw.BorderRadius.circular(20),
+            ),
+            child: pw.Text(
+              invoice.status.value.toUpperCase(),
+              style: pw.TextStyle(
+                color: PdfColors.white,
+                fontWeight: pw.FontWeight.bold,
+                fontSize: 12,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  pw.Widget _buildModernDetailRow(String label, String value) {
+    return pw.Row(
+      children: [
+        pw.Text(
+          label,
+          style: pw.TextStyle(
+            fontWeight: pw.FontWeight.bold,
+            color: PdfColors.blue700,
+            fontSize: 12,
+          ),
+        ),
+        pw.SizedBox(width: 8),
+        pw.Text(
+          value,
+          style: const pw.TextStyle(fontSize: 12),
+        ),
+      ],
+    );
+  }
+
+  pw.Widget _buildModernItemsTable(List<InvoiceItem> items) {
+    return pw.Container(
+      decoration: pw.BoxDecoration(
+        borderRadius: pw.BorderRadius.circular(8),
+        border: pw.Border.all(color: PdfColors.grey300),
+      ),
+      child: pw.Table(
+        border: pw.TableBorder.all(color: PdfColors.grey300),
+        columnWidths: {
+          0: const pw.FlexColumnWidth(3),
+          1: const pw.FlexColumnWidth(1),
+          2: const pw.FlexColumnWidth(1.5),
+          3: const pw.FlexColumnWidth(1.5),
+        },
+        children: [
+          // Header
+          pw.TableRow(
+            decoration: pw.BoxDecoration(
+              gradient: pw.LinearGradient(
+                colors: [PdfColors.blue600, PdfColors.blue700],
+              ),
+            ),
+            children: [
+              _buildModernTableCell('Product/Service', isHeader: true),
+              _buildModernTableCell('Qty', isHeader: true, alignment: pw.Alignment.center),
+              _buildModernTableCell('Rate', isHeader: true, alignment: pw.Alignment.centerRight),
+              _buildModernTableCell('Amount', isHeader: true, alignment: pw.Alignment.centerRight),
+            ],
+          ),
+          // Items
+          ...items.asMap().entries.map((entry) => pw.TableRow(
+            decoration: pw.BoxDecoration(
+              color: entry.key % 2 == 0 ? PdfColors.white : PdfColors.grey50,
+            ),
+            children: [
+              _buildModernProductCell(entry.value),
+              _buildModernTableCell(entry.value.quantity.toString(), alignment: pw.Alignment.center),
+              _buildModernTableCell(NumberFormat.currency(symbol: '\$').format(entry.value.unitPrice), alignment: pw.Alignment.centerRight),
+              _buildModernTableCell(NumberFormat.currency(symbol: '\$').format(entry.value.total), alignment: pw.Alignment.centerRight),
+            ],
+          )),
+        ],
+      ),
+    );
+  }
+
+  pw.Widget _buildModernTableCell(String text, {bool isHeader = false, pw.Alignment? alignment}) {
+    return pw.Container(
+      padding: const pw.EdgeInsets.all(12),
+      alignment: alignment ?? pw.Alignment.centerLeft,
+      child: pw.Text(
+        text,
+        style: pw.TextStyle(
+          fontWeight: isHeader ? pw.FontWeight.bold : pw.FontWeight.normal,
+          fontSize: isHeader ? 12 : 11,
+          color: isHeader ? PdfColors.white : PdfColors.black,
+        ),
+      ),
+    );
+  }
+
+  pw.Widget _buildModernProductCell(InvoiceItem item) {
+    return pw.Container(
+      padding: const pw.EdgeInsets.all(12),
+      alignment: pw.Alignment.centerLeft,
+      child: pw.Column(
+        crossAxisAlignment: pw.CrossAxisAlignment.start,
+        mainAxisSize: pw.MainAxisSize.min,
+        children: [
+          pw.Text(
+            item.name,
+            style: pw.TextStyle(
+              fontWeight: pw.FontWeight.bold,
+              fontSize: 11,
+              color: PdfColors.blue800,
+            ),
+          ),
+          if (item.description.isNotEmpty) ...[
+            pw.SizedBox(height: 2),
+            pw.Text(
+              item.description,
+              style: pw.TextStyle(
+                fontSize: 10,
+                color: PdfColors.grey600,
+                fontStyle: pw.FontStyle.italic,
+              ),
+            ),
+          ],
+          if (item.category != null && item.category!.isNotEmpty) ...[
+            pw.SizedBox(height: 3),
+            pw.Container(
+              padding: const pw.EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+              decoration: pw.BoxDecoration(
+                color: PdfColors.orange100,
+                borderRadius: pw.BorderRadius.circular(4),
+                border: pw.Border.all(color: PdfColors.orange300, width: 0.5),
+              ),
+              child: pw.Text(
+                item.category!,
+                style: pw.TextStyle(
+                  fontSize: 9,
+                  color: PdfColors.orange700,
+                  fontWeight: pw.FontWeight.bold,
+                ),
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  pw.Widget _buildModernTotalsSection(Invoice invoice) {
+    return pw.Align(
+      alignment: pw.Alignment.centerRight,
+      child: pw.Container(
+        width: 250,
+        padding: const pw.EdgeInsets.all(20),
+        decoration: pw.BoxDecoration(
+          color: PdfColors.grey50,
+          borderRadius: pw.BorderRadius.circular(8),
+          border: pw.Border.all(color: PdfColors.grey300),
+        ),
+        child: pw.Column(
+          crossAxisAlignment: pw.CrossAxisAlignment.end,
+          children: [
+            _buildModernTotalRow('Subtotal:', NumberFormat.currency(symbol: '\$').format(invoice.subtotal)),
+            if (invoice.discountAmount > 0)
+              _buildModernTotalRow('Discount:', '-${NumberFormat.currency(symbol: '\$').format(invoice.discountAmount)}'),
+            if (invoice.taxAmount > 0)
+              _buildModernTotalRow('Tax:', NumberFormat.currency(symbol: '\$').format(invoice.taxAmount)),
+            pw.Container(
+              margin: const pw.EdgeInsets.symmetric(vertical: 8),
+              height: 2,
+              decoration: pw.BoxDecoration(
+                gradient: pw.LinearGradient(
+                  colors: [PdfColors.blue400, PdfColors.blue600],
+                ),
+              ),
+            ),
+            _buildModernTotalRow(
+              'Total:',
+              NumberFormat.currency(symbol: '\$').format(invoice.total),
+              isTotal: true,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  pw.Widget _buildModernTotalRow(String label, String amount, {bool isTotal = false}) {
+    return pw.Padding(
+      padding: const pw.EdgeInsets.symmetric(vertical: 4),
+      child: pw.Row(
+        mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+        children: [
+          pw.Text(
+            label,
+            style: pw.TextStyle(
+              fontWeight: isTotal ? pw.FontWeight.bold : pw.FontWeight.normal,
+              fontSize: isTotal ? 16 : 14,
+              color: isTotal ? PdfColors.blue700 : PdfColors.black,
+            ),
+          ),
+          pw.Text(
+            amount,
+            style: pw.TextStyle(
+              fontWeight: isTotal ? pw.FontWeight.bold : pw.FontWeight.normal,
+              fontSize: isTotal ? 16 : 14,
+              color: isTotal ? PdfColors.blue700 : PdfColors.black,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  pw.Widget _buildModernNotesSection(String notes) {
+    return pw.Container(
+      padding: const pw.EdgeInsets.all(16),
+      decoration: pw.BoxDecoration(
+        color: PdfColors.blue50,
+        borderRadius: pw.BorderRadius.circular(8),
+        border: pw.Border.all(color: PdfColors.blue200),
+      ),
+      child: pw.Column(
+        crossAxisAlignment: pw.CrossAxisAlignment.start,
+        children: [
+          pw.Text(
+            'Notes:',
+            style: pw.TextStyle(
+              fontSize: 14,
+              fontWeight: pw.FontWeight.bold,
+              color: PdfColors.blue700,
+            ),
+          ),
+          pw.SizedBox(height: 8),
+          pw.Text(
+            notes,
+            style: const pw.TextStyle(fontSize: 12),
+          ),
+        ],
+      ),
+    );
+  }
+
+  pw.Widget _buildModernTermsSection(String terms) {
+    return pw.Container(
+      padding: const pw.EdgeInsets.all(16),
+      decoration: pw.BoxDecoration(
+        color: PdfColors.grey50,
+        borderRadius: pw.BorderRadius.circular(8),
+        border: pw.Border.all(color: PdfColors.grey300),
+      ),
+      child: pw.Column(
+        crossAxisAlignment: pw.CrossAxisAlignment.start,
+        children: [
+          pw.Text(
+            'Terms & Conditions:',
+            style: pw.TextStyle(
+              fontSize: 14,
+              fontWeight: pw.FontWeight.bold,
+              color: PdfColors.grey700,
+            ),
+          ),
+          pw.SizedBox(height: 8),
+          pw.Text(
+            terms,
+            style: pw.TextStyle(
+              fontSize: 11,
+              color: PdfColors.grey600,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  pw.Widget _buildModernFooter() {
+    return pw.Container(
+      padding: const pw.EdgeInsets.all(16),
+      decoration: pw.BoxDecoration(
+        gradient: pw.LinearGradient(
+          colors: [PdfColors.blue600, PdfColors.blue800],
+        ),
+        borderRadius: pw.BorderRadius.circular(8),
+      ),
+      child: pw.Center(
+        child: pw.Text(
+          'Thank you for your business!',
+          style: pw.TextStyle(
+            fontSize: 16,
+            color: PdfColors.white,
+            fontWeight: pw.FontWeight.bold,
+          ),
+        ),
+      ),
+    );
+  }
+
+  pw.Widget _buildModernCompanyLogo(Company? company) {
+    if (company?.logoPath != null &&
+        company!.logoPath!.isNotEmpty &&
+        File(company.logoPath!).existsSync()) {
+      try {
+        final logoBytes = File(company.logoPath!).readAsBytesSync();
+        final logoImage = pw.MemoryImage(logoBytes);
+
+        return pw.Container(
+          width: 80,
+          height: 80,
+          decoration: pw.BoxDecoration(
+            color: PdfColors.white,
+            borderRadius: pw.BorderRadius.circular(8),
+            border: pw.Border.all(color: PdfColors.grey300),
+          ),
+          child: pw.Padding(
+            padding: const pw.EdgeInsets.all(4),
+            child: pw.Image(
+              logoImage,
+              fit: pw.BoxFit.contain,
+            ),
+          ),
+        );
+      } catch (e) {
+        return _buildModernTextLogo(company);
+      }
+    } else if (company?.name != null) {
+      return _buildModernTextLogo(company!);
+    }
+
+    return pw.SizedBox(width: 80, height: 80);
+  }
+
+  pw.Widget _buildModernTextLogo(Company company) {
+    return pw.Container(
+      width: 80,
+      height: 80,
+      decoration: pw.BoxDecoration(
+        color: PdfColors.white,
+        borderRadius: pw.BorderRadius.circular(8),
+        border: pw.Border.all(color: PdfColors.grey300),
+      ),
+      child: pw.Center(
+        child: pw.Text(
+          company.name.substring(0, 1).toUpperCase(),
+          style: pw.TextStyle(
+            fontSize: 32,
+            fontWeight: pw.FontWeight.bold,
+            color: PdfColors.blue700,
+          ),
+        ),
+      ),
     );
   }
 }

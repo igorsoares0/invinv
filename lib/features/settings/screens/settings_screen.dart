@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'company_settings_screen.dart';
+import 'invoice_templates_screen.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({Key? key}) : super(key: key);
@@ -69,7 +70,12 @@ class SettingsScreen extends StatelessWidget {
           title: 'Invoice Templates',
           subtitle: 'Customize your invoice layout and branding',
           icon: Icons.receipt_long_outlined,
-          onTap: () => _showComingSoon(context, 'Invoice Templates'),
+          onTap: () => Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const InvoiceTemplatesScreen(),
+            ),
+          ),
         ),
         _buildSettingsTile(
           context,
