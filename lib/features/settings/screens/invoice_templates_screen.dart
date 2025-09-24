@@ -13,6 +13,7 @@ class _InvoiceTemplatesScreenState extends State<InvoiceTemplatesScreen> {
   final TemplateService _templateService = TemplateService();
   InvoiceTemplateType _selectedTemplate = InvoiceTemplateType.classic;
   bool _isLoading = true;
+  Color _classicTemplateColor = const Color(0xFF1976D2);
 
   @override
   void initState() {
@@ -23,8 +24,10 @@ class _InvoiceTemplatesScreenState extends State<InvoiceTemplatesScreen> {
   Future<void> _loadSelectedTemplate() async {
     try {
       final template = await _templateService.getSelectedTemplate();
+      final classicColor = await _templateService.getClassicTemplateColor();
       setState(() {
         _selectedTemplate = template;
+        _classicTemplateColor = classicColor;
         _isLoading = false;
       });
     } catch (e) {
@@ -168,11 +171,13 @@ class _InvoiceTemplatesScreenState extends State<InvoiceTemplatesScreen> {
           ),
         ],
       ),
-      child: InkWell(
-        onTap: () => _selectTemplate(template.type),
-        borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: const EdgeInsets.all(20),
+      child: Column(
+        children: [
+          InkWell(
+            onTap: () => _selectTemplate(template.type),
+            borderRadius: BorderRadius.circular(12),
+            child: Padding(
+              padding: const EdgeInsets.all(20),
           child: Row(
             children: [
               // Template Preview
@@ -209,6 +214,14 @@ class _InvoiceTemplatesScreenState extends State<InvoiceTemplatesScreen> {
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
+                          ),
+                        ],
+                        if (template.isCustomizable) ...[
+                          const SizedBox(width: 8),
+                          Icon(
+                            Icons.palette_outlined,
+                            size: 16,
+                            color: Colors.grey.shade600,
                           ),
                         ],
                       ],
@@ -257,6 +270,11 @@ class _InvoiceTemplatesScreenState extends State<InvoiceTemplatesScreen> {
           ),
         ),
       ),
+          // Color customization for Classic template
+          if (template.type == InvoiceTemplateType.classic && isSelected)
+            _buildColorCustomization(),
+        ],
+      ),
     );
   }
 
@@ -294,6 +312,7 @@ class _InvoiceTemplatesScreenState extends State<InvoiceTemplatesScreen> {
   }
 
   Widget _buildClassicPreview(bool isSelected) {
+    final previewColor = _classicTemplateColor;
     return Container(
       width: 80,
       height: 100,
@@ -301,7 +320,7 @@ class _InvoiceTemplatesScreenState extends State<InvoiceTemplatesScreen> {
         color: Colors.white,
         borderRadius: BorderRadius.circular(8),
         border: Border.all(
-          color: isSelected ? Colors.blue.shade400 : Colors.grey.shade300,
+          color: isSelected ? previewColor : Colors.grey.shade300,
           width: isSelected ? 2 : 1,
         ),
         boxShadow: [
@@ -324,7 +343,7 @@ class _InvoiceTemplatesScreenState extends State<InvoiceTemplatesScreen> {
                 Container(
                   width: 20,
                   height: 3,
-                  color: Colors.blue.shade600,
+                  color: previewColor,
                 ),
                 Container(
                   width: 12,
@@ -656,5 +675,133 @@ class _InvoiceTemplatesScreenState extends State<InvoiceTemplatesScreen> {
         ),
       ),
     );
+  }
+
+  Widget _buildColorCustomization() {
+    final predefinedColors = [
+      const Color(0xFF1976D2), // Blue
+      const Color(0xFF388E3C), // Green
+      const Color(0xFFD32F2F), // Red
+      const Color(0xFFFF8F00), // Orange
+      const Color(0xFF7B1FA2), // Purple
+      const Color(0xFF00796B), // Teal
+      const Color(0xFF5D4037), // Brown
+      const Color(0xFF424242), // Grey
+    ];
+
+    return Container(
+      margin: const EdgeInsets.only(top: 16),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.grey.shade50,
+        borderRadius: const BorderRadius.only(
+          bottomLeft: Radius.circular(12),
+          bottomRight: Radius.circular(12),
+        ),
+        border: Border(
+          top: BorderSide(color: Colors.grey.shade300),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(
+                Icons.palette,
+                size: 20,
+                color: Colors.grey.shade700,
+              ),
+              const SizedBox(width: 8),
+              Text(
+                'Customize Colors',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.grey.shade800,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Text(
+            'Choose an accent color for your Classic template:',
+            style: TextStyle(
+              fontSize: 14,
+              color: Colors.grey.shade600,
+            ),
+          ),
+          const SizedBox(height: 16),
+          Wrap(
+            spacing: 12,
+            runSpacing: 8,
+            children: predefinedColors.map((color) {
+              final isSelected = _classicTemplateColor.value == color.value;
+              return GestureDetector(
+                onTap: () => _updateClassicColor(color),
+                child: Container(
+                  width: 44,
+                  height: 44,
+                  decoration: BoxDecoration(
+                    color: color,
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: isSelected ? Colors.black : Colors.transparent,
+                      width: 3,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: color.withOpacity(0.3),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: isSelected
+                      ? const Icon(
+                          Icons.check,
+                          color: Colors.white,
+                          size: 20,
+                        )
+                      : null,
+                ),
+              );
+            }).toList(),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _updateClassicColor(Color color) async {
+    setState(() {
+      _classicTemplateColor = color;
+    });
+
+    try {
+      await _templateService.setClassicTemplateColor(color);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text('Color updated successfully!'),
+            backgroundColor: Colors.green,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Failed to save color'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 }

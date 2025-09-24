@@ -1,3 +1,5 @@
+import 'package:flutter/material.dart';
+
 enum InvoiceTemplateType {
   classic,
   modern,
@@ -9,12 +11,16 @@ class InvoiceTemplate {
   final String name;
   final String description;
   final String? previewImagePath;
+  final Color primaryColor;
+  final bool isCustomizable;
 
   const InvoiceTemplate({
     required this.type,
     required this.name,
     required this.description,
     this.previewImagePath,
+    this.primaryColor = const Color(0xFF1976D2),
+    this.isCustomizable = false,
   });
 
   static const List<InvoiceTemplate> templates = [
@@ -22,6 +28,8 @@ class InvoiceTemplate {
       type: InvoiceTemplateType.classic,
       name: 'Classic',
       description: 'Traditional professional invoice layout with clean lines',
+      primaryColor: Color(0xFF1976D2),
+      isCustomizable: true,
     ),
     InvoiceTemplate(
       type: InvoiceTemplateType.modern,

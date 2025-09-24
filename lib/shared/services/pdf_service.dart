@@ -37,13 +37,20 @@ class PDFService {
     Map<String, dynamic> clientData,
     Company? company,
   ) async {
+    // Get custom color for classic template
+    final customColor = await _templateService.getClassicTemplateColor();
+    final pdfColor = PdfColor(
+      customColor.red / 255.0,
+      customColor.green / 255.0,
+      customColor.blue / 255.0,
+    );
     pdf.addPage(
       pw.MultiPage(
         pageFormat: PdfPageFormat.a4,
         margin: const pw.EdgeInsets.all(32),
         build: (pw.Context context) {
           return [
-            _buildHeader(invoice, company),
+            _buildHeader(invoice, company, pdfColor),
             pw.SizedBox(height: 32),
             _buildCompanyAndClientInfo(company, clientData),
             pw.SizedBox(height: 32),
@@ -51,7 +58,7 @@ class PDFService {
             pw.SizedBox(height: 32),
             _buildItemsTable(items),
             pw.SizedBox(height: 24),
-            _buildTotalsSection(invoice),
+            _buildTotalsSection(invoice, pdfColor),
             if (invoice.notes != null && invoice.notes!.isNotEmpty) ...[
               pw.SizedBox(height: 32),
               _buildNotesSection(invoice.notes!),
@@ -150,7 +157,7 @@ class PDFService {
     return pdf.save();
   }
 
-  pw.Widget _buildHeader(Invoice invoice, Company? company) {
+  pw.Widget _buildHeader(Invoice invoice, Company? company, [PdfColor? customColor]) {
     return pw.Row(
       mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
       crossAxisAlignment: pw.CrossAxisAlignment.start,
@@ -163,7 +170,7 @@ class PDFService {
               style: pw.TextStyle(
                 fontSize: 32,
                 fontWeight: pw.FontWeight.bold,
-                color: PdfColors.blue700,
+                color: customColor ?? PdfColors.blue700,
               ),
             ),
             pw.SizedBox(height: 4),
@@ -176,12 +183,12 @@ class PDFService {
             ),
           ],
         ),
-        _buildCompanyLogo(company),
+        _buildCompanyLogo(company, customColor),
       ],
     );
   }
 
-  pw.Widget _buildCompanyLogo(Company? company) {
+  pw.Widget _buildCompanyLogo(Company? company, [PdfColor? customColor]) {
     if (company?.logoPath != null &&
         company!.logoPath!.isNotEmpty &&
         File(company.logoPath!).existsSync()) {
@@ -202,16 +209,16 @@ class PDFService {
         );
       } catch (e) {
         // Fallback to text logo if image fails to load
-        return _buildTextLogo(company);
+        return _buildTextLogo(company, customColor);
       }
     } else if (company?.name != null) {
-      return _buildTextLogo(company!);
+      return _buildTextLogo(company!, customColor);
     }
 
     return pw.SizedBox(width: 100, height: 100);
   }
 
-  pw.Widget _buildTextLogo(Company company) {
+  pw.Widget _buildTextLogo(Company company, [PdfColor? customColor]) {
     return pw.Container(
       width: 100,
       height: 100,
@@ -225,7 +232,7 @@ class PDFService {
           style: pw.TextStyle(
             fontSize: 36,
             fontWeight: pw.FontWeight.bold,
-            color: PdfColors.blue700,
+            color: customColor ?? PdfColors.blue700,
           ),
         ),
       ),
@@ -468,23 +475,24 @@ class PDFService {
     );
   }
 
-  pw.Widget _buildTotalsSection(Invoice invoice) {
+  pw.Widget _buildTotalsSection(Invoice invoice, [PdfColor? customColor]) {
     return pw.Row(
       children: [
         pw.Spacer(flex: 2),
         pw.Expanded(
           child: pw.Column(
             children: [
-              _buildTotalRow('Subtotal:', NumberFormat.currency(symbol: '\$').format(invoice.subtotal)),
+              _buildTotalRow('Subtotal:', NumberFormat.currency(symbol: '\$').format(invoice.subtotal), customColor: customColor),
               if (invoice.discountAmount > 0)
-                _buildTotalRow('Discount:', '-${NumberFormat.currency(symbol: '\$').format(invoice.discountAmount)}'),
+                _buildTotalRow('Discount:', '-${NumberFormat.currency(symbol: '\$').format(invoice.discountAmount)}', customColor: customColor),
               if (invoice.taxAmount > 0)
-                _buildTotalRow('Tax:', NumberFormat.currency(symbol: '\$').format(invoice.taxAmount)),
-              pw.Divider(color: PdfColors.blue700, thickness: 2),
+                _buildTotalRow('Tax:', NumberFormat.currency(symbol: '\$').format(invoice.taxAmount), customColor: customColor),
+              pw.Divider(color: customColor ?? PdfColors.blue700, thickness: 2),
               _buildTotalRow(
                 'Total:',
                 NumberFormat.currency(symbol: '\$').format(invoice.total),
                 isTotal: true,
+                customColor: customColor,
               ),
             ],
           ),
@@ -493,7 +501,7 @@ class PDFService {
     );
   }
 
-  pw.Widget _buildTotalRow(String label, String amount, {bool isTotal = false}) {
+  pw.Widget _buildTotalRow(String label, String amount, {bool isTotal = false, PdfColor? customColor}) {
     return pw.Padding(
       padding: const pw.EdgeInsets.symmetric(vertical: 4),
       child: pw.Row(
@@ -504,7 +512,7 @@ class PDFService {
             style: pw.TextStyle(
               fontWeight: isTotal ? pw.FontWeight.bold : pw.FontWeight.normal,
               fontSize: isTotal ? 16 : 14,
-              color: isTotal ? PdfColors.blue700 : PdfColors.black,
+              color: isTotal ? (customColor ?? PdfColors.blue700) : PdfColors.black,
             ),
           ),
           pw.Text(
@@ -512,7 +520,7 @@ class PDFService {
             style: pw.TextStyle(
               fontWeight: isTotal ? pw.FontWeight.bold : pw.FontWeight.normal,
               fontSize: isTotal ? 16 : 14,
-              color: isTotal ? PdfColors.blue700 : PdfColors.black,
+              color: isTotal ? (customColor ?? PdfColors.blue700) : PdfColors.black,
             ),
           ),
         ],
