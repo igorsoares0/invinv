@@ -181,7 +181,7 @@ class _InvoiceTemplatesScreenState extends State<InvoiceTemplatesScreen> {
           child: Row(
             children: [
               // Template Preview
-              _buildTemplatePreview(template.type, isSelected),
+              _buildTemplatePreview(template.type, isSelected, _classicTemplateColor),
               const SizedBox(width: 20),
               // Template Details
               Expanded(
@@ -300,10 +300,10 @@ class _InvoiceTemplatesScreenState extends State<InvoiceTemplatesScreen> {
     }
   }
 
-  Widget _buildTemplatePreview(InvoiceTemplateType type, bool isSelected) {
+  Widget _buildTemplatePreview(InvoiceTemplateType type, bool isSelected, Color customColor) {
     switch (type) {
       case InvoiceTemplateType.classic:
-        return _buildClassicPreview(isSelected);
+        return _buildClassicPreview(isSelected, customColor);
       case InvoiceTemplateType.modern:
         return _buildModernPreview(isSelected);
       case InvoiceTemplateType.elegant:
@@ -311,9 +311,10 @@ class _InvoiceTemplatesScreenState extends State<InvoiceTemplatesScreen> {
     }
   }
 
-  Widget _buildClassicPreview(bool isSelected) {
-    final previewColor = _classicTemplateColor;
+  Widget _buildClassicPreview(bool isSelected, Color customColor) {
+    final previewColor = customColor;
     return Container(
+      key: ValueKey('classic_preview_${previewColor.value}'),
       width: 80,
       height: 100,
       decoration: BoxDecoration(
@@ -341,8 +342,8 @@ class _InvoiceTemplatesScreenState extends State<InvoiceTemplatesScreen> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Container(
-                  width: 20,
-                  height: 3,
+                  width: 30,
+                  height: 4,
                   color: previewColor,
                 ),
                 Container(
@@ -374,10 +375,10 @@ class _InvoiceTemplatesScreenState extends State<InvoiceTemplatesScreen> {
               width: double.infinity,
               height: 12,
               decoration: BoxDecoration(
-                border: Border.all(color: Colors.grey.shade300),
+                border: Border.all(color: previewColor),
               ),
               child: Container(
-                color: Colors.grey.shade100,
+                color: previewColor.withOpacity(0.1),
               ),
             ),
             const SizedBox(height: 2),
@@ -396,7 +397,8 @@ class _InvoiceTemplatesScreenState extends State<InvoiceTemplatesScreen> {
                 width: 20,
                 height: 8,
                 decoration: BoxDecoration(
-                  border: Border.all(color: Colors.grey.shade300),
+                  border: Border.all(color: previewColor, width: 1),
+                  color: previewColor.withOpacity(0.1),
                 ),
               ),
             ),
