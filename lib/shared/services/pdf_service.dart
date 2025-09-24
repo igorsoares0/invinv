@@ -84,21 +84,28 @@ class PDFService {
     Map<String, dynamic> clientData,
     Company? company,
   ) async {
+    // Get custom color for modern template
+    final customColor = await _templateService.getModernTemplateColor();
+    final pdfColor = PdfColor(
+      customColor.red / 255.0,
+      customColor.green / 255.0,
+      customColor.blue / 255.0,
+    );
     pdf.addPage(
       pw.MultiPage(
         pageFormat: PdfPageFormat.a4,
         margin: const pw.EdgeInsets.all(24),
         build: (pw.Context context) {
           return [
-            _buildModernHeader(invoice, company),
+            _buildModernHeader(invoice, company, pdfColor),
             pw.SizedBox(height: 24),
-            _buildModernCompanyAndClientInfo(company, clientData),
+            _buildModernCompanyAndClientInfo(company, clientData, pdfColor),
             pw.SizedBox(height: 24),
-            _buildModernInvoiceDetails(invoice),
+            _buildModernInvoiceDetails(invoice, pdfColor),
             pw.SizedBox(height: 24),
-            _buildModernItemsTable(items),
+            _buildModernItemsTable(items, pdfColor),
             pw.SizedBox(height: 20),
-            _buildModernTotalsSection(invoice),
+            _buildModernTotalsSection(invoice, pdfColor),
             if (invoice.notes != null && invoice.notes!.isNotEmpty) ...[
               pw.SizedBox(height: 24),
               _buildModernNotesSection(invoice.notes!),
@@ -648,12 +655,12 @@ class PDFService {
   }
 
   // Modern Template Methods
-  pw.Widget _buildModernHeader(Invoice invoice, Company? company) {
+  pw.Widget _buildModernHeader(Invoice invoice, Company? company, [PdfColor? customColor]) {
     return pw.Container(
       padding: const pw.EdgeInsets.all(24),
       decoration: pw.BoxDecoration(
         gradient: pw.LinearGradient(
-          colors: [PdfColors.blue600, PdfColors.blue800],
+          colors: [customColor ?? PdfColors.blue600, (customColor ?? PdfColors.blue800)],
         ),
         borderRadius: pw.BorderRadius.circular(12),
       ),
@@ -681,13 +688,13 @@ class PDFService {
               ),
             ],
           ),
-          _buildModernCompanyLogo(company),
+          _buildModernCompanyLogo(company, customColor),
         ],
       ),
     );
   }
 
-  pw.Widget _buildModernCompanyAndClientInfo(Company? company, Map<String, dynamic> clientData) {
+  pw.Widget _buildModernCompanyAndClientInfo(Company? company, Map<String, dynamic> clientData, [PdfColor? customColor]) {
     return pw.Row(
       crossAxisAlignment: pw.CrossAxisAlignment.start,
       children: [
@@ -790,7 +797,7 @@ class PDFService {
     );
   }
 
-  pw.Widget _buildModernInvoiceDetails(Invoice invoice) {
+  pw.Widget _buildModernInvoiceDetails(Invoice invoice, [PdfColor? customColor]) {
     return pw.Container(
       padding: const pw.EdgeInsets.all(16),
       decoration: pw.BoxDecoration(
@@ -854,7 +861,7 @@ class PDFService {
     );
   }
 
-  pw.Widget _buildModernItemsTable(List<InvoiceItem> items) {
+  pw.Widget _buildModernItemsTable(List<InvoiceItem> items, [PdfColor? customColor]) {
     return pw.Container(
       decoration: pw.BoxDecoration(
         borderRadius: pw.BorderRadius.circular(8),
@@ -873,7 +880,7 @@ class PDFService {
           pw.TableRow(
             decoration: pw.BoxDecoration(
               gradient: pw.LinearGradient(
-                colors: [PdfColors.blue600, PdfColors.blue700],
+                colors: [customColor ?? PdfColors.blue600, customColor ?? PdfColors.blue700],
               ),
             ),
             children: [
@@ -966,7 +973,7 @@ class PDFService {
     );
   }
 
-  pw.Widget _buildModernTotalsSection(Invoice invoice) {
+  pw.Widget _buildModernTotalsSection(Invoice invoice, [PdfColor? customColor]) {
     return pw.Align(
       alignment: pw.Alignment.centerRight,
       child: pw.Container(
@@ -990,7 +997,7 @@ class PDFService {
               height: 2,
               decoration: pw.BoxDecoration(
                 gradient: pw.LinearGradient(
-                  colors: [PdfColors.blue400, PdfColors.blue600],
+                  colors: [customColor ?? PdfColors.blue400, customColor ?? PdfColors.blue600],
                 ),
               ),
             ),
@@ -1115,7 +1122,7 @@ class PDFService {
     );
   }
 
-  pw.Widget _buildModernCompanyLogo(Company? company) {
+  pw.Widget _buildModernCompanyLogo(Company? company, [PdfColor? customColor]) {
     if (company?.logoPath != null &&
         company!.logoPath!.isNotEmpty &&
         File(company.logoPath!).existsSync()) {
@@ -1140,16 +1147,16 @@ class PDFService {
           ),
         );
       } catch (e) {
-        return _buildModernTextLogo(company);
+        return _buildModernTextLogo(company, customColor);
       }
     } else if (company?.name != null) {
-      return _buildModernTextLogo(company!);
+      return _buildModernTextLogo(company!, customColor);
     }
 
     return pw.SizedBox(width: 80, height: 80);
   }
 
-  pw.Widget _buildModernTextLogo(Company company) {
+  pw.Widget _buildModernTextLogo(Company company, [PdfColor? customColor]) {
     return pw.Container(
       width: 80,
       height: 80,

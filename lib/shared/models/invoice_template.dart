@@ -35,6 +35,8 @@ class InvoiceTemplate {
       type: InvoiceTemplateType.modern,
       name: 'Modern',
       description: 'Contemporary design with enhanced visual hierarchy',
+      primaryColor: Color(0xFF1976D2),
+      isCustomizable: true,
     ),
     InvoiceTemplate(
       type: InvoiceTemplateType.elegant,

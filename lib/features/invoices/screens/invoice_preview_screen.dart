@@ -29,6 +29,7 @@ class _InvoicePreviewScreenState extends State<InvoicePreviewScreen> {
   bool _isLoading = true;
   String? _errorMessage;
   Color _classicTemplateColor = const Color(0xFF1976D2);
+  Color _modernTemplateColor = const Color(0xFF1976D2);
 
   @override
   void initState() {
@@ -48,6 +49,7 @@ class _InvoicePreviewScreenState extends State<InvoicePreviewScreen> {
         _invoiceService.getInvoiceWithDetails(widget.invoiceId),
         _templateService.getSelectedTemplate(),
         _templateService.getClassicTemplateColor(),
+        _templateService.getModernTemplateColor(),
       ]);
 
       setState(() {
@@ -55,6 +57,7 @@ class _InvoicePreviewScreenState extends State<InvoicePreviewScreen> {
         _invoiceDetails = results[1] as Map<String, dynamic>?;
         _templateType = results[2] as InvoiceTemplateType;
         _classicTemplateColor = results[3] as Color;
+        _modernTemplateColor = results[4] as Color;
         _isLoading = false;
       });
     } catch (e) {
@@ -149,6 +152,17 @@ class _InvoicePreviewScreenState extends State<InvoicePreviewScreen> {
     return _buildPreview(_invoiceDetails!);
   }
 
+  Color _getTemplateColor() {
+    switch (_templateType) {
+      case InvoiceTemplateType.classic:
+        return _classicTemplateColor;
+      case InvoiceTemplateType.modern:
+        return _modernTemplateColor;
+      case InvoiceTemplateType.elegant:
+        return const Color(0xFF424242); // Grey for elegant
+    }
+  }
+
   Widget _buildPreview(Map<String, dynamic> details) {
     try {
       final invoiceData = details['invoice'] as Map<String, dynamic>;
@@ -225,7 +239,7 @@ class _InvoicePreviewScreenState extends State<InvoicePreviewScreen> {
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
-                color: _templateType == InvoiceTemplateType.classic ? _classicTemplateColor : Colors.blue,
+                color: _getTemplateColor(),
               ),
             ),
             const SizedBox(height: 4),
@@ -287,7 +301,7 @@ class _InvoicePreviewScreenState extends State<InvoicePreviewScreen> {
                 style: TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
-                  color: _templateType == InvoiceTemplateType.classic ? _classicTemplateColor : Colors.blue,
+                  color: _getTemplateColor(),
                 ),
               )
             : const Icon(
@@ -555,15 +569,15 @@ class _InvoicePreviewScreenState extends State<InvoicePreviewScreen> {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
               decoration: BoxDecoration(
-                color: (_templateType == InvoiceTemplateType.classic ? _classicTemplateColor : Colors.blue).withOpacity(0.1),
+                color: _getTemplateColor().withOpacity(0.1),
                 borderRadius: BorderRadius.circular(4),
-                border: Border.all(color: (_templateType == InvoiceTemplateType.classic ? _classicTemplateColor : Colors.blue).withOpacity(0.3), width: 0.5),
+                border: Border.all(color: _getTemplateColor().withOpacity(0.3), width: 0.5),
               ),
               child: Text(
                 item.category!,
                 style: TextStyle(
                   fontSize: 9,
-                  color: _templateType == InvoiceTemplateType.classic ? _classicTemplateColor.withOpacity(0.8) : Colors.blue.shade700,
+                  color: _getTemplateColor().withOpacity(0.8),
                   fontWeight: FontWeight.w500,
                 ),
               ),
@@ -587,7 +601,7 @@ class _InvoicePreviewScreenState extends State<InvoicePreviewScreen> {
               _buildTotalRow('Discount:', '-${NumberFormat.currency(symbol: '\$').format(invoice.discountAmount)}'),
             if (invoice.taxAmount > 0)
               _buildTotalRow('Tax:', NumberFormat.currency(symbol: '\$').format(invoice.taxAmount)),
-            Divider(color: _templateType == InvoiceTemplateType.classic ? _classicTemplateColor : Colors.blue, thickness: 2),
+            Divider(color: _getTemplateColor(), thickness: 2),
             _buildTotalRow(
               'Total:',
               NumberFormat.currency(symbol: '\$').format(invoice.total),
@@ -610,7 +624,7 @@ class _InvoicePreviewScreenState extends State<InvoicePreviewScreen> {
             style: TextStyle(
               fontWeight: isTotal ? FontWeight.bold : FontWeight.normal,
               fontSize: isTotal ? 14 : 12,
-              color: isTotal ? (_templateType == InvoiceTemplateType.classic ? _classicTemplateColor : Colors.blue) : Colors.black,
+              color: isTotal ? _getTemplateColor() : Colors.black,
             ),
           ),
           Text(
@@ -618,7 +632,7 @@ class _InvoicePreviewScreenState extends State<InvoicePreviewScreen> {
             style: TextStyle(
               fontWeight: isTotal ? FontWeight.bold : FontWeight.normal,
               fontSize: isTotal ? 14 : 12,
-              color: isTotal ? (_templateType == InvoiceTemplateType.classic ? _classicTemplateColor : Colors.blue) : Colors.black,
+              color: isTotal ? _getTemplateColor() : Colors.black,
             ),
           ),
         ],
@@ -888,7 +902,7 @@ class _InvoicePreviewScreenState extends State<InvoicePreviewScreen> {
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [Colors.blue.shade600, Colors.blue.shade800],
+          colors: [_getTemplateColor(), _getTemplateColor().withOpacity(0.8)],
         ),
         borderRadius: BorderRadius.circular(12),
       ),
@@ -911,7 +925,7 @@ class _InvoicePreviewScreenState extends State<InvoicePreviewScreen> {
                 invoice.number,
                 style: TextStyle(
                   fontSize: 16,
-                  color: Colors.blue.shade100,
+                  color: Colors.white.withOpacity(0.8),
                 ),
               ),
             ],
@@ -942,7 +956,7 @@ class _InvoicePreviewScreenState extends State<InvoicePreviewScreen> {
                   style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.bold,
-                    color: Colors.blue.shade700,
+                    color: _getTemplateColor(),
                   ),
                 ),
                 const SizedBox(height: 12),
@@ -997,9 +1011,9 @@ class _InvoicePreviewScreenState extends State<InvoicePreviewScreen> {
           child: Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              color: Colors.blue.shade50,
+              color: _getTemplateColor().withOpacity(0.1),
               borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: Colors.blue.shade200),
+              border: Border.all(color: _getTemplateColor().withOpacity(0.3)),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -1009,7 +1023,7 @@ class _InvoicePreviewScreenState extends State<InvoicePreviewScreen> {
                   style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.bold,
-                    color: Colors.blue.shade700,
+                    color: _getTemplateColor(),
                   ),
                 ),
                 const SizedBox(height: 12),
@@ -1146,7 +1160,7 @@ class _InvoicePreviewScreenState extends State<InvoicePreviewScreen> {
           TableRow(
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: [Colors.blue.shade600, Colors.blue.shade700],
+                colors: [_getTemplateColor(), _getTemplateColor().withOpacity(0.8)],
               ),
             ),
             children: [
@@ -1201,7 +1215,7 @@ class _InvoicePreviewScreenState extends State<InvoicePreviewScreen> {
             style: TextStyle(
               fontWeight: FontWeight.w600,
               fontSize: 11,
-              color: Colors.blue.shade800,
+              color: _getTemplateColor().withOpacity(0.9),
             ),
           ),
           if (item.description.isNotEmpty) ...[
@@ -1220,15 +1234,15 @@ class _InvoicePreviewScreenState extends State<InvoicePreviewScreen> {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
               decoration: BoxDecoration(
-                color: Colors.orange.shade100,
+                color: _getTemplateColor().withOpacity(0.1),
                 borderRadius: BorderRadius.circular(4),
-                border: Border.all(color: Colors.orange.shade300, width: 0.5),
+                border: Border.all(color: _getTemplateColor().withOpacity(0.4), width: 0.5),
               ),
               child: Text(
                 item.category!,
                 style: TextStyle(
                   fontSize: 9,
-                  color: Colors.orange.shade700,
+                  color: _getTemplateColor().withOpacity(0.9),
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -1270,7 +1284,7 @@ class _InvoicePreviewScreenState extends State<InvoicePreviewScreen> {
               height: 2,
               decoration: BoxDecoration(
                 gradient: LinearGradient(
-                  colors: [Colors.blue.shade400, Colors.blue.shade600],
+                  colors: [_getTemplateColor().withOpacity(0.6), _getTemplateColor()],
                 ),
               ),
             ),
@@ -1296,7 +1310,7 @@ class _InvoicePreviewScreenState extends State<InvoicePreviewScreen> {
             style: TextStyle(
               fontWeight: isTotal ? FontWeight.bold : FontWeight.normal,
               fontSize: isTotal ? 14 : 12,
-              color: isTotal ? Colors.blue.shade700 : Colors.black,
+              color: isTotal ? _getTemplateColor() : Colors.black,
             ),
           ),
           Text(
@@ -1304,7 +1318,7 @@ class _InvoicePreviewScreenState extends State<InvoicePreviewScreen> {
             style: TextStyle(
               fontWeight: isTotal ? FontWeight.bold : FontWeight.normal,
               fontSize: isTotal ? 14 : 12,
-              color: isTotal ? Colors.blue.shade700 : Colors.black,
+              color: isTotal ? _getTemplateColor() : Colors.black,
             ),
           ),
         ],
@@ -1316,9 +1330,9 @@ class _InvoicePreviewScreenState extends State<InvoicePreviewScreen> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.blue.shade50,
+        color: _getTemplateColor().withOpacity(0.1),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.blue.shade200),
+        border: Border.all(color: _getTemplateColor().withOpacity(0.3)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1378,7 +1392,7 @@ class _InvoicePreviewScreenState extends State<InvoicePreviewScreen> {
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [Colors.blue.shade600, Colors.blue.shade800],
+          colors: [_getTemplateColor(), _getTemplateColor().withOpacity(0.8)],
         ),
         borderRadius: BorderRadius.circular(8),
       ),
@@ -1454,7 +1468,7 @@ class _InvoicePreviewScreenState extends State<InvoicePreviewScreen> {
                 style: TextStyle(
                   fontSize: 32,
                   fontWeight: FontWeight.bold,
-                  color: Colors.blue.shade700,
+                  color: _getTemplateColor(),
                 ),
               )
             : Icon(

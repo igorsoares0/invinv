@@ -5,6 +5,7 @@ import '../models/invoice_template.dart';
 class TemplateService {
   static const String _templateKey = 'selected_invoice_template';
   static const String _classicColorKey = 'classic_template_color';
+  static const String _modernColorKey = 'modern_template_color';
 
   Future<InvoiceTemplateType> getSelectedTemplate() async {
     try {
@@ -39,6 +40,25 @@ class TemplateService {
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setInt(_classicColorKey, color.value);
+    } catch (e) {
+      // Silently fail
+    }
+  }
+
+  Future<Color> getModernTemplateColor() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final colorValue = prefs.getInt(_modernColorKey) ?? 0xFF1976D2;
+      return Color(colorValue);
+    } catch (e) {
+      return const Color(0xFF1976D2); // Default blue
+    }
+  }
+
+  Future<void> setModernTemplateColor(Color color) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setInt(_modernColorKey, color.value);
     } catch (e) {
       // Silently fail
     }
