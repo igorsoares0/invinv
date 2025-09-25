@@ -690,18 +690,6 @@ class _InvoicePreviewScreenState extends State<InvoicePreviewScreen> {
     );
   }
 
-  Widget _buildFooter() {
-    return Center(
-      child: Text(
-        'Thank you for your business!',
-        style: TextStyle(
-          fontSize: 14,
-          color: Colors.grey[600],
-          fontStyle: FontStyle.italic,
-        ),
-      ),
-    );
-  }
 
 
   String _buildFullAddress(Map<String, dynamic> invoiceData) {
@@ -877,7 +865,6 @@ class _InvoicePreviewScreenState extends State<InvoicePreviewScreen> {
         _buildTermsSection(invoice.terms!),
       ],
       const SizedBox(height: 20),
-      _buildFooter(),
     ];
   }
 
@@ -901,7 +888,6 @@ class _InvoicePreviewScreenState extends State<InvoicePreviewScreen> {
         _buildModernTermsSection(invoice.terms!),
       ],
       const SizedBox(height: 20),
-      _buildModernFooter(),
     ];
   }
 
@@ -1395,27 +1381,6 @@ class _InvoicePreviewScreenState extends State<InvoicePreviewScreen> {
     );
   }
 
-  Widget _buildModernFooter() {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [_getTemplateColor(), _getTemplateColor().withOpacity(0.8)],
-        ),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: const Center(
-        child: Text(
-          'Thank you for your business!',
-          style: TextStyle(
-            fontSize: 16,
-            color: Colors.white,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-      ),
-    );
-  }
 
   Widget _buildModernCompanyLogoPreview() {
     if (_company?.logoPath != null &&
@@ -1508,7 +1473,6 @@ class _InvoicePreviewScreenState extends State<InvoicePreviewScreen> {
         _buildElegantTermsSection(invoice.terms!),
       ],
       const SizedBox(height: 20),
-      _buildElegantFooter(),
     ];
   }
 
@@ -2069,26 +2033,4 @@ class _InvoicePreviewScreenState extends State<InvoicePreviewScreen> {
     );
   }
 
-  Widget _buildElegantFooter() {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(vertical: 16),
-      decoration: BoxDecoration(
-        border: Border(
-          top: BorderSide(color: _getTemplateColor(), width: 2),
-        ),
-      ),
-      child: Center(
-        child: Text(
-          'Thank you for your business!',
-          style: TextStyle(
-            fontSize: 14,
-            color: Colors.grey.shade600,
-            fontStyle: FontStyle.italic,
-            letterSpacing: 1,
-          ),
-        ),
-      ),
-    );
-  }
 }

@@ -68,7 +68,6 @@ class PDFService {
               _buildTermsSection(invoice.terms!),
             ],
             pw.Spacer(),
-            _buildFooter(),
           ];
         },
       ),
@@ -115,7 +114,6 @@ class PDFService {
               _buildModernTermsSection(invoice.terms!),
             ],
             pw.Spacer(),
-            _buildModernFooter(),
           ];
         },
       ),
@@ -162,7 +160,6 @@ class PDFService {
               _buildElegantTermsSection(invoice.terms!),
             ],
             pw.Spacer(),
-            _buildElegantFooter(pdfColor),
           ];
         },
       ),
@@ -584,18 +581,6 @@ class PDFService {
     );
   }
 
-  pw.Widget _buildFooter() {
-    return pw.Center(
-      child: pw.Text(
-        'Thank you for your business!',
-        style: pw.TextStyle(
-          fontSize: 14,
-          color: PdfColors.grey600,
-          fontStyle: pw.FontStyle.italic,
-        ),
-      ),
-    );
-  }
 
   String _buildFullAddress(Map<String, dynamic> clientData) {
     final parts = [
@@ -1107,27 +1092,6 @@ class PDFService {
     );
   }
 
-  pw.Widget _buildModernFooter() {
-    return pw.Container(
-      padding: const pw.EdgeInsets.all(16),
-      decoration: pw.BoxDecoration(
-        gradient: pw.LinearGradient(
-          colors: [PdfColors.blue600, PdfColors.blue800],
-        ),
-        borderRadius: pw.BorderRadius.circular(8),
-      ),
-      child: pw.Center(
-        child: pw.Text(
-          'Thank you for your business!',
-          style: pw.TextStyle(
-            fontSize: 16,
-            color: PdfColors.white,
-            fontWeight: pw.FontWeight.bold,
-          ),
-        ),
-      ),
-    );
-  }
 
   pw.Widget _buildModernCompanyLogo(Company? company, [PdfColor? customColor]) {
     if (company?.logoPath != null &&
@@ -1716,26 +1680,4 @@ class PDFService {
     );
   }
 
-  pw.Widget _buildElegantFooter([PdfColor? customColor]) {
-    return pw.Container(
-      width: double.infinity,
-      padding: const pw.EdgeInsets.symmetric(vertical: 16),
-      decoration: pw.BoxDecoration(
-        border: pw.Border(
-          top: pw.BorderSide(color: customColor ?? PdfColors.grey800, width: 2),
-        ),
-      ),
-      child: pw.Center(
-        child: pw.Text(
-          'Thank you for your business!',
-          style: pw.TextStyle(
-            fontSize: 14,
-            color: PdfColors.grey600,
-            fontStyle: pw.FontStyle.italic,
-            letterSpacing: 1,
-          ),
-        ),
-      ),
-    );
-  }
 }
