@@ -42,6 +42,8 @@ class InvoiceTemplate {
       type: InvoiceTemplateType.elegant,
       name: 'Elegant',
       description: 'Sophisticated design with premium aesthetics and refined details',
+      primaryColor: Color(0xFF424242),
+      isCustomizable: true,
     ),
   ];
 

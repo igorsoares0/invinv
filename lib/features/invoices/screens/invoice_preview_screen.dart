@@ -30,6 +30,7 @@ class _InvoicePreviewScreenState extends State<InvoicePreviewScreen> {
   String? _errorMessage;
   Color _classicTemplateColor = const Color(0xFF1976D2);
   Color _modernTemplateColor = const Color(0xFF1976D2);
+  Color _elegantTemplateColor = const Color(0xFF424242);
 
   @override
   void initState() {
@@ -50,6 +51,7 @@ class _InvoicePreviewScreenState extends State<InvoicePreviewScreen> {
         _templateService.getSelectedTemplate(),
         _templateService.getClassicTemplateColor(),
         _templateService.getModernTemplateColor(),
+        _templateService.getElegantTemplateColor(),
       ]);
 
       setState(() {
@@ -58,6 +60,7 @@ class _InvoicePreviewScreenState extends State<InvoicePreviewScreen> {
         _templateType = results[2] as InvoiceTemplateType;
         _classicTemplateColor = results[3] as Color;
         _modernTemplateColor = results[4] as Color;
+        _elegantTemplateColor = results[5] as Color;
         _isLoading = false;
       });
     } catch (e) {
@@ -159,7 +162,7 @@ class _InvoicePreviewScreenState extends State<InvoicePreviewScreen> {
       case InvoiceTemplateType.modern:
         return _modernTemplateColor;
       case InvoiceTemplateType.elegant:
-        return const Color(0xFF424242); // Grey for elegant
+        return _elegantTemplateColor;
     }
   }
 

@@ -15,6 +15,7 @@ class _InvoiceTemplatesScreenState extends State<InvoiceTemplatesScreen> {
   bool _isLoading = true;
   Color _classicTemplateColor = const Color(0xFF1976D2);
   Color _modernTemplateColor = const Color(0xFF1976D2);
+  Color _elegantTemplateColor = const Color(0xFF424242);
 
   @override
   void initState() {
@@ -28,12 +29,14 @@ class _InvoiceTemplatesScreenState extends State<InvoiceTemplatesScreen> {
         _templateService.getSelectedTemplate(),
         _templateService.getClassicTemplateColor(),
         _templateService.getModernTemplateColor(),
+        _templateService.getElegantTemplateColor(),
       ]);
 
       setState(() {
         _selectedTemplate = results[0] as InvoiceTemplateType;
         _classicTemplateColor = results[1] as Color;
         _modernTemplateColor = results[2] as Color;
+        _elegantTemplateColor = results[3] as Color;
         _isLoading = false;
       });
     } catch (e) {
@@ -277,7 +280,7 @@ class _InvoiceTemplatesScreenState extends State<InvoiceTemplatesScreen> {
         ),
       ),
           // Color customization for customizable templates
-          if ((template.type == InvoiceTemplateType.classic || template.type == InvoiceTemplateType.modern) && isSelected)
+          if (template.isCustomizable && isSelected)
             _buildColorCustomization(template.type),
         ],
       ),
@@ -313,7 +316,7 @@ class _InvoiceTemplatesScreenState extends State<InvoiceTemplatesScreen> {
       case InvoiceTemplateType.modern:
         return _modernTemplateColor;
       case InvoiceTemplateType.elegant:
-        return const Color(0xFF424242); // Grey for elegant
+        return _elegantTemplateColor;
     }
   }
 
@@ -324,7 +327,7 @@ class _InvoiceTemplatesScreenState extends State<InvoiceTemplatesScreen> {
       case InvoiceTemplateType.modern:
         return _buildModernPreview(isSelected, customColor);
       case InvoiceTemplateType.elegant:
-        return _buildElegantPreview(isSelected);
+        return _buildElegantPreview(isSelected, customColor);
     }
   }
 
@@ -563,15 +566,17 @@ class _InvoiceTemplatesScreenState extends State<InvoiceTemplatesScreen> {
     );
   }
 
-  Widget _buildElegantPreview(bool isSelected) {
+  Widget _buildElegantPreview(bool isSelected, Color customColor) {
+    final previewColor = customColor;
     return Container(
+      key: ValueKey('elegant_preview_${previewColor.value}'),
       width: 80,
       height: 100,
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(8),
         border: Border.all(
-          color: isSelected ? Colors.blue.shade400 : Colors.grey.shade300,
+          color: isSelected ? previewColor : Colors.grey.shade300,
           width: isSelected ? 2 : 1,
         ),
         boxShadow: [
@@ -594,13 +599,13 @@ class _InvoiceTemplatesScreenState extends State<InvoiceTemplatesScreen> {
                 Container(
                   width: 30,
                   height: 3,
-                  color: Colors.grey.shade800,
+                  color: previewColor,
                 ),
                 const SizedBox(height: 1),
                 Container(
                   width: double.infinity,
                   height: 2,
-                  color: Colors.grey.shade800,
+                  color: previewColor,
                 ),
               ],
             ),
@@ -613,13 +618,13 @@ class _InvoiceTemplatesScreenState extends State<InvoiceTemplatesScreen> {
                     Container(
                       width: 15,
                       height: 1,
-                      color: Colors.grey.shade600,
+                      color: previewColor.withOpacity(0.7),
                     ),
                     const SizedBox(width: 8),
                     Container(
                       width: 15,
                       height: 1,
-                      color: Colors.grey.shade600,
+                      color: previewColor.withOpacity(0.7),
                     ),
                   ],
                 ),
@@ -646,7 +651,7 @@ class _InvoiceTemplatesScreenState extends State<InvoiceTemplatesScreen> {
                   Container(
                     width: double.infinity,
                     height: 8,
-                    color: Colors.grey.shade800,
+                    color: previewColor,
                   ),
                   const SizedBox(height: 2),
                   Container(
@@ -682,7 +687,7 @@ class _InvoiceTemplatesScreenState extends State<InvoiceTemplatesScreen> {
                     Container(
                       width: double.infinity,
                       height: 6,
-                      color: Colors.grey.shade800,
+                      color: previewColor,
                     ),
                     Container(
                       width: double.infinity,
@@ -743,14 +748,14 @@ class _InvoiceTemplatesScreenState extends State<InvoiceTemplatesScreen> {
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
-                  color: Colors.grey.shade800,
+                  color: _getTemplateColor(templateType),
                 ),
               ),
             ],
           ),
           const SizedBox(height: 12),
           Text(
-            'Choose an accent color for your ${templateType == InvoiceTemplateType.classic ? 'Classic' : 'Modern'} template:',
+            'Choose an accent color for your ${templateType == InvoiceTemplateType.classic ? 'Classic' : templateType == InvoiceTemplateType.modern ? 'Modern' : 'Elegant'} template:',
             style: TextStyle(
               fontSize: 14,
               color: Colors.grey.shade600,
@@ -804,6 +809,8 @@ class _InvoiceTemplatesScreenState extends State<InvoiceTemplatesScreen> {
         _classicTemplateColor = color;
       } else if (templateType == InvoiceTemplateType.modern) {
         _modernTemplateColor = color;
+      } else if (templateType == InvoiceTemplateType.elegant) {
+        _elegantTemplateColor = color;
       }
     });
 
@@ -812,6 +819,8 @@ class _InvoiceTemplatesScreenState extends State<InvoiceTemplatesScreen> {
         await _templateService.setClassicTemplateColor(color);
       } else if (templateType == InvoiceTemplateType.modern) {
         await _templateService.setModernTemplateColor(color);
+      } else if (templateType == InvoiceTemplateType.elegant) {
+        await _templateService.setElegantTemplateColor(color);
       }
 
       if (mounted) {

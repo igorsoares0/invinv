@@ -131,21 +131,28 @@ class PDFService {
     Map<String, dynamic> clientData,
     Company? company,
   ) async {
+    // Get custom color for elegant template
+    final customColor = await _templateService.getElegantTemplateColor();
+    final pdfColor = PdfColor(
+      customColor.red / 255.0,
+      customColor.green / 255.0,
+      customColor.blue / 255.0,
+    );
     pdf.addPage(
       pw.MultiPage(
         pageFormat: PdfPageFormat.a4,
         margin: const pw.EdgeInsets.all(28),
         build: (pw.Context context) {
           return [
-            _buildElegantHeader(invoice, company),
+            _buildElegantHeader(invoice, company, pdfColor),
             pw.SizedBox(height: 28),
             _buildElegantCompanyAndClientInfo(company, clientData),
             pw.SizedBox(height: 28),
             _buildElegantInvoiceDetails(invoice),
             pw.SizedBox(height: 28),
-            _buildElegantItemsTable(items),
+            _buildElegantItemsTable(items, pdfColor),
             pw.SizedBox(height: 24),
-            _buildElegantTotalsSection(invoice),
+            _buildElegantTotalsSection(invoice, pdfColor),
             if (invoice.notes != null && invoice.notes!.isNotEmpty) ...[
               pw.SizedBox(height: 28),
               _buildElegantNotesSection(invoice.notes!),
@@ -155,7 +162,7 @@ class PDFService {
               _buildElegantTermsSection(invoice.terms!),
             ],
             pw.Spacer(),
-            _buildElegantFooter(),
+            _buildElegantFooter(pdfColor),
           ];
         },
       ),
@@ -1179,11 +1186,11 @@ class PDFService {
   }
 
   // Elegant Template Methods
-  pw.Widget _buildElegantHeader(Invoice invoice, Company? company) {
+  pw.Widget _buildElegantHeader(Invoice invoice, Company? company, [PdfColor? customColor]) {
     return pw.Container(
       decoration: pw.BoxDecoration(
         border: pw.Border(
-          bottom: pw.BorderSide(color: PdfColors.grey800, width: 3),
+          bottom: pw.BorderSide(color: customColor ?? PdfColors.grey800, width: 3),
         ),
       ),
       child: pw.Padding(
@@ -1200,7 +1207,7 @@ class PDFService {
                   style: pw.TextStyle(
                     fontSize: 36,
                     fontWeight: pw.FontWeight.bold,
-                    color: PdfColors.grey800,
+                    color: customColor ?? PdfColors.grey800,
                     letterSpacing: 2,
                   ),
                 ),
@@ -1208,7 +1215,7 @@ class PDFService {
                 pw.Container(
                   padding: const pw.EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                   decoration: pw.BoxDecoration(
-                    color: PdfColors.grey800,
+                    color: customColor ?? PdfColors.grey800,
                   ),
                   child: pw.Text(
                     invoice.number,
@@ -1221,14 +1228,14 @@ class PDFService {
                 ),
               ],
             ),
-            _buildElegantCompanyLogo(company),
+            _buildElegantCompanyLogo(company, customColor),
           ],
         ),
       ),
     );
   }
 
-  pw.Widget _buildElegantCompanyLogo(Company? company) {
+  pw.Widget _buildElegantCompanyLogo(Company? company, [PdfColor? customColor]) {
     if (company?.logoPath != null &&
         company!.logoPath!.isNotEmpty &&
         File(company.logoPath!).existsSync()) {
@@ -1240,7 +1247,7 @@ class PDFService {
           width: 90,
           height: 90,
           decoration: pw.BoxDecoration(
-            border: pw.Border.all(color: PdfColors.grey800, width: 2),
+            border: pw.Border.all(color: customColor ?? PdfColors.grey800, width: 2),
           ),
           child: pw.Padding(
             padding: const pw.EdgeInsets.all(6),
@@ -1251,21 +1258,21 @@ class PDFService {
           ),
         );
       } catch (e) {
-        return _buildElegantTextLogo(company);
+        return _buildElegantTextLogo(company, customColor);
       }
     } else if (company?.name != null) {
-      return _buildElegantTextLogo(company!);
+      return _buildElegantTextLogo(company!, customColor);
     }
 
     return pw.SizedBox(width: 90, height: 90);
   }
 
-  pw.Widget _buildElegantTextLogo(Company company) {
+  pw.Widget _buildElegantTextLogo(Company company, [PdfColor? customColor]) {
     return pw.Container(
       width: 90,
       height: 90,
       decoration: pw.BoxDecoration(
-        border: pw.Border.all(color: PdfColors.grey800, width: 2),
+        border: pw.Border.all(color: customColor ?? PdfColors.grey800, width: 2),
       ),
       child: pw.Center(
         child: pw.Text(
@@ -1273,7 +1280,7 @@ class PDFService {
           style: pw.TextStyle(
             fontSize: 36,
             fontWeight: pw.FontWeight.bold,
-            color: PdfColors.grey800,
+            color: customColor ?? PdfColors.grey800,
           ),
         ),
       ),
@@ -1453,11 +1460,11 @@ class PDFService {
     );
   }
 
-  pw.Widget _buildElegantItemsTable(List<InvoiceItem> items) {
+  pw.Widget _buildElegantItemsTable(List<InvoiceItem> items, [PdfColor? customColor]) {
     return pw.Table(
       border: pw.TableBorder(
-        top: pw.BorderSide(color: PdfColors.grey800, width: 2),
-        bottom: pw.BorderSide(color: PdfColors.grey800, width: 2),
+        top: pw.BorderSide(color: customColor ?? PdfColors.grey800, width: 2),
+        bottom: pw.BorderSide(color: customColor ?? PdfColors.grey800, width: 2),
         horizontalInside: pw.BorderSide(color: PdfColors.grey400, width: 0.5),
       ),
       columnWidths: {
@@ -1469,7 +1476,7 @@ class PDFService {
       children: [
         // Header
         pw.TableRow(
-          decoration: pw.BoxDecoration(color: PdfColors.grey800),
+          decoration: pw.BoxDecoration(color: customColor ?? PdfColors.grey800),
           children: [
             _buildElegantTableCell('PRODUCT/SERVICE', isHeader: true),
             _buildElegantTableCell('QTY', isHeader: true, alignment: pw.Alignment.center),
@@ -1555,13 +1562,13 @@ class PDFService {
     );
   }
 
-  pw.Widget _buildElegantTotalsSection(Invoice invoice) {
+  pw.Widget _buildElegantTotalsSection(Invoice invoice, [PdfColor? customColor]) {
     return pw.Align(
       alignment: pw.Alignment.centerRight,
       child: pw.Container(
         width: 240,
         decoration: pw.BoxDecoration(
-          border: pw.Border.all(color: PdfColors.grey800, width: 1),
+          border: pw.Border.all(color: customColor ?? PdfColors.grey800, width: 1),
         ),
         child: pw.Column(
           crossAxisAlignment: pw.CrossAxisAlignment.end,
@@ -1570,7 +1577,7 @@ class PDFService {
               width: double.infinity,
               padding: const pw.EdgeInsets.all(12),
               decoration: pw.BoxDecoration(
-                color: PdfColors.grey800,
+                color: customColor ?? PdfColors.grey800,
               ),
               child: pw.Text(
                 'SUMMARY',
@@ -1595,7 +1602,7 @@ class PDFService {
                   pw.Container(
                     margin: const pw.EdgeInsets.symmetric(vertical: 8),
                     height: 1,
-                    color: PdfColors.grey800,
+                    color: customColor ?? PdfColors.grey800,
                   ),
                   _buildElegantTotalRow(
                     'TOTAL',
@@ -1709,13 +1716,13 @@ class PDFService {
     );
   }
 
-  pw.Widget _buildElegantFooter() {
+  pw.Widget _buildElegantFooter([PdfColor? customColor]) {
     return pw.Container(
       width: double.infinity,
       padding: const pw.EdgeInsets.symmetric(vertical: 16),
       decoration: pw.BoxDecoration(
         border: pw.Border(
-          top: pw.BorderSide(color: PdfColors.grey800, width: 2),
+          top: pw.BorderSide(color: customColor ?? PdfColors.grey800, width: 2),
         ),
       ),
       child: pw.Center(
