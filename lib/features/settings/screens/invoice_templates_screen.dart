@@ -707,7 +707,9 @@ class _InvoiceTemplatesScreenState extends State<InvoiceTemplatesScreen> {
   Widget _buildColorCustomization(InvoiceTemplateType templateType) {
     final currentColor = templateType == InvoiceTemplateType.classic
         ? _classicTemplateColor
-        : _modernTemplateColor;
+        : templateType == InvoiceTemplateType.modern
+          ? _modernTemplateColor
+          : _elegantTemplateColor;
     final predefinedColors = [
       const Color(0xFF1976D2), // Blue
       const Color(0xFF388E3C), // Green
