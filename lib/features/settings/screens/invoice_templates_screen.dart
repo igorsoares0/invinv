@@ -763,27 +763,27 @@ class _InvoiceTemplatesScreenState extends State<InvoiceTemplatesScreen> {
           ),
           const SizedBox(height: 16),
           Wrap(
-            spacing: 12,
-            runSpacing: 8,
+            spacing: 8,
+            runSpacing: 4,
             children: predefinedColors.map((color) {
               final isSelected = currentColor.value == color.value;
               return GestureDetector(
                 onTap: () => _updateTemplateColor(color, templateType),
                 child: Container(
-                  width: 44,
-                  height: 44,
+                  width: 32,
+                  height: 32,
                   decoration: BoxDecoration(
                     color: color,
                     shape: BoxShape.circle,
                     border: Border.all(
                       color: isSelected ? Colors.black : Colors.transparent,
-                      width: 3,
+                      width: 2,
                     ),
                     boxShadow: [
                       BoxShadow(
                         color: color.withOpacity(0.3),
-                        blurRadius: 8,
-                        offset: const Offset(0, 2),
+                        blurRadius: 4,
+                        offset: const Offset(0, 1),
                       ),
                     ],
                   ),
@@ -791,7 +791,7 @@ class _InvoiceTemplatesScreenState extends State<InvoiceTemplatesScreen> {
                       ? const Icon(
                           Icons.check,
                           color: Colors.white,
-                          size: 20,
+                          size: 16,
                         )
                       : null,
                 ),
