@@ -706,7 +706,7 @@ class PDFService {
                   style: pw.TextStyle(
                     fontSize: 12,
                     fontWeight: pw.FontWeight.bold,
-                    color: PdfColors.blue700,
+                    color: customColor ?? PdfColors.blue700,
                   ),
                 ),
                 pw.SizedBox(height: 12),
@@ -746,9 +746,9 @@ class PDFService {
           child: pw.Container(
             padding: const pw.EdgeInsets.all(20),
             decoration: pw.BoxDecoration(
-              color: PdfColors.blue50,
+              color: PdfColors.grey50,
               borderRadius: pw.BorderRadius.circular(8),
-              border: pw.Border.all(color: PdfColors.blue200),
+              border: pw.Border.all(color: PdfColors.grey300),
             ),
             child: pw.Column(
               crossAxisAlignment: pw.CrossAxisAlignment.start,
@@ -758,7 +758,7 @@ class PDFService {
                   style: pw.TextStyle(
                     fontSize: 12,
                     fontWeight: pw.FontWeight.bold,
-                    color: PdfColors.blue700,
+                    color: customColor ?? PdfColors.blue700,
                   ),
                 ),
                 pw.SizedBox(height: 12),
@@ -803,12 +803,13 @@ class PDFService {
           pw.Column(
             crossAxisAlignment: pw.CrossAxisAlignment.start,
             children: [
-              _buildModernDetailRow('Issue Date:', DateFormat('MMM dd, yyyy').format(invoice.issueDate)),
+              _buildModernDetailRow('Issue Date:', DateFormat('MMM dd, yyyy').format(invoice.issueDate), customColor),
               if (invoice.dueDate != null) ...[
                 pw.SizedBox(height: 8),
                 _buildModernDetailRow(
                   invoice.type == InvoiceType.estimate ? 'Valid Until:' : 'Due Date:',
                   DateFormat('MMM dd, yyyy').format(invoice.dueDate!),
+                  customColor,
                 ),
               ],
             ],
@@ -833,14 +834,14 @@ class PDFService {
     );
   }
 
-  pw.Widget _buildModernDetailRow(String label, String value) {
+  pw.Widget _buildModernDetailRow(String label, String value, [PdfColor? customColor]) {
     return pw.Row(
       children: [
         pw.Text(
           label,
           style: pw.TextStyle(
             fontWeight: pw.FontWeight.bold,
-            color: PdfColors.blue700,
+            color: customColor ?? PdfColors.blue700,
             fontSize: 12,
           ),
         ),
@@ -888,7 +889,7 @@ class PDFService {
               color: entry.key % 2 == 0 ? PdfColors.white : PdfColors.grey50,
             ),
             children: [
-              _buildModernProductCell(entry.value),
+              _buildModernProductCell(entry.value, customColor),
               _buildModernTableCell(entry.value.quantity.toString(), alignment: pw.Alignment.center),
               _buildModernTableCell(NumberFormat.currency(symbol: '\$').format(entry.value.unitPrice), alignment: pw.Alignment.centerRight),
               _buildModernTableCell(NumberFormat.currency(symbol: '\$').format(entry.value.total), alignment: pw.Alignment.centerRight),
@@ -914,7 +915,7 @@ class PDFService {
     );
   }
 
-  pw.Widget _buildModernProductCell(InvoiceItem item) {
+  pw.Widget _buildModernProductCell(InvoiceItem item, [PdfColor? customColor]) {
     return pw.Container(
       padding: const pw.EdgeInsets.all(12),
       alignment: pw.Alignment.centerLeft,
@@ -927,7 +928,7 @@ class PDFService {
             style: pw.TextStyle(
               fontWeight: pw.FontWeight.bold,
               fontSize: 11,
-              color: PdfColors.blue800,
+              color: customColor ?? PdfColors.blue800,
             ),
           ),
           if (item.description.isNotEmpty) ...[
@@ -979,11 +980,11 @@ class PDFService {
         child: pw.Column(
           crossAxisAlignment: pw.CrossAxisAlignment.end,
           children: [
-            _buildModernTotalRow('Subtotal:', NumberFormat.currency(symbol: '\$').format(invoice.subtotal)),
+            _buildModernTotalRow('Subtotal:', NumberFormat.currency(symbol: '\$').format(invoice.subtotal), customColor: customColor),
             if (invoice.discountAmount > 0)
-              _buildModernTotalRow('Discount:', '-${NumberFormat.currency(symbol: '\$').format(invoice.discountAmount)}'),
+              _buildModernTotalRow('Discount:', '-${NumberFormat.currency(symbol: '\$').format(invoice.discountAmount)}', customColor: customColor),
             if (invoice.taxAmount > 0)
-              _buildModernTotalRow('Tax:', NumberFormat.currency(symbol: '\$').format(invoice.taxAmount)),
+              _buildModernTotalRow('Tax:', NumberFormat.currency(symbol: '\$').format(invoice.taxAmount), customColor: customColor),
             pw.Container(
               margin: const pw.EdgeInsets.symmetric(vertical: 8),
               height: 2,
@@ -997,6 +998,7 @@ class PDFService {
               'Total:',
               NumberFormat.currency(symbol: '\$').format(invoice.total),
               isTotal: true,
+              customColor: customColor,
             ),
           ],
         ),
@@ -1004,7 +1006,7 @@ class PDFService {
     );
   }
 
-  pw.Widget _buildModernTotalRow(String label, String amount, {bool isTotal = false}) {
+  pw.Widget _buildModernTotalRow(String label, String amount, {bool isTotal = false, PdfColor? customColor}) {
     return pw.Padding(
       padding: const pw.EdgeInsets.symmetric(vertical: 4),
       child: pw.Row(
@@ -1015,7 +1017,7 @@ class PDFService {
             style: pw.TextStyle(
               fontWeight: isTotal ? pw.FontWeight.bold : pw.FontWeight.normal,
               fontSize: isTotal ? 16 : 14,
-              color: isTotal ? PdfColors.blue700 : PdfColors.black,
+              color: isTotal ? (customColor ?? PdfColors.blue700) : PdfColors.black,
             ),
           ),
           pw.Text(
@@ -1023,7 +1025,7 @@ class PDFService {
             style: pw.TextStyle(
               fontWeight: isTotal ? pw.FontWeight.bold : pw.FontWeight.normal,
               fontSize: isTotal ? 16 : 14,
-              color: isTotal ? PdfColors.blue700 : PdfColors.black,
+              color: isTotal ? (customColor ?? PdfColors.blue700) : PdfColors.black,
             ),
           ),
         ],
