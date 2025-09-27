@@ -796,7 +796,6 @@ class _InvoiceTemplatesScreenState extends State<InvoiceTemplatesScreen> {
   }
 
   Future<void> _updateTemplateColor(Color color, InvoiceTemplateType templateType) async {
-    print('DEBUG: Template screen - updating color $color for template $templateType');
 
     setState(() {
       if (templateType == InvoiceTemplateType.classic) {
@@ -816,7 +815,6 @@ class _InvoiceTemplatesScreenState extends State<InvoiceTemplatesScreen> {
       } else if (templateType == InvoiceTemplateType.elegant) {
         await _templateService.setElegantTemplateColor(color);
       }
-      print('DEBUG: Template screen - color saved successfully');
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

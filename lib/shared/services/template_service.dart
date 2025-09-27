@@ -8,7 +8,12 @@ class TemplateService {
   static const String _modernColorKey = 'modern_template_color';
   static const String _elegantColorKey = 'elegant_template_color';
 
-  int _colorToInt(Color color) => color.value;
+  int _colorToInt(Color color) {
+    return ((color.a * 255).round() << 24) |
+           ((color.r * 255).round() << 16) |
+           ((color.g * 255).round() << 8) |
+           (color.b * 255).round();
+  }
 
   Future<InvoiceTemplateType> getSelectedTemplate() async {
     try {
@@ -45,6 +50,7 @@ class TemplateService {
       final colorValue = _colorToInt(color);
       await prefs.setInt(_classicColorKey, colorValue);
     } catch (e) {
+      // Silently handle color saving errors
     }
   }
 
@@ -64,6 +70,7 @@ class TemplateService {
       final colorValue = _colorToInt(color);
       await prefs.setInt(_modernColorKey, colorValue);
     } catch (e) {
+      // Silently handle color saving errors
     }
   }
 
@@ -83,6 +90,7 @@ class TemplateService {
       final colorValue = _colorToInt(color);
       await prefs.setInt(_elegantColorKey, colorValue);
     } catch (e) {
+      // Silently handle color saving errors
     }
   }
 }
