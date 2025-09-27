@@ -43,13 +43,11 @@ class _InvoicePreviewScreenState extends State<InvoicePreviewScreen> {
     super.didChangeDependencies();
     // Only refresh colors if not currently loading to avoid conflicts
     if (!_isLoading && mounted) {
-      print('DEBUG: didChangeDependencies triggered - refreshing colors');
       _refreshColors();
     }
   }
 
   Future<void> _refreshColors() async {
-    print('DEBUG: Manually refreshing colors...');
     try {
       final results = await Future.wait([
         _templateService.getSelectedTemplate(),
@@ -64,13 +62,9 @@ class _InvoicePreviewScreenState extends State<InvoicePreviewScreen> {
         _modernTemplateColor = results[2] as Color;
         _elegantTemplateColor = results[3] as Color;
 
-        print('DEBUG: Manual refresh - template type: $_templateType');
-        print('DEBUG: Manual refresh - classic color: $_classicTemplateColor');
-        print('DEBUG: Manual refresh - modern color: $_modernTemplateColor');
-        print('DEBUG: Manual refresh - elegant color: $_elegantTemplateColor');
       });
     } catch (e) {
-      print('DEBUG: Error in manual refresh: $e');
+      // Silently handle refresh errors
     }
   }
 
@@ -99,10 +93,6 @@ class _InvoicePreviewScreenState extends State<InvoicePreviewScreen> {
         _elegantTemplateColor = results[5] as Color;
         _isLoading = false;
 
-        print('DEBUG: Preview loaded template type: $_templateType');
-        print('DEBUG: Preview loaded classic color: $_classicTemplateColor');
-        print('DEBUG: Preview loaded modern color: $_modernTemplateColor');
-        print('DEBUG: Preview loaded elegant color: $_elegantTemplateColor');
       });
     } catch (e) {
       setState(() {
@@ -254,13 +244,6 @@ class _InvoicePreviewScreenState extends State<InvoicePreviewScreen> {
         ],
       ),
       body: _buildBody(),
-      floatingActionButton: FloatingActionButton(
-        mini: true,
-        onPressed: _refreshColors,
-        backgroundColor: Colors.orange,
-        child: const Icon(Icons.refresh, color: Colors.white),
-        tooltip: 'Debug: Refresh Colors',
-      ),
     );
   }
 
@@ -305,7 +288,6 @@ class _InvoicePreviewScreenState extends State<InvoicePreviewScreen> {
         color = _elegantTemplateColor;
         break;
     }
-    print('DEBUG: _getTemplateColor() - template: $_templateType, color: $color');
     return color;
   }
 
