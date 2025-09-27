@@ -40,9 +40,9 @@ class PDFService {
     // Get custom color for classic template
     final customColor = await _templateService.getClassicTemplateColor();
     final pdfColor = PdfColor(
-      customColor.red / 255.0,
-      customColor.green / 255.0,
-      customColor.blue / 255.0,
+      (customColor.r * 255.0).round() / 255.0,
+      (customColor.g * 255.0).round() / 255.0,
+      (customColor.b * 255.0).round() / 255.0,
     );
     pdf.addPage(
       pw.MultiPage(
@@ -86,9 +86,9 @@ class PDFService {
     // Get custom color for modern template
     final customColor = await _templateService.getModernTemplateColor();
     final pdfColor = PdfColor(
-      customColor.red / 255.0,
-      customColor.green / 255.0,
-      customColor.blue / 255.0,
+      (customColor.r * 255.0).round() / 255.0,
+      (customColor.g * 255.0).round() / 255.0,
+      (customColor.b * 255.0).round() / 255.0,
     );
     pdf.addPage(
       pw.MultiPage(
@@ -132,9 +132,9 @@ class PDFService {
     // Get custom color for elegant template
     final customColor = await _templateService.getElegantTemplateColor();
     final pdfColor = PdfColor(
-      customColor.red / 255.0,
-      customColor.green / 255.0,
-      customColor.blue / 255.0,
+      (customColor.r * 255.0).round() / 255.0,
+      (customColor.g * 255.0).round() / 255.0,
+      (customColor.b * 255.0).round() / 255.0,
     );
     pdf.addPage(
       pw.MultiPage(
