@@ -51,6 +51,11 @@ class InvoiceApp extends StatelessWidget {
               debugShowCheckedModeBanner: false,
               theme: ThemeData(
                 primarySwatch: Colors.blue,
+                primaryColor: const Color(0xFF1976D2),
+                colorScheme: ColorScheme.fromSeed(
+                  seedColor: const Color(0xFF1976D2),
+                  brightness: Brightness.light,
+                ),
                 useMaterial3: true,
                 appBarTheme: const AppBarTheme(
                   backgroundColor: Colors.white,
@@ -157,6 +162,8 @@ class _MainLayoutState extends State<MainLayout> {
         backgroundColor: Colors.white,
         elevation: 8,
         height: 80,
+        indicatorColor: const Color(0xFF1976D2).withOpacity(0.1),
+        labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
         destinations: const [
           NavigationDestination(
             icon: Icon(Icons.receipt_outlined),
