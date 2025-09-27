@@ -68,6 +68,7 @@ class PDFService {
               _buildTermsSection(invoice.terms!),
             ],
             pw.Spacer(),
+            _buildWatermark(),
           ];
         },
       ),
@@ -114,6 +115,7 @@ class PDFService {
               _buildModernTermsSection(invoice.terms!),
             ],
             pw.Spacer(),
+            _buildWatermark(),
           ];
         },
       ),
@@ -160,6 +162,7 @@ class PDFService {
               _buildElegantTermsSection(invoice.terms!),
             ],
             pw.Spacer(),
+            _buildWatermark(),
           ];
         },
       ),
@@ -1679,6 +1682,23 @@ class PDFService {
           ),
         ),
       ],
+    );
+  }
+
+  pw.Widget _buildWatermark() {
+    return pw.Align(
+      alignment: pw.Alignment.bottomRight,
+      child: pw.Padding(
+        padding: const pw.EdgeInsets.only(top: 16),
+        child: pw.Text(
+          'powered by invoice box',
+          style: pw.TextStyle(
+            fontSize: 8,
+            color: PdfColors.grey400,
+            fontStyle: pw.FontStyle.italic,
+          ),
+        ),
+      ),
     );
   }
 
