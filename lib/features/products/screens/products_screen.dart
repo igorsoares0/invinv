@@ -6,7 +6,7 @@ import '../../../shared/models/models.dart';
 import 'product_form_screen.dart';
 
 class ProductsScreen extends StatefulWidget {
-  const ProductsScreen({Key? key}) : super(key: key);
+  const ProductsScreen({super.key});
 
   @override
   State<ProductsScreen> createState() => _ProductsScreenState();
@@ -102,7 +102,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
           borderRadius: BorderRadius.circular(12),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.05),
+              color: Colors.black.withValues(alpha:0.05),
               blurRadius: 10,
               offset: const Offset(0, 2),
             ),
@@ -166,7 +166,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha:0.05),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -261,7 +261,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
               width: 32,
               height: 32,
               decoration: BoxDecoration(
-                color: color.withOpacity(0.1),
+                color: color.withValues(alpha:0.1),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Icon(
@@ -311,7 +311,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
               width: 40,
               height: 40,
               decoration: BoxDecoration(
-                color: Colors.red.withOpacity(0.1),
+                color: Colors.red.withValues(alpha:0.1),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: const Icon(

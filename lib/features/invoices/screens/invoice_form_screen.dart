@@ -17,10 +17,10 @@ class InvoiceFormScreen extends StatefulWidget {
   final Invoice? invoice;
 
   const InvoiceFormScreen({
-    Key? key,
+    super.key,
     required this.type,
     this.invoice,
-  }) : super(key: key);
+  });
 
   @override
   State<InvoiceFormScreen> createState() => _InvoiceFormScreenState();
@@ -73,20 +73,6 @@ class _InvoiceFormScreenState extends State<InvoiceFormScreen> {
     }
   }
 
-  void _addEmptyItem() {
-    setState(() {
-      _items.add(InvoiceItem(
-        invoiceId: 0,
-        name: '',
-        description: '',
-        quantity: 1.0,
-        unit: 'un',
-        unitPrice: 0.0,
-        category: null,
-        total: 0.0,
-      ));
-    });
-  }
 
   void _showAddItemModal() {
     showModalBottomSheet(
@@ -150,7 +136,7 @@ class _InvoiceFormScreenState extends State<InvoiceFormScreen> {
                 width: 40,
                 height: 40,
                 decoration: BoxDecoration(
-                  color: Colors.blue.withOpacity(0.1),
+                  color: Colors.blue.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: const Icon(
@@ -396,7 +382,7 @@ class _InvoiceFormScreenState extends State<InvoiceFormScreen> {
         border: Border.all(color: Colors.grey.shade200),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -523,263 +509,6 @@ class _InvoiceFormScreenState extends State<InvoiceFormScreen> {
     );
   }
 
-  Widget _buildItemRow(int index) {
-    final item = _items[index];
-    final List<String> _units = ['un', 'hr', 'kg', 'lb', 'm', 'ft', 'L', 'gal', 'piece', 'box'];
-
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Column(
-        children: [
-          Row(
-            children: [
-              Expanded(
-                flex: 2,
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: Colors.grey.shade50,
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: Colors.grey.shade300),
-                  ),
-                  child: TextFormField(
-                    key: ValueKey('name_${index}_${item.name}'),
-                    initialValue: item.name,
-                    decoration: const InputDecoration(
-                      labelText: 'Product/Service Name *',
-                      hintText: 'Enter name...',
-                      border: InputBorder.none,
-                      contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 16),
-                    ),
-                    onChanged: (value) {
-                      setState(() {
-                        _items[index] = item.copyWith(name: value);
-                      });
-                    },
-                    validator: (value) {
-                      if (value == null || value.trim().isEmpty) {
-                        return 'Name is required';
-                      }
-                      return null;
-                    },
-                  ),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                flex: 2,
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: Colors.grey.shade50,
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: Colors.grey.shade300),
-                  ),
-                  child: TextFormField(
-                    key: ValueKey('description_${index}_${item.description}'),
-                    initialValue: item.description,
-                    decoration: const InputDecoration(
-                      labelText: 'Description',
-                      hintText: 'Optional details...',
-                      border: InputBorder.none,
-                      contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 16),
-                    ),
-                    onChanged: (value) {
-                      setState(() {
-                        _items[index] = item.copyWith(description: value);
-                      });
-                    },
-                  ),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Container(
-                decoration: BoxDecoration(
-                  color: Colors.green.shade50,
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: Colors.green.shade200),
-                ),
-                child: IconButton(
-                  onPressed: () => _showProductSelector(index),
-                  icon: Icon(
-                    Icons.inventory_2_outlined,
-                    color: Colors.green.shade700,
-                    size: 20,
-                  ),
-                  tooltip: 'Select from products',
-                  padding: const EdgeInsets.all(12),
-                  constraints: const BoxConstraints(
-                    minWidth: 44,
-                    minHeight: 44,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              Expanded(
-                flex: 2,
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: Colors.grey.shade50,
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: Colors.grey.shade300),
-                  ),
-                  child: TextFormField(
-                    key: ValueKey('quantity_${index}_${item.quantity}'),
-                    initialValue: item.quantity.toString(),
-                    decoration: const InputDecoration(
-                      labelText: 'Quantity',
-                      border: InputBorder.none,
-                      contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-                    ),
-                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                    onChanged: (value) {
-                      final qty = double.tryParse(value) ?? 0.0;
-                      setState(() {
-                        _items[index] = item.copyWith(
-                          quantity: qty,
-                          total: qty * item.unitPrice,
-                        );
-                        _calculateTotals();
-                      });
-                    },
-                  ),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: Colors.grey.shade50,
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: Colors.grey.shade300),
-                  ),
-                  child: DropdownButtonFormField<String>(
-                    key: ValueKey('unit_${index}_${item.unit}'),
-                    value: _units.contains(item.unit) ? item.unit : 'un',
-                    decoration: const InputDecoration(
-                      labelText: 'Unit',
-                      border: InputBorder.none,
-                      contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-                    ),
-                    items: _units.map((unit) => DropdownMenuItem(
-                      value: unit,
-                      child: Text(unit),
-                    )).toList(),
-                    onChanged: (value) {
-                      setState(() {
-                        _items[index] = item.copyWith(unit: value ?? 'un');
-                      });
-                    },
-                  ),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                flex: 2,
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: Colors.grey.shade50,
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: Colors.grey.shade300),
-                  ),
-                  child: TextFormField(
-                    key: ValueKey('unitPrice_${index}_${item.unitPrice}'),
-                    initialValue: item.unitPrice.toString(),
-                    decoration: const InputDecoration(
-                      labelText: 'Unit Price',
-                      border: InputBorder.none,
-                      contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-                    ),
-                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                    onChanged: (value) {
-                      final price = double.tryParse(value) ?? 0.0;
-                      setState(() {
-                        _items[index] = item.copyWith(
-                          unitPrice: price,
-                          total: item.quantity * price,
-                        );
-                        _calculateTotals();
-                      });
-                    },
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              Expanded(
-                flex: 3,
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: Colors.grey.shade50,
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: Colors.grey.shade300),
-                  ),
-                  child: TextFormField(
-                    key: ValueKey('category_${index}_${item.category ?? ""}'),
-                    initialValue: item.category ?? '',
-                    decoration: const InputDecoration(
-                      labelText: 'Category',
-                      hintText: 'Optional category...',
-                      border: InputBorder.none,
-                      contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-                    ),
-                    onChanged: (value) {
-                      setState(() {
-                        _items[index] = item.copyWith(category: value.isEmpty ? null : value);
-                      });
-                    },
-                  ),
-                ),
-              ),
-              const SizedBox(width: 16),
-              Container(
-                width: 80,
-                child: Column(
-                  children: [
-                    Text(
-                      'Total',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.grey.shade600,
-                      ),
-                    ),
-                    Text(
-                      NumberFormat.currency(symbol: '\$').format(item.total),
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              IconButton(
-                icon: const Icon(Icons.delete_outline, color: Colors.red),
-                onPressed: () => _removeItem(index),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
 
   Widget _buildTotalsSection() {
     return _buildSection(
@@ -930,7 +659,7 @@ class _InvoiceFormScreenState extends State<InvoiceFormScreen> {
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -1002,13 +731,12 @@ class _InvoiceFormScreenState extends State<InvoiceFormScreen> {
               onSurface: Colors.black87,
               onPrimary: Colors.white,
             ),
-            dialogBackgroundColor: Colors.white,
             dialogTheme: DialogThemeData(
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(16),
               ),
               elevation: 8,
-              shadowColor: Colors.black.withOpacity(0.1),
+              shadowColor: Colors.black.withValues(alpha: 0.1),
             ),
             datePickerTheme: DatePickerThemeData(
               backgroundColor: Colors.white,
@@ -1018,16 +746,16 @@ class _InvoiceFormScreenState extends State<InvoiceFormScreen> {
                 fontSize: 14,
                 fontWeight: FontWeight.w500,
               ),
-              todayBackgroundColor: MaterialStateProperty.all(Colors.blue.shade50),
-              todayForegroundColor: MaterialStateProperty.all(Colors.blue.shade700),
-              dayForegroundColor: MaterialStateProperty.resolveWith((states) {
-                if (states.contains(MaterialState.selected)) {
+              todayBackgroundColor: WidgetStateProperty.all(Colors.blue.shade50),
+              todayForegroundColor: WidgetStateProperty.all(Colors.blue.shade700),
+              dayForegroundColor: WidgetStateProperty.resolveWith((states) {
+                if (states.contains(WidgetState.selected)) {
                   return Colors.white;
                 }
                 return Colors.black87;
               }),
-              dayBackgroundColor: MaterialStateProperty.resolveWith((states) {
-                if (states.contains(MaterialState.selected)) {
+              dayBackgroundColor: WidgetStateProperty.resolveWith((states) {
+                if (states.contains(WidgetState.selected)) {
                   return Colors.blue;
                 }
                 return null;
@@ -1035,7 +763,7 @@ class _InvoiceFormScreenState extends State<InvoiceFormScreen> {
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(16),
               ),
-              dayShape: MaterialStateProperty.all(
+              dayShape: WidgetStateProperty.all(
                 RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),
@@ -1306,7 +1034,7 @@ class _InvoiceFormScreenState extends State<InvoiceFormScreen> {
                       border: Border.all(color: Colors.blue.shade200),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.05),
+                          color: Colors.black.withValues(alpha: 0.05),
                           blurRadius: 8,
                           offset: const Offset(0, 2),
                         ),
@@ -1380,7 +1108,7 @@ class _InvoiceFormScreenState extends State<InvoiceFormScreen> {
                       border: Border.all(color: Colors.green.shade200),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.05),
+                          color: Colors.black.withValues(alpha: 0.05),
                           blurRadius: 8,
                           offset: const Offset(0, 2),
                         ),
@@ -1454,8 +1182,8 @@ class _InvoiceFormScreenState extends State<InvoiceFormScreen> {
   }
 
   Widget _buildManualItemForm({int? editingIndex}) {
-    final _manualFormKey = GlobalKey<FormBuilderState>();
-    final List<String> _units = ['un', 'hr', 'kg', 'lb', 'm', 'ft', 'L', 'gal', 'piece', 'box'];
+    final manualFormKey = GlobalKey<FormBuilderState>();
+    const List<String> units = ['un', 'hr', 'kg', 'lb', 'm', 'ft', 'L', 'gal', 'piece', 'box'];
 
     final isEditing = editingIndex != null;
     final initialValues = isEditing ? {
@@ -1528,7 +1256,7 @@ class _InvoiceFormScreenState extends State<InvoiceFormScreen> {
           // Form
           Expanded(
             child: FormBuilder(
-              key: _manualFormKey,
+              key: manualFormKey,
               initialValue: initialValues,
               child: SingleChildScrollView(
                 padding: const EdgeInsets.all(20),
@@ -1594,7 +1322,7 @@ class _InvoiceFormScreenState extends State<InvoiceFormScreen> {
                                   borderRadius: BorderRadius.circular(12),
                                   boxShadow: [
                                     BoxShadow(
-                                      color: Colors.black.withOpacity(0.05),
+                                      color: Colors.black.withValues(alpha: 0.05),
                                       blurRadius: 10,
                                       offset: const Offset(0, 2),
                                     ),
@@ -1602,7 +1330,7 @@ class _InvoiceFormScreenState extends State<InvoiceFormScreen> {
                                 ),
                                 child: FormBuilderDropdown<String>(
                                   name: 'unit',
-                                  items: _units.map((unit) => DropdownMenuItem(
+                                  items: units.map((unit) => DropdownMenuItem(
                                     value: unit,
                                     child: Text(unit),
                                   )).toList(),
@@ -1670,7 +1398,7 @@ class _InvoiceFormScreenState extends State<InvoiceFormScreen> {
                               borderRadius: BorderRadius.circular(25),
                             ),
                             child: TextButton(
-                              onPressed: () => _saveManualItem(_manualFormKey, editingIndex),
+                              onPressed: () => _saveManualItem(manualFormKey, editingIndex),
                               child: Text(
                                 isEditing ? 'Update Item' : 'Add Item',
                                 style: const TextStyle(
@@ -1814,7 +1542,7 @@ class _InvoiceFormScreenState extends State<InvoiceFormScreen> {
                           border: Border.all(color: Colors.grey.shade200),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withOpacity(0.04),
+                              color: Colors.black.withValues(alpha: 0.04),
                               blurRadius: 4,
                               offset: const Offset(0, 2),
                             ),
@@ -2002,7 +1730,7 @@ class _InvoiceFormScreenState extends State<InvoiceFormScreen> {
             borderRadius: BorderRadius.circular(12),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.05),
+                color: Colors.black.withValues(alpha: 0.05),
                 blurRadius: 10,
                 offset: const Offset(0, 2),
               ),

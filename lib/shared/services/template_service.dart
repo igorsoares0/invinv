@@ -8,6 +8,8 @@ class TemplateService {
   static const String _modernColorKey = 'modern_template_color';
   static const String _elegantColorKey = 'elegant_template_color';
 
+  int _colorToInt(Color color) => color.value;
+
   Future<InvoiceTemplateType> getSelectedTemplate() async {
     try {
       final prefs = await SharedPreferences.getInstance();
@@ -40,9 +42,9 @@ class TemplateService {
   Future<void> setClassicTemplateColor(Color color) async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      await prefs.setInt(_classicColorKey, color.value);
+      final colorValue = _colorToInt(color);
+      await prefs.setInt(_classicColorKey, colorValue);
     } catch (e) {
-      // Silently fail
     }
   }
 
@@ -59,9 +61,9 @@ class TemplateService {
   Future<void> setModernTemplateColor(Color color) async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      await prefs.setInt(_modernColorKey, color.value);
+      final colorValue = _colorToInt(color);
+      await prefs.setInt(_modernColorKey, colorValue);
     } catch (e) {
-      // Silently fail
     }
   }
 
@@ -78,9 +80,9 @@ class TemplateService {
   Future<void> setElegantTemplateColor(Color color) async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      await prefs.setInt(_elegantColorKey, color.value);
+      final colorValue = _colorToInt(color);
+      await prefs.setInt(_elegantColorKey, colorValue);
     } catch (e) {
-      // Silently fail
     }
   }
 }

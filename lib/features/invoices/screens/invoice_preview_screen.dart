@@ -10,7 +10,7 @@ import '../../../shared/services/template_service.dart';
 class InvoicePreviewScreen extends StatefulWidget {
   final int invoiceId;
 
-  const InvoicePreviewScreen({Key? key, required this.invoiceId}) : super(key: key);
+  const InvoicePreviewScreen({super.key, required this.invoiceId});
 
   @override
   State<InvoicePreviewScreen> createState() => _InvoicePreviewScreenState();
@@ -38,6 +38,42 @@ class _InvoicePreviewScreenState extends State<InvoicePreviewScreen> {
     _loadData();
   }
 
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Only refresh colors if not currently loading to avoid conflicts
+    if (!_isLoading && mounted) {
+      print('DEBUG: didChangeDependencies triggered - refreshing colors');
+      _refreshColors();
+    }
+  }
+
+  Future<void> _refreshColors() async {
+    print('DEBUG: Manually refreshing colors...');
+    try {
+      final results = await Future.wait([
+        _templateService.getSelectedTemplate(),
+        _templateService.getClassicTemplateColor(),
+        _templateService.getModernTemplateColor(),
+        _templateService.getElegantTemplateColor(),
+      ]);
+
+      setState(() {
+        _templateType = results[0] as InvoiceTemplateType;
+        _classicTemplateColor = results[1] as Color;
+        _modernTemplateColor = results[2] as Color;
+        _elegantTemplateColor = results[3] as Color;
+
+        print('DEBUG: Manual refresh - template type: $_templateType');
+        print('DEBUG: Manual refresh - classic color: $_classicTemplateColor');
+        print('DEBUG: Manual refresh - modern color: $_modernTemplateColor');
+        print('DEBUG: Manual refresh - elegant color: $_elegantTemplateColor');
+      });
+    } catch (e) {
+      print('DEBUG: Error in manual refresh: $e');
+    }
+  }
+
   Future<void> _loadData() async {
     try {
       setState(() {
@@ -62,6 +98,11 @@ class _InvoicePreviewScreenState extends State<InvoicePreviewScreen> {
         _modernTemplateColor = results[4] as Color;
         _elegantTemplateColor = results[5] as Color;
         _isLoading = false;
+
+        print('DEBUG: Preview loaded template type: $_templateType');
+        print('DEBUG: Preview loaded classic color: $_classicTemplateColor');
+        print('DEBUG: Preview loaded modern color: $_modernTemplateColor');
+        print('DEBUG: Preview loaded elegant color: $_elegantTemplateColor');
       });
     } catch (e) {
       setState(() {
@@ -124,7 +165,7 @@ class _InvoicePreviewScreenState extends State<InvoicePreviewScreen> {
                       Container(
                         padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
-                          color: const Color(0xFF1976D2).withOpacity(0.1),
+                          color: const Color(0xFF1976D2).withValues(alpha:0.1),
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: const Icon(
@@ -155,7 +196,7 @@ class _InvoicePreviewScreenState extends State<InvoicePreviewScreen> {
                       Container(
                         padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
-                          color: const Color(0xFF1976D2).withOpacity(0.1),
+                          color: const Color(0xFF1976D2).withValues(alpha:0.1),
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: const Icon(
@@ -186,7 +227,7 @@ class _InvoicePreviewScreenState extends State<InvoicePreviewScreen> {
                       Container(
                         padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
-                          color: const Color(0xFF1976D2).withOpacity(0.1),
+                          color: const Color(0xFF1976D2).withValues(alpha:0.1),
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: const Icon(
@@ -213,6 +254,13 @@ class _InvoicePreviewScreenState extends State<InvoicePreviewScreen> {
         ],
       ),
       body: _buildBody(),
+      floatingActionButton: FloatingActionButton(
+        mini: true,
+        onPressed: _refreshColors,
+        backgroundColor: Colors.orange,
+        child: const Icon(Icons.refresh, color: Colors.white),
+        tooltip: 'Debug: Refresh Colors',
+      ),
     );
   }
 
@@ -245,14 +293,20 @@ class _InvoicePreviewScreenState extends State<InvoicePreviewScreen> {
   }
 
   Color _getTemplateColor() {
+    Color color;
     switch (_templateType) {
       case InvoiceTemplateType.classic:
-        return _classicTemplateColor;
+        color = _classicTemplateColor;
+        break;
       case InvoiceTemplateType.modern:
-        return _modernTemplateColor;
+        color = _modernTemplateColor;
+        break;
       case InvoiceTemplateType.elegant:
-        return _elegantTemplateColor;
+        color = _elegantTemplateColor;
+        break;
     }
+    print('DEBUG: _getTemplateColor() - template: $_templateType, color: $color');
+    return color;
   }
 
   Widget _buildPreview(Map<String, dynamic> details) {
@@ -276,10 +330,10 @@ class _InvoicePreviewScreenState extends State<InvoicePreviewScreen> {
                   ),
                   child: Container(
                   key: _templateType == InvoiceTemplateType.elegant
-                    ? ValueKey('elegant_preview_${_elegantTemplateColor.value}')
+                    ? ValueKey('elegant_preview_${_elegantTemplateColor.hashCode}')
                     : _templateType == InvoiceTemplateType.modern
-                      ? ValueKey('modern_preview_${_modernTemplateColor.value}')
-                      : ValueKey('classic_preview_${_classicTemplateColor.value}'),
+                      ? ValueKey('modern_preview_${_modernTemplateColor.hashCode}')
+                      : ValueKey('classic_preview_${_classicTemplateColor.hashCode}'),
                   width: double.infinity,
                   padding: const EdgeInsets.all(16),
                   decoration: const BoxDecoration(
@@ -666,15 +720,15 @@ class _InvoicePreviewScreenState extends State<InvoicePreviewScreen> {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
               decoration: BoxDecoration(
-                color: _getTemplateColor().withOpacity(0.1),
+                color: _getTemplateColor().withValues(alpha:0.1),
                 borderRadius: BorderRadius.circular(4),
-                border: Border.all(color: _getTemplateColor().withOpacity(0.3), width: 0.5),
+                border: Border.all(color: _getTemplateColor().withValues(alpha:0.3), width: 0.5),
               ),
               child: Text(
                 item.category!,
                 style: TextStyle(
                   fontSize: 9,
-                  color: _getTemplateColor().withOpacity(0.8),
+                  color: _getTemplateColor().withValues(alpha:0.8),
                   fontWeight: FontWeight.w500,
                 ),
               ),
@@ -897,7 +951,6 @@ class _InvoicePreviewScreenState extends State<InvoicePreviewScreen> {
   }
 
   void _sendByEmail() {
-    // TODO: Implement email sending with attachment
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
         content: Text('Email functionality coming soon!'),
@@ -985,7 +1038,7 @@ class _InvoicePreviewScreenState extends State<InvoicePreviewScreen> {
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [_getTemplateColor(), _getTemplateColor().withOpacity(0.8)],
+          colors: [_getTemplateColor(), _getTemplateColor().withValues(alpha:0.8)],
         ),
         borderRadius: BorderRadius.circular(12),
       ),
@@ -1008,7 +1061,7 @@ class _InvoicePreviewScreenState extends State<InvoicePreviewScreen> {
                 invoice.number,
                 style: TextStyle(
                   fontSize: 16,
-                  color: Colors.white.withOpacity(0.8),
+                  color: Colors.white.withValues(alpha:0.8),
                 ),
               ),
             ],
@@ -1094,9 +1147,9 @@ class _InvoicePreviewScreenState extends State<InvoicePreviewScreen> {
           child: Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              color: _getTemplateColor().withOpacity(0.1),
+              color: _getTemplateColor().withValues(alpha:0.1),
               borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: _getTemplateColor().withOpacity(0.3)),
+              border: Border.all(color: _getTemplateColor().withValues(alpha:0.3)),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -1155,7 +1208,7 @@ class _InvoicePreviewScreenState extends State<InvoicePreviewScreen> {
         border: Border.all(color: Colors.grey.shade300),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha:0.05),
             blurRadius: 4,
             offset: const Offset(0, 2),
           ),
@@ -1224,7 +1277,7 @@ class _InvoicePreviewScreenState extends State<InvoicePreviewScreen> {
         border: Border.all(color: Colors.grey.shade300),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha:0.05),
             blurRadius: 4,
             offset: const Offset(0, 2),
           ),
@@ -1243,7 +1296,7 @@ class _InvoicePreviewScreenState extends State<InvoicePreviewScreen> {
           TableRow(
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: [_getTemplateColor(), _getTemplateColor().withOpacity(0.8)],
+                colors: [_getTemplateColor(), _getTemplateColor().withValues(alpha:0.8)],
               ),
             ),
             children: [
@@ -1298,7 +1351,7 @@ class _InvoicePreviewScreenState extends State<InvoicePreviewScreen> {
             style: TextStyle(
               fontWeight: FontWeight.w600,
               fontSize: 11,
-              color: _getTemplateColor().withOpacity(0.9),
+              color: _getTemplateColor().withValues(alpha:0.9),
             ),
           ),
           if (item.description.isNotEmpty) ...[
@@ -1317,15 +1370,15 @@ class _InvoicePreviewScreenState extends State<InvoicePreviewScreen> {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
               decoration: BoxDecoration(
-                color: _getTemplateColor().withOpacity(0.1),
+                color: _getTemplateColor().withValues(alpha:0.1),
                 borderRadius: BorderRadius.circular(4),
-                border: Border.all(color: _getTemplateColor().withOpacity(0.4), width: 0.5),
+                border: Border.all(color: _getTemplateColor().withValues(alpha:0.4), width: 0.5),
               ),
               child: Text(
                 item.category!,
                 style: TextStyle(
                   fontSize: 9,
-                  color: _getTemplateColor().withOpacity(0.9),
+                  color: _getTemplateColor().withValues(alpha:0.9),
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -1348,7 +1401,7 @@ class _InvoicePreviewScreenState extends State<InvoicePreviewScreen> {
           border: Border.all(color: Colors.grey.shade300),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.05),
+              color: Colors.black.withValues(alpha:0.05),
               blurRadius: 4,
               offset: const Offset(0, 2),
             ),
@@ -1367,7 +1420,7 @@ class _InvoicePreviewScreenState extends State<InvoicePreviewScreen> {
               height: 2,
               decoration: BoxDecoration(
                 gradient: LinearGradient(
-                  colors: [_getTemplateColor().withOpacity(0.6), _getTemplateColor()],
+                  colors: [_getTemplateColor().withValues(alpha:0.6), _getTemplateColor()],
                 ),
               ),
             ),
@@ -1413,9 +1466,9 @@ class _InvoicePreviewScreenState extends State<InvoicePreviewScreen> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: _getTemplateColor().withOpacity(0.1),
+        color: _getTemplateColor().withValues(alpha:0.1),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: _getTemplateColor().withOpacity(0.3)),
+        border: Border.all(color: _getTemplateColor().withValues(alpha:0.3)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1484,7 +1537,7 @@ class _InvoicePreviewScreenState extends State<InvoicePreviewScreen> {
             borderRadius: BorderRadius.circular(8),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.1),
+                color: Colors.black.withValues(alpha:0.1),
                 blurRadius: 4,
                 offset: const Offset(0, 2),
               ),
@@ -1517,7 +1570,7 @@ class _InvoicePreviewScreenState extends State<InvoicePreviewScreen> {
         borderRadius: BorderRadius.circular(8),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: Colors.black.withValues(alpha:0.1),
             blurRadius: 4,
             offset: const Offset(0, 2),
           ),

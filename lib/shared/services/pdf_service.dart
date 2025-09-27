@@ -39,11 +39,14 @@ class PDFService {
   ) async {
     // Get custom color for classic template
     final customColor = await _templateService.getClassicTemplateColor();
+    print('DEBUG: PDF Classic customColor: $customColor');
+    print('DEBUG: PDF Classic red: ${customColor.red}, green: ${customColor.green}, blue: ${customColor.blue}');
     final pdfColor = PdfColor(
       customColor.red / 255.0,
       customColor.green / 255.0,
       customColor.blue / 255.0,
     );
+    print('DEBUG: PDF Classic pdfColor: $pdfColor');
     pdf.addPage(
       pw.MultiPage(
         pageFormat: PdfPageFormat.a4,
@@ -85,11 +88,13 @@ class PDFService {
   ) async {
     // Get custom color for modern template
     final customColor = await _templateService.getModernTemplateColor();
+    print('DEBUG: PDF Modern customColor: $customColor');
     final pdfColor = PdfColor(
       customColor.red / 255.0,
       customColor.green / 255.0,
       customColor.blue / 255.0,
     );
+    print('DEBUG: PDF Modern pdfColor: $pdfColor');
     pdf.addPage(
       pw.MultiPage(
         pageFormat: PdfPageFormat.a4,
@@ -131,11 +136,13 @@ class PDFService {
   ) async {
     // Get custom color for elegant template
     final customColor = await _templateService.getElegantTemplateColor();
+    print('DEBUG: PDF Elegant customColor: $customColor');
     final pdfColor = PdfColor(
       customColor.red / 255.0,
       customColor.green / 255.0,
       customColor.blue / 255.0,
     );
+    print('DEBUG: PDF Elegant pdfColor: $pdfColor');
     pdf.addPage(
       pw.MultiPage(
         pageFormat: PdfPageFormat.a4,

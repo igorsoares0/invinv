@@ -35,9 +35,8 @@ class AppRoutes {
           GoRoute(
             path: clientForm,
             builder: (context, state) {
-              final clientId = state.extra as int?;
               return ClientFormScreen(
-                client: clientId != null ? null : null, // TODO: Load client by ID
+                client: null,
               );
             },
           ),
@@ -48,9 +47,8 @@ class AppRoutes {
           GoRoute(
             path: productForm,
             builder: (context, state) {
-              final productId = state.extra as int?;
               return ProductFormScreen(
-                product: productId != null ? null : null, // TODO: Load product by ID
+                product: null,
               );
             },
           ),

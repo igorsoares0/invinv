@@ -64,6 +64,8 @@ extension InvoiceTemplateTypeExtension on InvoiceTemplateType {
     }
   }
 
+  String get stringValue => name;
+
   static InvoiceTemplateType fromString(String value) {
     switch (value) {
       case 'classic':

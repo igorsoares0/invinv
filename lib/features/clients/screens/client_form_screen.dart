@@ -9,7 +9,7 @@ import '../../../shared/models/models.dart';
 class ClientFormScreen extends StatefulWidget {
   final Client? client;
 
-  const ClientFormScreen({Key? key, this.client}) : super(key: key);
+  const ClientFormScreen({super.key, this.client});
 
   @override
   State<ClientFormScreen> createState() => _ClientFormScreenState();
@@ -215,7 +215,7 @@ class _ClientFormScreenState extends State<ClientFormScreen> {
             borderRadius: BorderRadius.circular(12),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.05),
+                color: Colors.black.withValues(alpha:0.05),
                 blurRadius: 10,
                 offset: const Offset(0, 2),
               ),

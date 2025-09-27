@@ -9,7 +9,7 @@ import '../../../shared/models/models.dart';
 import '../../../shared/services/company_service.dart';
 
 class CompanySettingsScreen extends StatefulWidget {
-  const CompanySettingsScreen({Key? key}) : super(key: key);
+  const CompanySettingsScreen({super.key});
 
   @override
   State<CompanySettingsScreen> createState() => _CompanySettingsScreenState();
@@ -299,7 +299,7 @@ class _CompanySettingsScreenState extends State<CompanySettingsScreen> {
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha:0.05),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -386,7 +386,7 @@ class _CompanySettingsScreenState extends State<CompanySettingsScreen> {
             borderRadius: BorderRadius.circular(12),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.05),
+                color: Colors.black.withValues(alpha:0.05),
                 blurRadius: 10,
                 offset: const Offset(0, 2),
               ),
@@ -433,9 +433,9 @@ class _CompanySettingsScreenState extends State<CompanySettingsScreen> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.blue.withOpacity(0.05),
+        color: Colors.blue.withValues(alpha:0.05),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.blue.withOpacity(0.2)),
+        border: Border.all(color: Colors.blue.withValues(alpha:0.2)),
       ),
       child: Row(
         children: [
@@ -546,7 +546,7 @@ class _CompanySettingsScreenState extends State<CompanySettingsScreen> {
             borderRadius: BorderRadius.circular(12),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.05),
+                color: Colors.black.withValues(alpha:0.05),
                 blurRadius: 10,
                 offset: const Offset(0, 2),
               ),

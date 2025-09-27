@@ -3,7 +3,7 @@ import '../../../shared/models/models.dart';
 import '../../../shared/services/template_service.dart';
 
 class InvoiceTemplatesScreen extends StatefulWidget {
-  const InvoiceTemplatesScreen({Key? key}) : super(key: key);
+  const InvoiceTemplatesScreen({super.key});
 
   @override
   State<InvoiceTemplatesScreen> createState() => _InvoiceTemplatesScreenState();
@@ -174,7 +174,7 @@ class _InvoiceTemplatesScreenState extends State<InvoiceTemplatesScreen> {
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha:0.05),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -287,16 +287,6 @@ class _InvoiceTemplatesScreenState extends State<InvoiceTemplatesScreen> {
     );
   }
 
-  IconData _getTemplateIcon(InvoiceTemplateType type) {
-    switch (type) {
-      case InvoiceTemplateType.classic:
-        return Icons.description_outlined;
-      case InvoiceTemplateType.modern:
-        return Icons.auto_awesome_outlined;
-      case InvoiceTemplateType.elegant:
-        return Icons.diamond_outlined;
-    }
-  }
 
   String _getTemplateFeatures(InvoiceTemplateType type) {
     switch (type) {
@@ -334,7 +324,7 @@ class _InvoiceTemplatesScreenState extends State<InvoiceTemplatesScreen> {
   Widget _buildClassicPreview(bool isSelected, Color customColor) {
     final previewColor = customColor;
     return Container(
-      key: ValueKey('classic_preview_${previewColor.value}'),
+      key: ValueKey('classic_preview_${previewColor.hashCode}'),
       width: 80,
       height: 100,
       decoration: BoxDecoration(
@@ -346,7 +336,7 @@ class _InvoiceTemplatesScreenState extends State<InvoiceTemplatesScreen> {
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: Colors.black.withValues(alpha:0.1),
             blurRadius: 4,
             offset: const Offset(0, 2),
           ),
@@ -398,7 +388,7 @@ class _InvoiceTemplatesScreenState extends State<InvoiceTemplatesScreen> {
                 border: Border.all(color: previewColor),
               ),
               child: Container(
-                color: previewColor.withOpacity(0.1),
+                color: previewColor.withValues(alpha:0.1),
               ),
             ),
             const SizedBox(height: 2),
@@ -418,7 +408,7 @@ class _InvoiceTemplatesScreenState extends State<InvoiceTemplatesScreen> {
                 height: 8,
                 decoration: BoxDecoration(
                   border: Border.all(color: previewColor, width: 1),
-                  color: previewColor.withOpacity(0.1),
+                  color: previewColor.withValues(alpha:0.1),
                 ),
               ),
             ),
@@ -431,7 +421,7 @@ class _InvoiceTemplatesScreenState extends State<InvoiceTemplatesScreen> {
   Widget _buildModernPreview(bool isSelected, Color customColor) {
     final previewColor = customColor;
     return Container(
-      key: ValueKey('modern_preview_${previewColor.value}'),
+      key: ValueKey('modern_preview_${previewColor.hashCode}'),
       width: 80,
       height: 100,
       decoration: BoxDecoration(
@@ -443,7 +433,7 @@ class _InvoiceTemplatesScreenState extends State<InvoiceTemplatesScreen> {
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: Colors.black.withValues(alpha:0.1),
             blurRadius: 4,
             offset: const Offset(0, 2),
           ),
@@ -460,7 +450,7 @@ class _InvoiceTemplatesScreenState extends State<InvoiceTemplatesScreen> {
               height: 12,
               decoration: BoxDecoration(
                 gradient: LinearGradient(
-                  colors: [previewColor, previewColor.withOpacity(0.8)],
+                  colors: [previewColor, previewColor.withValues(alpha:0.8)],
                 ),
                 borderRadius: BorderRadius.circular(2),
               ),
@@ -503,7 +493,7 @@ class _InvoiceTemplatesScreenState extends State<InvoiceTemplatesScreen> {
                   width: 25,
                   height: 10,
                   decoration: BoxDecoration(
-                    color: previewColor.withOpacity(0.2),
+                    color: previewColor.withValues(alpha:0.2),
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
@@ -516,7 +506,7 @@ class _InvoiceTemplatesScreenState extends State<InvoiceTemplatesScreen> {
               height: 10,
               decoration: BoxDecoration(
                 gradient: LinearGradient(
-                  colors: [previewColor, previewColor.withOpacity(0.8)],
+                  colors: [previewColor, previewColor.withValues(alpha:0.8)],
                 ),
               ),
             ),
@@ -547,12 +537,12 @@ class _InvoiceTemplatesScreenState extends State<InvoiceTemplatesScreen> {
                 width: 22,
                 height: 10,
                 decoration: BoxDecoration(
-                  color: previewColor.withOpacity(0.1),
+                  color: previewColor.withValues(alpha:0.1),
                   borderRadius: BorderRadius.circular(2),
-                  border: Border.all(color: previewColor.withOpacity(0.3)),
+                  border: Border.all(color: previewColor.withValues(alpha:0.3)),
                   boxShadow: [
                     BoxShadow(
-                      color: previewColor.withOpacity(0.2),
+                      color: previewColor.withValues(alpha:0.2),
                       blurRadius: 2,
                       offset: const Offset(0, 1),
                     ),
@@ -569,7 +559,7 @@ class _InvoiceTemplatesScreenState extends State<InvoiceTemplatesScreen> {
   Widget _buildElegantPreview(bool isSelected, Color customColor) {
     final previewColor = customColor;
     return Container(
-      key: ValueKey('elegant_preview_${previewColor.value}'),
+      key: ValueKey('elegant_preview_${previewColor.hashCode}'),
       width: 80,
       height: 100,
       decoration: BoxDecoration(
@@ -581,7 +571,7 @@ class _InvoiceTemplatesScreenState extends State<InvoiceTemplatesScreen> {
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: Colors.black.withValues(alpha:0.1),
             blurRadius: 4,
             offset: const Offset(0, 2),
           ),
@@ -618,13 +608,13 @@ class _InvoiceTemplatesScreenState extends State<InvoiceTemplatesScreen> {
                     Container(
                       width: 15,
                       height: 1,
-                      color: previewColor.withOpacity(0.7),
+                      color: previewColor.withValues(alpha:0.7),
                     ),
                     const SizedBox(width: 8),
                     Container(
                       width: 15,
                       height: 1,
-                      color: previewColor.withOpacity(0.7),
+                      color: previewColor.withValues(alpha:0.7),
                     ),
                   ],
                 ),
@@ -768,7 +758,7 @@ class _InvoiceTemplatesScreenState extends State<InvoiceTemplatesScreen> {
             spacing: 8,
             runSpacing: 4,
             children: predefinedColors.map((color) {
-              final isSelected = currentColor.value == color.value;
+              final isSelected = currentColor == color;
               return GestureDetector(
                 onTap: () => _updateTemplateColor(color, templateType),
                 child: Container(
@@ -783,7 +773,7 @@ class _InvoiceTemplatesScreenState extends State<InvoiceTemplatesScreen> {
                     ),
                     boxShadow: [
                       BoxShadow(
-                        color: color.withOpacity(0.3),
+                        color: color.withValues(alpha:0.3),
                         blurRadius: 4,
                         offset: const Offset(0, 1),
                       ),
@@ -806,6 +796,8 @@ class _InvoiceTemplatesScreenState extends State<InvoiceTemplatesScreen> {
   }
 
   Future<void> _updateTemplateColor(Color color, InvoiceTemplateType templateType) async {
+    print('DEBUG: Template screen - updating color $color for template $templateType');
+
     setState(() {
       if (templateType == InvoiceTemplateType.classic) {
         _classicTemplateColor = color;
@@ -824,6 +816,7 @@ class _InvoiceTemplatesScreenState extends State<InvoiceTemplatesScreen> {
       } else if (templateType == InvoiceTemplateType.elegant) {
         await _templateService.setElegantTemplateColor(color);
       }
+      print('DEBUG: Template screen - color saved successfully');
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -850,8 +843,4 @@ class _InvoiceTemplatesScreenState extends State<InvoiceTemplatesScreen> {
     }
   }
 
-  // Manter compatibilidade com código antigo
-  Future<void> _updateClassicColor(Color color) async {
-    return _updateTemplateColor(color, InvoiceTemplateType.classic);
-  }
 }

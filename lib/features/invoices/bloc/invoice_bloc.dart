@@ -1,7 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
 import '../../../shared/services/invoice_service.dart';
-import '../../../shared/services/client_service.dart';
 import '../../../shared/models/models.dart';
 
 // Events

@@ -9,7 +9,7 @@ import 'invoice_form_screen.dart';
 import 'invoice_preview_screen.dart';
 
 class InvoicesScreen extends StatefulWidget {
-  const InvoicesScreen({Key? key}) : super(key: key);
+  const InvoicesScreen({super.key});
 
   @override
   State<InvoicesScreen> createState() => _InvoicesScreenState();
@@ -205,7 +205,7 @@ class _InvoicesScreenState extends State<InvoicesScreen> {
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha:0.05),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -235,7 +235,7 @@ class _InvoicesScreenState extends State<InvoicesScreen> {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  '${invoice.dueDate != null ? DateFormat('MMM, dd').format(invoice.dueDate!) : 'No due date'}',
+                  invoice.dueDate != null ? DateFormat('MMM, dd').format(invoice.dueDate!) : 'No due date',
                   style: TextStyle(
                     fontSize: 14,
                     color: Colors.grey.shade600,
@@ -341,7 +341,7 @@ class _InvoicesScreenState extends State<InvoicesScreen> {
               width: 32,
               height: 32,
               decoration: BoxDecoration(
-                color: color.withOpacity(0.1),
+                color: color.withValues(alpha:0.1),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Icon(
@@ -426,7 +426,7 @@ class _InvoicesScreenState extends State<InvoicesScreen> {
               width: 40,
               height: 40,
               decoration: BoxDecoration(
-                color: Colors.red.withOpacity(0.1),
+                color: Colors.red.withValues(alpha:0.1),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: const Icon(
@@ -616,6 +616,8 @@ class _InvoicesScreenState extends State<InvoicesScreen> {
   }
 
   Future<void> _shareInvoice(Invoice invoice) async {
+    if (!mounted) return;
+
     try {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -626,6 +628,8 @@ class _InvoicesScreenState extends State<InvoicesScreen> {
 
       final invoiceService = InvoiceService();
       final invoiceDetails = await invoiceService.getInvoiceWithDetails(invoice.id!);
+
+      if (!mounted) return;
 
       if (invoiceDetails != null) {
         final invoiceData = invoiceDetails['invoice'] as Map<String, dynamic>;
@@ -640,6 +644,7 @@ class _InvoicesScreenState extends State<InvoicesScreen> {
           clientData: invoiceData,
         );
 
+        if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('PDF shared successfully!'),
@@ -647,6 +652,7 @@ class _InvoicesScreenState extends State<InvoicesScreen> {
           ),
         );
       } else {
+        if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Error loading invoice details for PDF generation'),
@@ -655,6 +661,7 @@ class _InvoicesScreenState extends State<InvoicesScreen> {
         );
       }
     } catch (e) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Error sharing invoice: ${e.toString()}'),

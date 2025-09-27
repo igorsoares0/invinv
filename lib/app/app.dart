@@ -12,7 +12,7 @@ import '../features/invoices/bloc/invoice_bloc.dart';
 import 'routes/app_routes.dart';
 
 class InvoiceApp extends StatelessWidget {
-  const InvoiceApp({Key? key}) : super(key: key);
+  const InvoiceApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -111,15 +111,13 @@ class InvoiceApp extends StatelessWidget {
 class MainLayout extends StatefulWidget {
   final Widget child;
 
-  const MainLayout({Key? key, required this.child}) : super(key: key);
+  const MainLayout({super.key, required this.child});
 
   @override
   State<MainLayout> createState() => _MainLayoutState();
 }
 
 class _MainLayoutState extends State<MainLayout> {
-  int _selectedIndex = 0;
-
   int _getSelectedIndex() {
     final location = GoRouterState.of(context).uri.path;
     switch (location) {
@@ -162,7 +160,7 @@ class _MainLayoutState extends State<MainLayout> {
         backgroundColor: Colors.white,
         elevation: 8,
         height: 80,
-        indicatorColor: const Color(0xFF1976D2).withOpacity(0.1),
+        indicatorColor: const Color(0xFF1976D2).withValues(alpha: 0.1),
         labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
         destinations: const [
           NavigationDestination(

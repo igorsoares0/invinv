@@ -8,7 +8,7 @@ import '../../../shared/models/models.dart';
 class ProductFormScreen extends StatefulWidget {
   final Product? product;
 
-  const ProductFormScreen({Key? key, this.product}) : super(key: key);
+  const ProductFormScreen({super.key, this.product});
 
   @override
   State<ProductFormScreen> createState() => _ProductFormScreenState();
@@ -104,7 +104,7 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
                             borderRadius: BorderRadius.circular(12),
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.black.withOpacity(0.05),
+                                color: Colors.black.withValues(alpha:0.05),
                                 blurRadius: 10,
                                 offset: const Offset(0, 2),
                               ),
@@ -238,7 +238,7 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
             borderRadius: BorderRadius.circular(12),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.05),
+                color: Colors.black.withValues(alpha:0.05),
                 blurRadius: 10,
                 offset: const Offset(0, 2),
               ),
