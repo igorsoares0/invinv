@@ -115,101 +115,68 @@ class MainLayout extends StatefulWidget {
 class _MainLayoutState extends State<MainLayout> {
   int _selectedIndex = 0;
 
-  final List<NavigationDestination> _destinations = const [
-    NavigationDestination(
-      icon: Icon(Icons.receipt_outlined),
-      selectedIcon: Icon(Icons.receipt),
-      label: 'Invoices',
-    ),
-    NavigationDestination(
-      icon: Icon(Icons.people_outlined),
-      selectedIcon: Icon(Icons.people),
-      label: 'Clients',
-    ),
-    NavigationDestination(
-      icon: Icon(Icons.inventory_2_outlined),
-      selectedIcon: Icon(Icons.inventory_2),
-      label: 'Products',
-    ),
-    NavigationDestination(
-      icon: Icon(Icons.settings_outlined),
-      selectedIcon: Icon(Icons.settings),
-      label: 'Settings',
-    ),
-  ];
+  int _getSelectedIndex() {
+    final location = GoRouterState.of(context).uri.path;
+    switch (location) {
+      case '/invoices':
+      case '/':
+        return 0;
+      case '/clients':
+        return 1;
+      case '/products':
+        return 2;
+      case '/settings':
+        return 3;
+      default:
+        return 0;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: widget.child,
-      bottomNavigationBar: Container(
-        decoration: BoxDecoration(
-          color: Colors.white,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.05),
-              blurRadius: 10,
-              offset: const Offset(0, -5),
-            ),
-          ],
-        ),
-        child: SafeArea(
-          child: Container(
-            height: 80,
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                _buildNavItem(0, Icons.receipt_outlined, Icons.receipt, 'Invoices'),
-                _buildNavItem(1, Icons.people_outlined, Icons.people, 'Clients'),
-                _buildNavItem(2, Icons.inventory_2_outlined, Icons.inventory_2, 'Products'),
-                _buildNavItem(3, Icons.settings_outlined, Icons.settings, 'Settings'),
-              ],
-            ),
+      bottomNavigationBar: NavigationBar(
+        selectedIndex: _getSelectedIndex(),
+        onDestinationSelected: (index) {
+          switch (index) {
+            case 0:
+              context.go('/invoices');
+              break;
+            case 1:
+              context.go('/clients');
+              break;
+            case 2:
+              context.go('/products');
+              break;
+            case 3:
+              context.go('/settings');
+              break;
+          }
+        },
+        backgroundColor: Colors.white,
+        elevation: 8,
+        height: 80,
+        destinations: const [
+          NavigationDestination(
+            icon: Icon(Icons.receipt_outlined),
+            selectedIcon: Icon(Icons.receipt),
+            label: 'Invoices',
           ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildNavItem(int index, IconData icon, IconData selectedIcon, String label) {
-    final isSelected = _selectedIndex == index;
-    
-    return GestureDetector(
-      onTap: () {
-        setState(() => _selectedIndex = index);
-        
-        switch (index) {
-          case 0:
-            context.go('/invoices');
-            break;
-          case 1:
-            context.go('/clients');
-            break;
-          case 2:
-            context.go('/products');
-            break;
-          case 3:
-            context.go('/settings');
-            break;
-        }
-      },
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            isSelected ? selectedIcon : icon,
-            color: isSelected ? Colors.blue : Colors.grey.shade600,
-            size: 24,
+          NavigationDestination(
+            icon: Icon(Icons.people_outlined),
+            selectedIcon: Icon(Icons.people),
+            label: 'Clients',
           ),
-          const SizedBox(height: 4),
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 12,
-              color: isSelected ? Colors.blue : Colors.grey.shade600,
-              fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-            ),
+          NavigationDestination(
+            icon: Icon(Icons.inventory_2_outlined),
+            selectedIcon: Icon(Icons.inventory_2),
+            label: 'Products',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.settings_outlined),
+            selectedIcon: Icon(Icons.settings),
+            label: 'Settings',
           ),
         ],
       ),
