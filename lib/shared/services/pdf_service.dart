@@ -1693,8 +1693,8 @@ class PDFService {
         child: pw.Text(
           'powered by invoice box',
           style: pw.TextStyle(
-            fontSize: 8,
-            color: PdfColors.grey400,
+            fontSize: 10,
+            color: PdfColors.grey500,
             fontStyle: pw.FontStyle.italic,
           ),
         ),

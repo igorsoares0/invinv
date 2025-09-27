@@ -324,11 +324,15 @@ class _InvoicePreviewScreenState extends State<InvoicePreviewScreen> {
                   ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  children: _templateType == InvoiceTemplateType.modern
-                      ? _buildModernLayout(invoice, invoiceData, items)
-                      : _templateType == InvoiceTemplateType.elegant
-                          ? _buildElegantLayout(invoice, invoiceData, items)
-                          : _buildClassicLayout(invoice, invoiceData, items),
+                  children: [
+                    ...(_templateType == InvoiceTemplateType.modern
+                        ? _buildModernLayout(invoice, invoiceData, items)
+                        : _templateType == InvoiceTemplateType.elegant
+                            ? _buildElegantLayout(invoice, invoiceData, items)
+                            : _buildClassicLayout(invoice, invoiceData, items)),
+                    const SizedBox(height: 24),
+                    _buildPreviewWatermark(),
+                  ],
                 ),
                   ),
                 ),
@@ -2154,6 +2158,23 @@ class _InvoicePreviewScreenState extends State<InvoicePreviewScreen> {
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildPreviewWatermark() {
+    return Align(
+      alignment: Alignment.bottomRight,
+      child: Padding(
+        padding: const EdgeInsets.only(top: 16),
+        child: Text(
+          'powered by invoice box',
+          style: TextStyle(
+            fontSize: 10,
+            color: Colors.grey.shade400,
+            fontStyle: FontStyle.italic,
+          ),
+        ),
+      ),
     );
   }
 
