@@ -81,42 +81,131 @@ class _InvoicePreviewScreenState extends State<InvoicePreviewScreen> {
         backgroundColor: Colors.white,
         foregroundColor: Colors.black87,
         actions: [
-          TextButton.icon(
-            onPressed: _isGeneratingPdf ? null : () => _generatePDF(),
-            icon: _isGeneratingPdf 
-                ? const SizedBox(
-                    width: 16,
-                    height: 16,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
-                : const Icon(Icons.picture_as_pdf),
-            label: Text(_isGeneratingPdf ? 'Generating...' : 'Generate PDF'),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 8.0),
+            child: ElevatedButton.icon(
+              onPressed: _isGeneratingPdf ? null : () => _generatePDF(),
+              icon: _isGeneratingPdf
+                  ? const SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                    )
+                  : const Icon(Icons.picture_as_pdf, size: 18),
+              label: Text(
+                _isGeneratingPdf ? 'Generating...' : 'Generate PDF',
+                style: const TextStyle(fontSize: 14),
+              ),
+              style: ElevatedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                backgroundColor: const Color(0xFF1976D2),
+                foregroundColor: Colors.white,
+                elevation: 2,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+            ),
           ),
           PopupMenuButton<String>(
             onSelected: (value) => _handleMenuAction(value),
+            icon: const Icon(Icons.more_vert, color: Colors.black87),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            elevation: 8,
             itemBuilder: (context) => [
-              const PopupMenuItem(
+              PopupMenuItem(
                 value: 'share',
-                child: ListTile(
-                  leading: Icon(Icons.share),
-                  title: Text('Share'),
-                  contentPadding: EdgeInsets.zero,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(vertical: 4),
+                  child: Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF1976D2).withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: const Icon(
+                          Icons.share,
+                          color: Color(0xFF1976D2),
+                          size: 20,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      const Text(
+                        'Share',
+                        style: TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.black87,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
-              const PopupMenuItem(
+              PopupMenuItem(
                 value: 'email',
-                child: ListTile(
-                  leading: Icon(Icons.email),
-                  title: Text('Send by Email'),
-                  contentPadding: EdgeInsets.zero,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(vertical: 4),
+                  child: Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF1976D2).withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: const Icon(
+                          Icons.email,
+                          color: Color(0xFF1976D2),
+                          size: 20,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      const Text(
+                        'Send by Email',
+                        style: TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.black87,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
-              const PopupMenuItem(
+              PopupMenuItem(
                 value: 'print',
-                child: ListTile(
-                  leading: Icon(Icons.print),
-                  title: Text('Print'),
-                  contentPadding: EdgeInsets.zero,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(vertical: 4),
+                  child: Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF1976D2).withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: const Icon(
+                          Icons.print,
+                          color: Color(0xFF1976D2),
+                          size: 20,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      const Text(
+                        'Print',
+                        style: TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.black87,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ],
