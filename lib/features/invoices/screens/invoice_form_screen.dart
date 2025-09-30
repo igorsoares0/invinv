@@ -10,6 +10,8 @@ import '../../clients/bloc/client_state.dart';
 import '../../products/bloc/product_bloc.dart';
 import '../../../shared/models/models.dart';
 import '../../../shared/services/invoice_service.dart';
+import '../../../shared/services/invoice_limit_service.dart';
+import '../../subscription/screens/paywall_screen.dart';
 import 'invoice_preview_screen.dart';
 
 class InvoiceFormScreen extends StatefulWidget {
@@ -29,6 +31,7 @@ class InvoiceFormScreen extends StatefulWidget {
 class _InvoiceFormScreenState extends State<InvoiceFormScreen> {
   final _formKey = GlobalKey<FormBuilderState>();
   final InvoiceService _invoiceService = InvoiceService();
+  final InvoiceLimitService _invoiceLimitService = InvoiceLimitService();
   
   List<InvoiceItem> _items = [];
   double _subtotal = 0.0;
@@ -1816,7 +1819,22 @@ class _InvoiceFormScreenState extends State<InvoiceFormScreen> {
   Future<void> _saveInvoice() async {
     if (_formKey.currentState?.saveAndValidate() ?? false) {
       final values = _formKey.currentState!.value;
-      
+
+      // Check invoice limit for new invoices
+      if (!isEditing) {
+        final limitResult = await _invoiceLimitService.checkCreateInvoicePermission();
+
+        if (!limitResult.canCreate) {
+          _showInvoiceLimitDialog(limitResult);
+          return;
+        }
+
+        if (limitResult.type == InvoiceLimitType.warning) {
+          final shouldContinue = await _showInvoiceWarningDialog(limitResult);
+          if (!shouldContinue) return;
+        }
+      }
+
       try {
         final invoice = Invoice(
           id: isEditing ? widget.invoice!.id : null,
@@ -1837,6 +1855,8 @@ class _InvoiceFormScreenState extends State<InvoiceFormScreen> {
           context.read<InvoiceBloc>().add(UpdateInvoice(invoice, _items));
         } else {
           context.read<InvoiceBloc>().add(CreateInvoice(invoice, _items));
+          // Increment counter after successful creation
+          await _invoiceLimitService.incrementInvoiceCount();
         }
 
         Navigator.pop(context);
@@ -1846,5 +1866,178 @@ class _InvoiceFormScreenState extends State<InvoiceFormScreen> {
         );
       }
     }
+  }
+
+  void _showInvoiceLimitDialog(InvoiceLimitResult result) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          title: Row(
+            children: [
+              Icon(
+                Icons.warning_amber,
+                color: Colors.amber,
+                size: 24,
+              ),
+              const SizedBox(width: 8),
+              Text(result.title ?? 'Invoice Limit Reached'),
+            ],
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                result.message ?? 'You have reached your invoice limit.',
+                style: const TextStyle(fontSize: 16),
+              ),
+              const SizedBox(height: 16),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.amber.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.amber.withValues(alpha: 0.3)),
+                ),
+                child: Row(
+                  children: [
+                    Icon(Icons.info_outline, color: Colors.amber.shade700, size: 20),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        'Upgrade to Premium for unlimited invoices',
+                        style: TextStyle(
+                          color: Colors.amber.shade700,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                Navigator.of(context).pop();
+                final purchaseResult = await Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => const PaywallScreen(
+                      fromInvoiceLimit: true,
+                      blockedFeature: PremiumFeature.unlimitedInvoices,
+                    ),
+                  ),
+                );
+                if (purchaseResult == true) {
+                  // Try saving again after successful purchase
+                  _saveInvoice();
+                }
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.amber,
+                foregroundColor: Colors.white,
+              ),
+              child: const Text('Upgrade to Premium'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<bool> _showInvoiceWarningDialog(InvoiceLimitResult result) async {
+    return await showDialog<bool>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          title: Row(
+            children: [
+              Icon(
+                Icons.info_outline,
+                color: Colors.blue,
+                size: 24,
+              ),
+              const SizedBox(width: 8),
+              Text(result.title ?? 'Almost at your limit'),
+            ],
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                result.message ?? 'You are approaching your invoice limit.',
+                style: const TextStyle(fontSize: 16),
+              ),
+              const SizedBox(height: 16),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.blue.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.blue.withValues(alpha: 0.3)),
+                ),
+                child: Row(
+                  children: [
+                    Icon(Icons.upgrade, color: Colors.blue.shade700, size: 20),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        'Consider upgrading to Premium for unlimited invoices',
+                        style: TextStyle(
+                          color: Colors.blue.shade700,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              child: const Text('Continue'),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                Navigator.of(context).pop(false);
+                final purchaseResult = await Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => const PaywallScreen(
+                      fromInvoiceLimit: false,
+                      blockedFeature: PremiumFeature.unlimitedInvoices,
+                    ),
+                  ),
+                );
+                if (purchaseResult == true) {
+                  // Try saving again after successful purchase
+                  _saveInvoice();
+                }
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.blue,
+                foregroundColor: Colors.white,
+              ),
+              child: const Text('Upgrade Now'),
+            ),
+          ],
+        );
+      },
+    ) ?? false;
   }
 }

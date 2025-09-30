@@ -76,6 +76,9 @@ dependencies:
   # Utilities
   equatable: ^2.0.5
 
+  # Subscription management
+  adapty_flutter: ^3.3.1
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

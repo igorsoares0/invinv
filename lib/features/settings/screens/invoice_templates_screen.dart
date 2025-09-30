@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../../../shared/models/models.dart';
 import '../../../shared/services/template_service.dart';
+import '../../../shared/services/premium_feature_service.dart';
+import '../../subscription/screens/paywall_screen.dart';
 
 class InvoiceTemplatesScreen extends StatefulWidget {
   const InvoiceTemplatesScreen({super.key});
@@ -11,6 +13,7 @@ class InvoiceTemplatesScreen extends StatefulWidget {
 
 class _InvoiceTemplatesScreenState extends State<InvoiceTemplatesScreen> {
   final TemplateService _templateService = TemplateService();
+  final PremiumFeatureService _premiumFeatureService = PremiumFeatureService();
   InvoiceTemplateType _selectedTemplate = InvoiceTemplateType.classic;
   bool _isLoading = true;
   Color _classicTemplateColor = const Color(0xFF1976D2);
@@ -47,6 +50,16 @@ class _InvoiceTemplatesScreenState extends State<InvoiceTemplatesScreen> {
   }
 
   Future<void> _selectTemplate(InvoiceTemplateType template) async {
+    // Check if premium template is available
+    if (template == InvoiceTemplateType.modern || template == InvoiceTemplateType.elegant) {
+      final featureResult = await _premiumFeatureService.checkFeatureAccess(PremiumFeature.premiumTemplates);
+
+      if (!featureResult.isAllowed) {
+        _showPremiumFeatureDialog(featureResult);
+        return;
+      }
+    }
+
     setState(() {
       _selectedTemplate = template;
     });
@@ -77,6 +90,91 @@ class _InvoiceTemplatesScreenState extends State<InvoiceTemplatesScreen> {
         );
       }
     }
+  }
+
+  void _showPremiumFeatureDialog(FeatureGateResult result) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          title: Row(
+            children: [
+              Icon(
+                Icons.star,
+                color: Colors.amber,
+                size: 24,
+              ),
+              const SizedBox(width: 8),
+              Text(result.title ?? 'Premium Feature'),
+            ],
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                result.description ?? 'This feature requires a premium subscription.',
+                style: const TextStyle(fontSize: 16),
+              ),
+              const SizedBox(height: 16),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.amber.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.amber.withValues(alpha: 0.3)),
+                ),
+                child: Row(
+                  children: [
+                    Icon(Icons.info_outline, color: Colors.amber.shade700, size: 20),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        'Modern and Elegant templates are premium features',
+                        style: TextStyle(
+                          color: Colors.amber.shade700,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                Navigator.of(context).pop();
+                final purchaseResult = await Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => PaywallScreen(
+                      blockedFeature: result.blockedFeature,
+                    ),
+                  ),
+                );
+                if (purchaseResult == true) {
+                  // Refresh the screen after successful purchase
+                  _loadSelectedTemplate();
+                }
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.amber,
+                foregroundColor: Colors.white,
+              ),
+              child: Text(result.actionText ?? 'Upgrade'),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
@@ -162,6 +260,7 @@ class _InvoiceTemplatesScreenState extends State<InvoiceTemplatesScreen> {
 
   Widget _buildTemplateCard(InvoiceTemplate template) {
     final isSelected = _selectedTemplate == template.type;
+    final isPremiumTemplate = template.type == InvoiceTemplateType.modern || template.type == InvoiceTemplateType.elegant;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
@@ -207,6 +306,46 @@ class _InvoiceTemplatesScreenState extends State<InvoiceTemplatesScreen> {
                             color: isSelected ? Colors.blue.shade700 : Colors.black87,
                           ),
                         ),
+                        if (isPremiumTemplate) ...[
+                          const SizedBox(width: 8),
+                          FutureBuilder<bool>(
+                            future: _premiumFeatureService.canUsePremiumTemplates(),
+                            builder: (context, snapshot) {
+                              final canUsePremium = snapshot.data ?? false;
+                              if (canUsePremium && !isSelected) return const SizedBox.shrink();
+
+                              return Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                decoration: BoxDecoration(
+                                  color: canUsePremium ? Colors.green.withValues(alpha: 0.1) : Colors.amber.withValues(alpha: 0.1),
+                                  borderRadius: BorderRadius.circular(4),
+                                  border: Border.all(
+                                    color: canUsePremium ? Colors.green.withValues(alpha: 0.3) : Colors.amber.withValues(alpha: 0.3),
+                                  ),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(
+                                      canUsePremium ? Icons.check : Icons.star,
+                                      size: 10,
+                                      color: canUsePremium ? Colors.green.shade700 : Colors.amber.shade700,
+                                    ),
+                                    const SizedBox(width: 2),
+                                    Text(
+                                      canUsePremium ? 'PREMIUM' : 'PREMIUM',
+                                      style: TextStyle(
+                                        fontSize: 8,
+                                        color: canUsePremium ? Colors.green.shade700 : Colors.amber.shade700,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            },
+                          ),
+                        ],
                         if (isSelected) ...[
                           const SizedBox(width: 8),
                           Container(

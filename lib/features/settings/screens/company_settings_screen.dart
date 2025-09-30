@@ -7,6 +7,8 @@ import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as path;
 import '../../../shared/models/models.dart';
 import '../../../shared/services/company_service.dart';
+import '../../../shared/services/premium_feature_service.dart';
+import '../../subscription/screens/paywall_screen.dart';
 
 class CompanySettingsScreen extends StatefulWidget {
   const CompanySettingsScreen({super.key});
@@ -18,6 +20,7 @@ class CompanySettingsScreen extends StatefulWidget {
 class _CompanySettingsScreenState extends State<CompanySettingsScreen> {
   final _formKey = GlobalKey<FormBuilderState>();
   final CompanyService _companyService = CompanyService();
+  final PremiumFeatureService _premiumFeatureService = PremiumFeatureService();
   final ImagePicker _picker = ImagePicker();
   Company? _company;
   bool _isLoading = true;
@@ -63,6 +66,13 @@ class _CompanySettingsScreenState extends State<CompanySettingsScreen> {
   }
 
   Future<void> _pickImage() async {
+    final featureResult = await _premiumFeatureService.checkFeatureAccess(PremiumFeature.logoUpload);
+
+    if (!featureResult.isAllowed) {
+      _showPremiumFeatureDialog(featureResult);
+      return;
+    }
+
     try {
       final XFile? pickedFile = await _picker.pickImage(
         source: ImageSource.gallery,
@@ -156,6 +166,91 @@ class _CompanySettingsScreenState extends State<CompanySettingsScreen> {
         }
       }
     }
+  }
+
+  void _showPremiumFeatureDialog(FeatureGateResult result) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          title: Row(
+            children: [
+              Icon(
+                Icons.star,
+                color: Colors.amber,
+                size: 24,
+              ),
+              const SizedBox(width: 8),
+              Text(result.title ?? 'Premium Feature'),
+            ],
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                result.description ?? 'This feature requires a premium subscription.',
+                style: const TextStyle(fontSize: 16),
+              ),
+              const SizedBox(height: 16),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.amber.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.amber.withValues(alpha: 0.3)),
+                ),
+                child: Row(
+                  children: [
+                    Icon(Icons.info_outline, color: Colors.amber.shade700, size: 20),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        'Upgrade to Premium to unlock this feature',
+                        style: TextStyle(
+                          color: Colors.amber.shade700,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                Navigator.of(context).pop();
+                final purchaseResult = await Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => PaywallScreen(
+                      blockedFeature: result.blockedFeature,
+                    ),
+                  ),
+                );
+                if (purchaseResult == true) {
+                  // Refresh the screen after successful purchase
+                  _loadCompany();
+                }
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.amber,
+                foregroundColor: Colors.white,
+              ),
+              child: Text(result.actionText ?? 'Upgrade'),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
@@ -536,6 +631,42 @@ class _CompanySettingsScreenState extends State<CompanySettingsScreen> {
                 color: Colors.grey.shade700,
                 fontWeight: FontWeight.w500,
               ),
+            ),
+            const SizedBox(width: 8),
+            FutureBuilder<bool>(
+              future: _premiumFeatureService.canUploadLogo(),
+              builder: (context, snapshot) {
+                final canUpload = snapshot.data ?? false;
+                if (canUpload) return const SizedBox.shrink();
+
+                return Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: Colors.amber.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(4),
+                    border: Border.all(color: Colors.amber.withValues(alpha: 0.3)),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.star,
+                        size: 12,
+                        color: Colors.amber.shade700,
+                      ),
+                      const SizedBox(width: 2),
+                      Text(
+                        'PREMIUM',
+                        style: TextStyle(
+                          fontSize: 10,
+                          color: Colors.amber.shade700,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              },
             ),
           ],
         ),

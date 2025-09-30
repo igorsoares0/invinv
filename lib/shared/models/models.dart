@@ -4,3 +4,6 @@ export 'product.dart';
 export 'invoice.dart';
 export 'invoice_item.dart';
 export 'invoice_template.dart';
+export 'subscription_plan.dart';
+export 'premium_feature.dart';
+export 'subscription_status.dart';

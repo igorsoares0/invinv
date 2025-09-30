@@ -7,10 +7,12 @@ import 'package:intl/intl.dart';
 import '../models/models.dart';
 import 'company_service.dart';
 import 'template_service.dart';
+import 'premium_feature_service.dart';
 
 class PDFService {
   final CompanyService _companyService = CompanyService();
   final TemplateService _templateService = TemplateService();
+  final PremiumFeatureService _premiumFeatureService = PremiumFeatureService();
 
   Future<Uint8List> generateInvoicePDF({
     required Invoice invoice,
@@ -39,6 +41,7 @@ class PDFService {
   ) async {
     // Get custom color for classic template
     final customColor = await _templateService.getClassicTemplateColor();
+    final watermark = await _buildWatermark();
     final pdfColor = PdfColor(
       (customColor.r * 255.0).round() / 255.0,
       (customColor.g * 255.0).round() / 255.0,
@@ -68,7 +71,7 @@ class PDFService {
               _buildTermsSection(invoice.terms!),
             ],
             pw.Spacer(),
-            _buildWatermark(),
+            watermark,
           ];
         },
       ),
@@ -86,6 +89,7 @@ class PDFService {
   ) async {
     // Get custom color for modern template
     final customColor = await _templateService.getModernTemplateColor();
+    final watermark = await _buildWatermark();
     final pdfColor = PdfColor(
       (customColor.r * 255.0).round() / 255.0,
       (customColor.g * 255.0).round() / 255.0,
@@ -115,7 +119,7 @@ class PDFService {
               _buildModernTermsSection(invoice.terms!),
             ],
             pw.Spacer(),
-            _buildWatermark(),
+            watermark,
           ];
         },
       ),
@@ -133,6 +137,7 @@ class PDFService {
   ) async {
     // Get custom color for elegant template
     final customColor = await _templateService.getElegantTemplateColor();
+    final watermark = await _buildWatermark();
     final pdfColor = PdfColor(
       (customColor.r * 255.0).round() / 255.0,
       (customColor.g * 255.0).round() / 255.0,
@@ -162,7 +167,7 @@ class PDFService {
               _buildElegantTermsSection(invoice.terms!),
             ],
             pw.Spacer(),
-            _buildWatermark(),
+            watermark,
           ];
         },
       ),
@@ -1685,7 +1690,13 @@ class PDFService {
     );
   }
 
-  pw.Widget _buildWatermark() {
+  Future<pw.Widget> _buildWatermark() async {
+    final shouldShow = await _premiumFeatureService.shouldShowWatermark();
+
+    if (!shouldShow) {
+      return pw.SizedBox.shrink();
+    }
+
     return pw.Align(
       alignment: pw.Alignment.bottomRight,
       child: pw.Padding(

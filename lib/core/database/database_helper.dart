@@ -20,7 +20,7 @@ class DatabaseHelper {
 
     return await openDatabase(
       path,
-      version: 3,
+      version: 4,
       onCreate: _createDatabase,
       onUpgrade: _upgradeDatabase,
     );
@@ -121,6 +121,34 @@ class DatabaseHelper {
     await db.execute('''
       CREATE INDEX idx_invoice_items_invoice_id ON invoice_items(invoice_id)
     ''');
+
+    await db.execute('''
+      CREATE TABLE subscription_status (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        is_premium BOOLEAN DEFAULT 0,
+        plan_type TEXT DEFAULT 'free',
+        expires_at TEXT,
+        is_active BOOLEAN DEFAULT 0,
+        invoice_count INTEGER DEFAULT 0,
+        updated_at TEXT NOT NULL
+      )
+    ''');
+
+    await db.execute('''
+      INSERT INTO subscription_status (is_premium, plan_type, is_active, invoice_count, updated_at)
+      VALUES (0, 'free', 1, 0, datetime('now'))
+    ''');
+
+    await db.execute('''
+      CREATE TRIGGER increment_invoice_count
+      AFTER INSERT ON invoices
+      BEGIN
+        UPDATE subscription_status
+        SET invoice_count = invoice_count + 1,
+            updated_at = datetime('now')
+        WHERE id = 1;
+      END
+    ''');
   }
 
   Future<void> _upgradeDatabase(Database db, int oldVersion, int newVersion) async {
@@ -136,6 +164,41 @@ class DatabaseHelper {
       await db.execute('UPDATE invoice_items SET name = description WHERE name = "" OR name IS NULL');
       // Clear description field for existing records since it's now separate
       await db.execute('UPDATE invoice_items SET description = ""');
+    }
+    if (oldVersion < 4) {
+      // Add subscription_status table
+      await db.execute('''
+        CREATE TABLE subscription_status (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          is_premium BOOLEAN DEFAULT 0,
+          plan_type TEXT DEFAULT 'free',
+          expires_at TEXT,
+          is_active BOOLEAN DEFAULT 0,
+          invoice_count INTEGER DEFAULT 0,
+          updated_at TEXT NOT NULL
+        )
+      ''');
+
+      // Count existing invoices and insert initial status
+      final result = await db.rawQuery('SELECT COUNT(*) as count FROM invoices');
+      final invoiceCount = result.first['count'] as int? ?? 0;
+
+      await db.execute('''
+        INSERT INTO subscription_status (is_premium, plan_type, is_active, invoice_count, updated_at)
+        VALUES (0, 'free', 1, ?, datetime('now'))
+      ''', [invoiceCount]);
+
+      // Create trigger to auto-increment invoice count
+      await db.execute('''
+        CREATE TRIGGER increment_invoice_count
+        AFTER INSERT ON invoices
+        BEGIN
+          UPDATE subscription_status
+          SET invoice_count = invoice_count + 1,
+              updated_at = datetime('now')
+          WHERE id = 1;
+        END
+      ''');
     }
   }
 
